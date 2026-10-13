@@ -311,7 +311,9 @@ What we measured on two publishes (pure-ASCII bundles; the second is the `Extend
 | Line endings | LF | LF |
 | Code | **identical**, line for line | **identical**, line for line |
 
-The result was the same both times, so it's repeatable for small files. It's still cleaner than an earlier 21 KB bundle, which came back reindented, with CRLF line endings and one escape sequence inside a comment changed (`\xE7` became `\xE3`). The likely difference is size and content: a small, ASCII-only file with no escape sequences in it. Don't assume you'll get the clean result; always run the diff.
+The result was the same both times, and again on a third publish (the main-container rule, which restored the 2,959-byte bundle), so it's repeatable for small files.
+
+The container rule is visible in the compiled screen code too: `MountPoint`'s style compiles to `"greeting-card" + (extendedClassIn !== nullTextIdentifier() ? " " + extendedClassIn : "")`, recalculated whenever `ExtendedClass` changes. It's still cleaner than an earlier 21 KB bundle, which came back reindented, with CRLF line endings and one escape sequence inside a comment changed (`\xE7` became `\xE3`). The likely difference is size and content: a small, ASCII-only file with no escape sequences in it. Don't assume you'll get the clean result; always run the diff.
 
 ### 8b. The JS nodes are wired as you asked
 
