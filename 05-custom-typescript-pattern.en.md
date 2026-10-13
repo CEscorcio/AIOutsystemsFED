@@ -19,7 +19,7 @@ flowchart LR
   subgraph Git["Git repo (high-code)"]
     T[types.ts<br/>the contract] --> C[GreetingCard.ts<br/>the class]
     C --> B[esbuild] --> D[dist/GreetingCard.js]
-    D --> X[npm test<br/>27 checks in jsdom]
+    D --> X[npm test<br/>24 checks in jsdom]
   end
   subgraph ODC["ODC app (low-code)"]
     S[Script<br/>GreetingCard.js]
@@ -77,7 +77,9 @@ npm test        # typecheck + build + checks
 // Block Input Parameters -> GreetingCardParameters
 //   Name           Text
 //   ButtonLabel    Text
-//   ExtendedClass  Text, not mandatory, default "" (every pattern has one)
+//   ExtendedClass  Text, not mandatory, default "" (every pattern has one).
+//                  Applied by the Block's main container, NOT by this class,
+//                  so it is deliberately absent from GreetingCardParameters.
 //
 // Block Events -> GreetingCardEvents (each wired through a bridge Client Action)
 //   OnGreetClicked(Count: Integer)  <- Client Action TriggerGreetClicked(Count)
@@ -85,7 +87,6 @@ npm test        # typecheck + build + checks
 export interface GreetingCardParameters {
   name: string;
   buttonLabel: string;
-  extendedClass?: string;
 }
 
 export interface GreetingCardEvents {
@@ -100,9 +101,11 @@ export interface GreetingCardConfig extends GreetingCardParameters {
 
 The comment block at the top is the most useful thing in the file: when you later write the Mentor prompt for the Block, you copy names straight from it.
 
-### Every pattern has an `ExtendedClass`
+### Rules for every custom pattern
 
-Like the patterns in OutSystems UI, every custom pattern exposes an **`ExtendedClass`** Input Parameter:
+Two conventions apply to every pattern we build, so they behave like the patterns in OutSystems UI.
+
+**Rule 1: an `ExtendedClass` Input Parameter.**
 
 | Property | Value |
 |---|---|
@@ -110,22 +113,20 @@ Like the patterns in OutSystems UI, every custom pattern exposes an **`ExtendedC
 | Type | Text |
 | Mandatory | **No** |
 | Default | `""` |
-| Effect | its CSS classes are added to the component's **root element**, after the pattern's own classes |
 
-It's how a screen adapts one instance (spacing, a theme variant, a utility class) without touching the pattern. The rules the class must follow:
+It's how a screen adapts one instance (spacing, a theme variant, a utility class) without touching the pattern.
 
-- Apply it on creation **and** in `onParametersChanged`, so a value bound to a variable updates live.
-- A new value **replaces** the previous extra classes; it never accumulates.
-- The pattern's own classes are **always kept**. In GreetingCard they're `card gc-card`, kept in a `ROOT_CLASS` constant.
-- An empty value removes the extra classes; an update that doesn't include it leaves it alone.
+**Rule 2: the pattern's main container carries the pattern class plus `ExtendedClass`.** The main container is the Block's outermost widget, the one the component mounts into (`MountPoint` in GreetingCard). Set its **Style Classes** property to the pattern's own class followed by this expression:
 
-```ts
-const ROOT_CLASS = "card gc-card";
-
-if (params.extendedClass !== undefined) {
-  this.root.className = `${ROOT_CLASS} ${params.extendedClass || ""}`.trim();
-}
 ```
+"greeting-card" + If(ExtendedClass <> NullTextIdentifier(), " " + ExtendedClass, "")
+```
+
+- `"greeting-card"` is the pattern class: always present, so the pattern's look and feel can be targeted and inspected. Name it after the pattern.
+- The `If` adds a space and the extra classes only when `ExtendedClass` isn't empty, so an empty value never leaves a trailing space.
+- Because it's a platform expression, it updates live when `ExtendedClass` changes. The JavaScript doesn't need to know about it.
+
+**`ExtendedClass` is applied in one place only: that container.** Don't also apply it from the TypeScript class. Doing both puts every class on two nested elements, and a spacing class like `margin-top-m` would add its margin twice. That's why `extendedClass` isn't in `GreetingCardParameters`, isn't passed by the JS nodes, and the class never touches the mount element's own classes. `npm test` checks this last point.
 
 ## Step 3: write the class to the bridge's rules
 
@@ -134,7 +135,7 @@ The Block will call exactly three things, so the class needs exactly three membe
 | Member | Called from | Rules that matter |
 |---|---|---|
 | `constructor(config)` | `OnReady` | find the mount by `config.runtimeId`; throw a clear error if it's missing; render once |
-| `onParametersChanged(params)` | `OnParametersChanged` | accept a **partial** update, `extendedClass` included; never reset internal state the user created (the count survives a name change) |
+| `onParametersChanged(params)` | `OnParametersChanged` | accept a **partial** update; never reset internal state the user created (the count survives a name change) |
 | `destroy()` | `OnDestroy` | remove **every** listener and observer; make later calls no-ops instead of throwing |
 
 Plus three habits that saved us debugging time:
@@ -175,14 +176,13 @@ PASS  uses OutSystems UI card and button classes
 PASS  click fires OnGreetClicked with count 1
 PASS  onParametersChanged keeps the count
 PASS  markup in data renders as text, not HTML
-PASS  ExtendedClass adds classes to the root
-PASS  ExtendedClass keeps the base classes
-PASS  changing ExtendedClass replaces the previous extra classes
+PASS  container classes (pattern class + ExtendedClass) are untouched on create
+PASS  ExtendedClass is not duplicated on the card root
 PASS  destroy removes the click listener
 PASS  calls after destroy are safe
 PASS  missing mount id throws a clear error
 ...
-27/27 passed
+24/24 passed
 ```
 
 The same file runs in the browser at `preview/index.html?test=1`. Write a check for every lifecycle rule in step 3; that's what makes AI-written component code safe to accept. Mentor quota is counted per tenant, so every bug caught here is a turn you don't spend.
@@ -224,31 +224,34 @@ create this Block. Do not publish.
    mandatory, default "Greet"), ExtendedClass (Text, NOT mandatory, default "").
 2. Event: OnGreetClicked with one input parameter Count (Integer).
 3. Local Variable: Instance (Object).
-4. Widget tree: a single empty Container named "MountPoint".
+4. Widget tree: a single empty Container named "MountPoint" (the pattern's main
+   container). Set its Style Classes to exactly:
+   "greeting-card" + If(ExtendedClass <> NullTextIdentifier(), " " + ExtendedClass, "")
 5. Required Scripts: add the "GreetingCard" Script.
 6. Client Action "TriggerGreetClicked" (input Count, Integer) whose only step is
    Trigger Event OnGreetClicked with Count = Count. (Needed because $actions in a
    JavaScript node cannot reference a Block Event directly.)
 7. Three lifecycle handlers, each with one JavaScript node:
 
-OnReady — inputs RuntimeId = MountPoint.Id, Name, ButtonLabel, ExtendedClass;
-output Instance, assigned to the local variable Instance:
+OnReady — inputs RuntimeId = MountPoint.Id, Name, ButtonLabel; output Instance,
+assigned to the local variable Instance:
 $parameters.Instance = new ClaudeTest.GreetingCard({
   runtimeId: $parameters.RuntimeId,
   name: $parameters.Name,
   buttonLabel: $parameters.ButtonLabel,
-  extendedClass: $parameters.ExtendedClass,
   events: { OnGreetClicked: $actions.TriggerGreetClicked }
 });
 
-OnParametersChanged — inputs Instance, Name, ButtonLabel, ExtendedClass:
+OnParametersChanged — inputs Instance, Name, ButtonLabel:
 if ($parameters.Instance) {
   $parameters.Instance.onParametersChanged({
     name: $parameters.Name,
-    buttonLabel: $parameters.ButtonLabel,
-    extendedClass: $parameters.ExtendedClass
+    buttonLabel: $parameters.ButtonLabel
   });
 }
+
+ExtendedClass is used only by MountPoint's Style Classes. Do not pass it to any
+JavaScript node.
 
 OnDestroy — input Instance:
 if ($parameters.Instance) {
@@ -322,13 +325,12 @@ In the matching chunk the three nodes compile to small functions. What we found:
 
 ```js
 function re(r){ r.Instance && r.Instance.destroy() }
-function ie(r){ r.Instance && r.Instance.onParametersChanged({name:r.Name, buttonLabel:r.ButtonLabel,
-  extendedClass:r.ExtendedClass}) }
+function ie(r){ r.Instance && r.Instance.onParametersChanged({name:r.Name, buttonLabel:r.ButtonLabel}) }
 function ae(r,n){ r.Instance = new ClaudeTest.GreetingCard({runtimeId:r.RuntimeId, name:r.Name,
-  buttonLabel:r.ButtonLabel, extendedClass:r.ExtendedClass, events:{OnGreetClicked:n.TriggerGreetClicked}}) }
+  buttonLabel:r.ButtonLabel, events:{OnGreetClicked:n.TriggerGreetClicked}}) }
 ```
 
-Check four things: the guards survived (the compiler rewrites `if (x) { … }` as `x && …`, which is equivalent), every parameter name matches `types.ts`, `extendedClass` is passed in **both** `OnReady` and `OnParametersChanged`, and the event goes through the bridge action (`n.TriggerGreetClicked`), not the Block Event.
+Check four things: the guards survived (the compiler rewrites `if (x) { … }` as `x && …`, which is equivalent), every parameter name matches `types.ts`, **no** `extendedClass` reaches the JS nodes (the container owns it), and the event goes through the bridge action (`n.TriggerGreetClicked`), not the Block Event.
 
 ### 8c. It works in a real browser
 
@@ -337,7 +339,7 @@ Validation and the diff are static. Open the screen and click through what the h
 1. The card renders inside the Block with the starting name.
 2. Each click shows the Info message with the count going up (proves the event made it back to OutSystems through the bridge).
 3. Typing in the input updates the greeting live (proves `onParametersChanged`).
-4. DevTools → Elements: the card's root has `card gc-card` plus whatever `ExtendedClass` the screen passes, and nothing extra when it passes none.
+4. DevTools → Elements: the Block's main container has `greeting-card` plus whatever `ExtendedClass` the screen passes (and nothing extra when it passes none), and the card inside it has exactly `card gc-card`.
 5. DevTools → Console is clean.
 
 ## Platform limits we hit along the way
@@ -355,12 +357,12 @@ All of these cost a turn or a question.
 ## Making it yours
 
 1. Copy `greeting-card/`, rename namespace, class and output file.
-2. Write `types.ts`: every Input Parameter, every Event and its payload. Always include `ExtendedClass` (Text, not mandatory, default `""`).
-3. Write the class to the three-member rules; add a check for each rule; `npm test` until green.
+2. Write `types.ts`: every Input Parameter, every Event and its payload. Every pattern gets `ExtendedClass` (Text, not mandatory, default `""`), documented as applied by the main container, not the class.
+3. Write the class to the three-member rules; add a check for each rule, including that it leaves the mount element's classes alone; `npm test` until green.
 4. Commit, including `dist/`.
-5. Turn A (Script), turn B (Block, one bridge Client Action per Event), turn C (harness screen), in one Mentor session.
+5. Turn A (Script), turn B (Block: one bridge Client Action per Event, and the main container's Style Classes set to `"<pattern-class>" + If(ExtendedClass <> NullTextIdentifier(), " " + ExtendedClass, "")`), turn C (harness screen), in one Mentor session.
 6. Publish; confirm the live revision.
-7. Diff the Script, find the JS nodes, click through in the browser.
+7. Diff the Script, find the JS nodes, check the container's classes, click through in the browser.
 8. Only then use the Block on real screens.
 
 For a component with real behaviour (a data table, a chart, a rich editor) the platform side barely grows: more Input Parameters and more bridge actions, still three JS nodes. The growth is all in the repo, which is where you want it.

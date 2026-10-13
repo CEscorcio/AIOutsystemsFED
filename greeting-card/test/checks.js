@@ -51,30 +51,25 @@ function runGreetingCardChecks(win) {
   check("markup in data renders as text, not HTML",
     host.querySelector("img") === null && title.textContent.indexOf("<img") !== -1);
 
-  var root = host.querySelector(".gc-card");
-  check("no ExtendedClass leaves only the base classes", root.className === "card gc-card");
-  card.onParametersChanged({ extendedClass: "my-theme  shadow-m" });
-  check("ExtendedClass adds classes to the root",
-    root.classList.contains("my-theme") && root.classList.contains("shadow-m"));
-  check("ExtendedClass keeps the base classes",
-    root.classList.contains("card") && root.classList.contains("gc-card"));
-  card.onParametersChanged({ extendedClass: "other" });
-  check("changing ExtendedClass replaces the previous extra classes",
-    root.classList.contains("other") && !root.classList.contains("my-theme"));
-  card.onParametersChanged({ name: "Ada" });
-  check("updates without ExtendedClass leave it alone", root.classList.contains("other"));
-  card.onParametersChanged({ extendedClass: "" });
-  check("empty ExtendedClass removes the extra classes", root.className === "card gc-card");
-
   check("styles injected into <head> once", doc.querySelectorAll("#gc-greeting-card-styles").length === 1);
+
+  // ExtendedClass is applied by the Block on its main container (the mount),
+  // via Style Classes. The class must leave the container's classes alone and
+  // never apply ExtendedClass itself, or every class would be applied twice.
   var host2 = doc.createElement("div");
   host2.id = "gc-test-mount-2";
+  host2.className = "greeting-card my-theme";
   doc.body.appendChild(host2);
-  var card2 = new GreetingCard({ runtimeId: "gc-test-mount-2", name: "B", buttonLabel: "B", extendedClass: "from-config" });
+  var card2 = new GreetingCard({ runtimeId: "gc-test-mount-2", name: "B", buttonLabel: "B" });
   check("second instance does not duplicate styles", doc.querySelectorAll("#gc-greeting-card-styles").length === 1);
-  check("ExtendedClass from the constructor is applied",
-    host2.querySelector(".gc-card").className === "card gc-card from-config");
+  check("container classes (pattern class + ExtendedClass) are untouched on create",
+    host2.className === "greeting-card my-theme");
+  card2.onParametersChanged({ name: "C", buttonLabel: "C" });
+  check("container classes are untouched on update", host2.className === "greeting-card my-theme");
+  check("ExtendedClass is not duplicated on the card root",
+    host2.querySelector(".gc-card").className === "card gc-card");
   card2.destroy();
+  check("container classes are untouched on destroy", host2.className === "greeting-card my-theme");
 
   card.destroy();
   check("destroy removes the component", host.querySelector(".gc-card") === null);

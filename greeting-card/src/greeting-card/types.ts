@@ -4,8 +4,11 @@
 // Block Input Parameters -> GreetingCardParameters
 //   Name           Text
 //   ButtonLabel    Text
-//   ExtendedClass  Text, not mandatory, default "" (every pattern has one:
-//                  extra CSS classes added to the component's root element)
+//   ExtendedClass  Text, not mandatory, default "" (every pattern has one).
+//                  Applied by the Block, NOT by this class: the Block's main
+//                  container has Style Classes =
+//                  "greeting-card" + If(ExtendedClass <> NullTextIdentifier(), " " + ExtendedClass, "")
+//                  so it is deliberately absent from GreetingCardParameters.
 //
 // Block Events -> GreetingCardEvents (each wired through a bridge Client Action,
 // because $actions in an ODC JS node resolves Client Actions only)
@@ -14,7 +17,6 @@
 export interface GreetingCardParameters {
   name: string;
   buttonLabel: string;
-  extendedClass?: string;
 }
 
 export interface GreetingCardEvents {

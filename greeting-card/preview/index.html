@@ -17,7 +17,8 @@
 <body>
   <h1>GreetingCard</h1>
   <p>Open with <code>?test=1</code> to run the scripted checks.</p>
-  <div id="mount"></div>
+  <!-- Mirrors the Block's main container: pattern class + ExtendedClass -->
+  <div id="mount" class="greeting-card"></div>
   <p id="events"></p>
   <div id="log"></div>
 
@@ -28,7 +29,6 @@
       runtimeId: "mount",
       name: "OutSystems",
       buttonLabel: "Greet",
-      extendedClass: "",
       events: {
         OnGreetClicked: function (n) {
           document.getElementById("events").textContent = "OnGreetClicked(" + n + ")";
