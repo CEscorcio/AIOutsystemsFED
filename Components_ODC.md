@@ -8,7 +8,7 @@ This page is the recipe: what to create, in what order, the exact prompts, and h
 
 Don't try to make Web Components work natively in OutSystems. Use the **Block as a thin bridge** instead: it receives data through Input Parameters, raises Events, and in its lifecycle handlers it creates and drives an instance of a class that lives in a JavaScript bundle built outside the platform. The Block is the small part you see in Studio; the component, with its types, build and tests, is ordinary high-code that evolves in Git and can change without republishing the Block as long as the contract holds.
 
-The technique comes from [*AI-Powered Frontend Development in OutSystems O11 and ODC*](https://antonio-carvalho.medium.com/ai-powered-frontend-development-in-outsystems-o11-and-odc-4d408fdb4ade) by **António Carvalho**. The article also describes it for O11; this page covers ODC only, because that's all we ran.
+The technique comes from [*AI-Powered Frontend Development in OutSystems O11 and ODC*](https://antonio-carvalho.medium.com/ai-powered-frontend-development-in-outsystems-o11-and-odc-4d408fdb4ade) by **António Carvalho**. The article also describes it for O11; this page covers ODC only, because that's all we ran. For O11, see [Components_11.md](Components_11.md).
 
 **If your tenant is shared:** Mentor's quota is counted per tenant, so the turns you spend are your colleagues' turns too. Steps 5 and 6 are designed to keep the number of turns low.
 
