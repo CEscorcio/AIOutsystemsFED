@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>GreetingCard preview</title>
+  <!-- Optional: paste the OutSystems UI stylesheet URL from your app's
+       /moduleservices/moduleinfo here to develop against the real cascade. -->
+  <style>
+    body { font-family: system-ui, sans-serif; max-width: 640px; margin: 32px auto; padding: 0 16px; }
+    .card { border: 1px solid #ddd; border-radius: 8px; padding: 16px; }
+    .btn { padding: 8px 16px; border-radius: 6px; border: 0; cursor: pointer; }
+    .btn-primary { background: #1068eb; color: #fff; }
+    #log { font-family: ui-monospace, monospace; font-size: 13px; white-space: pre-wrap; }
+    .pass { color: #0a7a2f; } .fail { color: #b00020; font-weight: 600; }
+  </style>
+</head>
+<body>
+  <h1>GreetingCard</h1>
+  <p>Open with <code>?test=1</code> to run the scripted checks.</p>
+  <div id="mount"></div>
+  <p id="events"></p>
+  <div id="log"></div>
+
+  <script src="../dist/GreetingCard.js"></script>
+  <script src="../test/checks.js"></script>
+  <script>
+    new ClaudeTest.GreetingCard({
+      runtimeId: "mount",
+      name: "OutSystems",
+      buttonLabel: "Greet",
+      events: {
+        OnGreetClicked: function (n) {
+          document.getElementById("events").textContent = "OnGreetClicked(" + n + ")";
+        }
+      }
+    });
+
+    if (new URLSearchParams(location.search).get("test") === "1") {
+      var results = runGreetingCardChecks(window);
+      var log = document.getElementById("log");
+      var failed = 0;
+      results.forEach(function (r) {
+        if (!r.ok) failed++;
+        var line = document.createElement("div");
+        line.className = r.ok ? "pass" : "fail";
+        line.textContent = (r.ok ? "PASS  " : "FAIL  ") + r.name;
+        log.appendChild(line);
+      });
+      var summary = document.createElement("div");
+      summary.textContent = "\n" + (results.length - failed) + "/" + results.length + " passed";
+      log.appendChild(summary);
+    }
+  </script>
+</body>
+</html>
