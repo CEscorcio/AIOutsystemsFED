@@ -141,7 +141,7 @@ The Block will call exactly three things, so the class needs exactly three membe
 Plus three habits that saved us debugging time:
 
 - **Platform data enters the DOM through `textContent`, never `innerHTML`.** One of the checks feeds `<img src=x onerror=alert(1)>` as the name and asserts it shows up as text.
-- **Reuse OutSystems UI classes for anything themed.** The card uses `card` and the button uses `btn btn-primary`, so it follows the app theme with no extra CSS. Your own stylesheet only does layout.
+- **Reuse OutSystems UI classes for anything themed.** The card uses `card` and the button uses `btn btn-primary`, so it follows the app theme. Your own stylesheet takes every colour, radius, spacing and shadow from OutSystems UI theme variables (`var(--color-primary, #1068eb)`), with a fallback for the local preview, so it never hard-codes the brand.
 - **Inject the stylesheet once**, keyed by an element id, so two instances on one screen don't duplicate it.
 
 See [`GreetingCard.ts`](greeting-card/src/greeting-card/GreetingCard.ts) for the full class (about 80 lines).
