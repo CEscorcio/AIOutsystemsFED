@@ -12,9 +12,13 @@ The recipe, run end to end: write the contract, write the class to the bridge's 
 
 The same pattern on O11 Reactive, with the agent working through Service Studio's MCP server instead of Mentor: the repo steps are shared, and the platform side becomes three Model API edits you review in Compare-and-Merge, a 1-Click Publish, and the same verification.
 
+**[Style rules for custom patterns](Style.md)**
+
+The CSS rules every pattern follows on both platforms, with OutSystems UI as the base theme: BEM class names (the golden rule), OutSystems UI classes next to them, every visual value an OutSystems UI variable with its base-theme fallback, one-class selectors, device classes, right-to-left and accessibility. Lists the base theme's variables and which rules `npm test` enforces.
+
 **[`greeting-card/`](greeting-card/)**
 
-The reference implementation the guide walks through: TypeScript source, esbuild bundle, 20 checks that run in jsdom (`npm test`) and in the browser (`preview/index.html?test=1`). Copy it as the starting point for your own pattern.
+The reference implementation the guide walks through: TypeScript source, esbuild bundle, 29 checks that run in jsdom (`npm test`) and in the browser (`preview/index.html?test=1`). Copy it as the starting point for your own pattern.
 
 ## Vocabulary
 

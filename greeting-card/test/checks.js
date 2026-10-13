@@ -67,6 +67,34 @@ function runGreetingCardChecks(win) {
 
   check("styles injected into <head> once", doc.querySelectorAll("#greeting-card-styles").length === 1);
 
+  // Style.md: every OutSystems UI variable is used with a fallback equal to its
+  // value in the base theme, and no raw colour appears outside such a fallback.
+  // Values copied from OutSystems UI 2.30.0's :root.
+  var OSUI_TOKENS = {
+    "--color-primary": "#1068eb", "--color-primary-selected": "rgba(20, 110, 245, .12)",
+    "--color-neutral-0": "#ffffff", "--color-neutral-4": "#dee2e6", "--color-neutral-5": "#ced4da",
+    "--color-neutral-9": "#272b30",
+    "--space-none": "0", "--space-xs": "4px", "--space-s": "8px", "--space-base": "16px", "--space-m": "24px",
+    "--border-radius-soft": "4px", "--border-radius-rounded": "100px",
+    "--border-size-s": "1px", "--border-size-l": "3px",
+    "--shadow-xs": "0 1px 2px rgba(0, 0, 0, .1)", "--shadow-s": "0 2px 4px rgba(0, 0, 0, .1)",
+    "--font-size-h5": "20px", "--font-size-base": "16px", "--font-size-xs": "12px", "--font-semi-bold": "600"
+  };
+  var css = (doc.getElementById("greeting-card-styles") || {}).textContent || "";
+  var VAR_WITH_FALLBACK = /var\((--[a-z0-9-]+)\s*(?:,\s*([^()]*(?:\([^()]*\))?[^()]*))?\)/g;
+  var tokenProblems = [];
+  var m;
+  while ((m = VAR_WITH_FALLBACK.exec(css)) !== null) {
+    if (!(m[1] in OSUI_TOKENS)) tokenProblems.push(m[1] + " is not a known OutSystems UI token");
+    else if (m[2] === undefined) tokenProblems.push(m[1] + " has no fallback");
+    else if (m[2].trim() !== OSUI_TOKENS[m[1]]) tokenProblems.push(m[1] + " fallback " + m[2].trim() + " != " + OSUI_TOKENS[m[1]]);
+  }
+  check("every variable is an OutSystems UI token with its base-theme fallback" +
+    (tokenProblems.length ? " (" + tokenProblems.join("; ") + ")" : ""), tokenProblems.length === 0);
+  var rawColours = css.replace(VAR_WITH_FALLBACK, "").match(/#[0-9a-fA-F]{3,8}\b|rgba?\(|hsla?\(/g);
+  check("no raw colour outside a variable fallback" + (rawColours ? " (" + rawColours.join(", ") + ")" : ""), !rawColours);
+  check("no !important", css.indexOf("!important") === -1);
+
   // ExtendedClass is applied by the Block on its main container (the mount),
   // via Style Classes. The class must leave the container's classes alone and
   // never apply ExtendedClass itself, or every class would be applied twice.

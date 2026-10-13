@@ -81,13 +81,12 @@ Same rule as [Rule 0 in the ODC guide](Components_ODC.md#rules-for-every-custom-
 | Element | `<pattern>__<element>` | `greeting-card__body`, `__text`, `__title`, `__count`, `__button` | The TypeScript class |
 | Modifier | `<pattern>--<modifier>` or `<pattern>__<element>--<modifier>` | `greeting-card--compact` | A screen, through `ExtendedClass` |
 
-- Lowercase kebab-case, `__` before an element, `--` before a modifier. Elements are flat: `greeting-card__title`, never `greeting-card__text__title`.
-- OutSystems UI classes sit **next to** the BEM class, never instead of it: `card greeting-card__body`, `btn btn-primary greeting-card__button`.
-- Selectors are a single BEM class. The only nesting allowed is a modifier changing its elements: `.greeting-card--compact .greeting-card__body`.
-- No abbreviations or prefixes such as `gc-`. The block name keeps classes unique across patterns.
-- Modifiers are the public styling API: a screen sets `ExtendedClass = "greeting-card--compact"`. Document every modifier in `types.ts`.
+The full rule and every other CSS rule for patterns (OutSystems UI variables with base-theme fallbacks, one-class selectors, device classes, right-to-left, accessibility) are in **[Style.md](Style.md)**. `npm test` enforces the parts a script can check, so they hold the same way on O11 as on ODC.
 
-`npm test` enforces it, so the rule holds the same way on O11 as on ODC. In Service Studio, it also means a screen should never style a pattern through its OutSystems UI classes (`.card`, `.btn`) or by element (`.greeting-card p`): style through a modifier instead.
+Two O11 notes:
+
+- **Check the fallback values against your OutSystems UI version.** Style.md lists the values from OutSystems UI 2.30.0 on ODC. An O11 environment may run an older version; read its `OutSystemsUI.css` `:root` from your app's `moduleinfo` and adjust `OSUI_TOKENS` in the tests if they differ.
+- **In Service Studio, never style a pattern from a screen** through its OutSystems UI classes (`.card`, `.btn`) or by element (`.greeting-card p`). Pick a modifier through `ExtendedClass` instead.
 
 ## Steps 1 to 5: identical to ODC
 
