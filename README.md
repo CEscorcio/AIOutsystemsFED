@@ -36,13 +36,14 @@ The repo side is identical. Only the platform side changes:
 | Publishing | A Mentor turn | 1-Click Publish |
 | Module types | Web apps and libraries | Reactive Web apps and libraries (not Traditional Web) |
 | Status | **Run end to end.** On every publish, the published Script matched the local bundle line for line (ODC only adds a BOM and drops the final newline) | **Written, not yet run end to end** |
-| Guide | [Components_ODC.md](Components_ODC.md) | [Components_11.md](Components_11.md) |
+| Guide (steps 6 to 8) | [Components_ODC.md](Components_ODC.md) | [Components_11.md](Components_11.md) |
 
 ## Start here
 
-1. **[Style.md](Style.md)**: the CSS rules every pattern follows, on both platforms.
-2. **The guide for your platform**: [Components_ODC.md](Components_ODC.md) or [Components_11.md](Components_11.md). Each one goes step by step from the contract to a verified publish, with the exact prompts.
-3. **[`greeting-card/`](greeting-card/)**: a worked example to copy. It's deliberately small (a card that greets a name and counts clicks), so every part of the bridge is visible. Replace the class with your own component; the rest stays the same.
+1. **[Components.md](Components.md)**: the idea, the rules every pattern follows, and steps 1 to 5 (contract, class, build, local tests). The same on both platforms.
+2. **[Style.md](Style.md)**: the CSS rules every pattern follows.
+3. **Steps 6 to 8 for your platform**: [Components_ODC.md](Components_ODC.md) or [Components_11.md](Components_11.md). Script, Block and harness screen through the agent, then publish and verify, with the exact prompts.
+4. **[`greeting-card/`](greeting-card/)**: a worked example to copy. It's deliberately small (a card that greets a name and counts clicks), so every part of the bridge is visible. Replace the class with your own component; the rest stays the same.
 
 ## Rules every pattern follows
 
@@ -50,10 +51,10 @@ The repo side is identical. Only the platform side changes:
 |---|---|---|
 | **BEM class names** (the golden rule) | The pattern class is the block; everything inside is `<pattern>__<element>`, variants are `<pattern>--<modifier>` | [Style.md, Rule 0](Style.md#rule-0-the-golden-rule-bem-class-names) |
 | **OutSystems UI is the base theme** | OutSystems UI classes go next to the BEM class; every colour, space, radius, shadow and font value is an OutSystems UI variable with its base-theme fallback | [Style.md, Rules 1 and 2](Style.md#rule-1-outsystems-ui-classes-go-next-to-the-bem-class-never-instead-of-it) |
-| **`ExtendedClass` on every pattern** | A Text Input Parameter, not mandatory, default `""`, so a screen can add classes or pick a modifier | [ODC guide, Rule 1](Components_ODC.md#rules-for-every-custom-pattern) |
-| **The main container carries the classes** | The Block's outermost Container has Style Classes `"<pattern>" + If(ExtendedClass <> NullTextIdentifier(), " " + ExtendedClass, "")`; the component never applies `ExtendedClass` itself | [ODC guide, Rule 2](Components_ODC.md#rules-for-every-custom-pattern) |
-| **The class has three members** | `constructor`, `onParametersChanged` (partial updates, keeps state), `destroy` (removes every listener); platform data enters the DOM as text only | [ODC guide, step 3](Components_ODC.md#step-3-write-the-class-to-the-bridges-rules) |
-| **Events go through a bridge Client Action** | In a JS node, `$actions` reaches Client Actions only, so each Block Event is raised by a Client Action passed into the class | [ODC guide, turn B](Components_ODC.md#turn-b-the-block) |
+| **`ExtendedClass` on every pattern** | A Text Input Parameter, not mandatory, default `""`, so a screen can add classes or pick a modifier | [Components.md, Rule 1](Components.md#rules-for-every-custom-pattern) |
+| **The main container carries the classes** | The Block's outermost Container has Style Classes `"<pattern>" + If(ExtendedClass <> NullTextIdentifier(), " " + ExtendedClass, "")`; the component never applies `ExtendedClass` itself | [Components.md, Rule 2](Components.md#rules-for-every-custom-pattern) |
+| **The class has three members** | `constructor`, `onParametersChanged` (partial updates, keeps state), `destroy` (removes every listener); platform data enters the DOM as text only | [Components.md, step 3](Components.md#step-3-write-the-class-to-the-bridges-rules) |
+| **Events go through a bridge Client Action** | In a JS node, `$actions` reaches Client Actions only, so each Block Event is raised by a Client Action passed into the class | [Components.md, step 3](Components.md#what-the-block-does-with-it) |
 
 `npm test` enforces the rules a script can check: BEM class names and selectors, OutSystems UI variables and their fallbacks, no raw colours or `!important`, logical properties, focus left to OutSystems UI, the container's classes left alone, and the lifecycle.
 
@@ -76,8 +77,9 @@ To start your own pattern, copy `greeting-card/` and rename four things consiste
 ```
 README.md               this page
 Style.md                CSS rules for every pattern, both platforms
-Components_ODC.md       step-by-step guide for ODC (run end to end)
-Components_11.md        step-by-step guide for O11 Reactive (not yet run)
+Components.md           the idea, the rules and steps 1 to 5, both platforms
+Components_ODC.md       steps 6 to 8 on ODC (run end to end)
+Components_11.md        steps 6 to 8 on O11 Reactive (not yet run)
 CLAUDE.md               standing rules for the AI agent working in this repo
 .claude/skills/
   new-pattern/          copy greeting-card and rename it consistently (scaffold.mjs)

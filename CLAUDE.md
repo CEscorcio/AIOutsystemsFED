@@ -1,6 +1,6 @@
 # Working in this repo
 
-Custom front-end patterns for OutSystems, built in TypeScript and shipped into an app as a Block that bridges to the bundle. Two platforms: ODC ([Components_ODC.md](Components_ODC.md)) and O11 Reactive ([Components_11.md](Components_11.md)). [README.md](README.md) has the overview.
+Custom front-end patterns for OutSystems, built in TypeScript and shipped into an app as a Block that bridges to the bundle. [Components.md](Components.md) holds what's shared (the idea, the rules, steps 1 to 5); steps 6 to 8 are per platform: ODC ([Components_ODC.md](Components_ODC.md)) and O11 Reactive ([Components_11.md](Components_11.md)). Put platform-neutral content in Components.md, never in a platform guide. [README.md](README.md) has the overview.
 
 ## Standing rules
 
