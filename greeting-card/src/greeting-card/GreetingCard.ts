@@ -22,19 +22,19 @@ export class GreetingCard {
     ensureStyles(document);
 
     this.root = document.createElement("div");
-    this.root.className = "card gc-card";
+    this.root.className = "card greeting-card__body";
 
     const text = document.createElement("div");
-    text.className = "gc-text";
+    text.className = "greeting-card__text";
     this.title = document.createElement("p");
-    this.title.className = "gc-title";
+    this.title.className = "greeting-card__title";
     this.countLabel = document.createElement("span");
-    this.countLabel.className = "gc-count";
+    this.countLabel.className = "greeting-card__count";
     text.append(this.title, this.countLabel);
 
     this.button = document.createElement("button");
     this.button.type = "button";
-    this.button.className = "btn btn-primary";
+    this.button.className = "btn btn-primary greeting-card__button";
     this.button.addEventListener("click", this.handleClick);
 
     this.root.append(text, this.button);

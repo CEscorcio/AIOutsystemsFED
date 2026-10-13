@@ -19,7 +19,7 @@ flowchart LR
   subgraph Git["Git repo (high-code)"]
     T[types.ts<br/>the contract] --> C[GreetingCard.ts<br/>the class]
     C --> B[esbuild] --> D[dist/GreetingCard.js]
-    D --> X[npm test<br/>24 checks in jsdom]
+    D --> X[npm test<br/>26 checks in jsdom]
   end
   subgraph ODC["ODC app (low-code)"]
     S[Script<br/>GreetingCard.js]
@@ -62,7 +62,7 @@ test/run.mjs                         runs the checks in jsdom (npm test)
 preview/index.html                   local page; ?test=1 runs the checks in the browser
 ```
 
-Three things to rename consistently: the **namespace** (`ClaudeTest` → yours, e.g. `MyCompany`), the **class name**, and the **output file**. The namespace is global, so make it unique to your team.
+Four things to rename consistently: the **namespace** (`ClaudeTest` → yours, e.g. `MyCompany`), the **class name**, the **output file**, and the **BEM block** (`greeting-card` → your pattern in kebab-case, in every CSS class, the stylesheet id and the test's BEM check; see [Rule 0](#rules-for-every-custom-pattern)). The namespace is global, so make it unique to your team.
 
 ```
 npm install
@@ -103,7 +103,25 @@ The comment block at the top is the most useful thing in the file: when you late
 
 ### Rules for every custom pattern
 
-Two conventions apply to every pattern we build, so they behave like the patterns in OutSystems UI.
+Three conventions apply to every pattern we build, so they behave like the patterns in OutSystems UI. Rule 0 is the golden rule: no pattern ships without it.
+
+**Rule 0 (golden rule): every CSS class the pattern owns follows BEM, with the pattern class as the block.**
+
+| BEM part | Form | GreetingCard | Who sets it |
+|---|---|---|---|
+| Block | `<pattern>` | `greeting-card` | The Block's main container (Rule 2) |
+| Element | `<pattern>__<element>` | `greeting-card__body`, `__text`, `__title`, `__count`, `__button` | The TypeScript class |
+| Modifier | `<pattern>--<modifier>` or `<pattern>__<element>--<modifier>` | `greeting-card--compact` | A screen, through `ExtendedClass` |
+
+- **Names are lowercase kebab-case**, with `__` before an element and `--` before a modifier. The block is the pattern name in kebab-case: `GreetingCard` → `greeting-card`.
+- **Elements are flat.** Write `greeting-card__title`, never `greeting-card__text__title`, even when the title sits inside the text element.
+- **OutSystems UI classes sit next to the BEM class, never instead of it.** The card root is `card greeting-card__body`; the button is `btn btn-primary greeting-card__button`. OutSystems UI gives the themed look; the BEM class is what your stylesheet targets.
+- **Selectors are a single BEM class.** Style `.greeting-card__title`, not `.card p` or `.greeting-card .greeting-card__title`. The only nesting allowed is a modifier changing its elements: `.greeting-card--compact .greeting-card__body`.
+- **No abbreviations or prefixes.** Use `greeting-card__title`, not `gc-title`. The block name is what makes classes unique across patterns.
+- **Modifiers are the public styling API.** A screen picks a variant by passing the modifier in `ExtendedClass` (`ExtendedClass = "greeting-card--compact"`). Any modifier the stylesheet defines is documented in `types.ts` next to `ExtendedClass`.
+- **Ids follow the block too.** The injected stylesheet's id is `greeting-card-styles`.
+
+`npm test` enforces the rule: it walks every element the component renders and fails if a class is neither an allowed OutSystems UI class nor `greeting-card`, `greeting-card__*` or `greeting-card--*`.
 
 **Rule 1: an `ExtendedClass` Input Parameter.**
 
@@ -141,7 +159,7 @@ The Block will call exactly three things, so the class needs exactly three membe
 Plus three habits that saved us debugging time:
 
 - **Platform data enters the DOM through `textContent`, never `innerHTML`.** One of the checks feeds `<img src=x onerror=alert(1)>` as the name and asserts it shows up as text.
-- **Reuse OutSystems UI classes for anything themed.** The card uses `card` and the button uses `btn btn-primary`, so it follows the app theme. Your own stylesheet takes every colour, radius, spacing and shadow from OutSystems UI theme variables (`var(--color-primary, #1068eb)`), with a fallback for the local preview, so it never hard-codes the brand.
+- **Reuse OutSystems UI classes for anything themed.** The card uses `card` and the button uses `btn btn-primary`, so it follows the app theme. Each of those elements also carries its BEM class (`greeting-card__body`, `greeting-card__button`), which is what your own stylesheet targets (Rule 0). That stylesheet takes every colour, radius, spacing and shadow from OutSystems UI theme variables (`var(--color-primary, #1068eb)`), with a fallback for the local preview, so it never hard-codes the brand.
 - **Inject the stylesheet once**, keyed by an element id, so two instances on one screen don't duplicate it.
 
 See [`GreetingCard.ts`](greeting-card/src/greeting-card/GreetingCard.ts) for the full class (about 80 lines).
@@ -173,6 +191,7 @@ Commit `dist/` too. It's the artifact that goes to OutSystems, and having it in 
 PASS  bundle registers window.ClaudeTest.GreetingCard
 PASS  renders inside the mount container
 PASS  uses OutSystems UI card and button classes
+PASS  every component class is BEM or OutSystems UI
 PASS  click fires OnGreetClicked with count 1
 PASS  onParametersChanged keeps the count
 PASS  markup in data renders as text, not HTML
@@ -182,7 +201,7 @@ PASS  destroy removes the click listener
 PASS  calls after destroy are safe
 PASS  missing mount id throws a clear error
 ...
-24/24 passed
+26/26 passed
 ```
 
 The same file runs in the browser at `preview/index.html?test=1`. Write a check for every lifecycle rule in step 3; that's what makes AI-written component code safe to accept. Mentor quota is counted per tenant, so every bug caught here is a turn you don't spend.
@@ -341,7 +360,7 @@ Validation and the diff are static. Open the screen and click through what the h
 1. The card renders inside the Block with the starting name.
 2. Each click shows the Info message with the count going up (proves the event made it back to OutSystems through the bridge).
 3. Typing in the input updates the greeting live (proves `onParametersChanged`).
-4. DevTools → Elements: the Block's main container has `greeting-card` plus whatever `ExtendedClass` the screen passes (and nothing extra when it passes none), and the card inside it has exactly `card gc-card`.
+4. DevTools → Elements: the Block's main container has `greeting-card` plus whatever `ExtendedClass` the screen passes (and nothing extra when it passes none), and the card inside it has exactly `card greeting-card__body`. Every class you see inside the container is `greeting-card__*`, `greeting-card--*` or an OutSystems UI class (Rule 0).
 5. DevTools → Console is clean.
 
 ## Platform limits we hit along the way
@@ -360,7 +379,7 @@ All of these cost a turn or a question.
 
 1. Copy `greeting-card/`, rename namespace, class and output file.
 2. Write `types.ts`: every Input Parameter, every Event and its payload. Every pattern gets `ExtendedClass` (Text, not mandatory, default `""`), documented as applied by the main container, not the class.
-3. Write the class to the three-member rules; add a check for each rule, including that it leaves the mount element's classes alone; `npm test` until green.
+3. Write the class to the three-member rules, naming every class BEM under the pattern block (Rule 0, the golden rule); add a check for each rule, including the BEM check and that it leaves the mount element's classes alone; `npm test` until green.
 4. Commit, including `dist/`.
 5. Turn A (Script), turn B (Block: one bridge Client Action per Event, and the main container's Style Classes set to `"<pattern-class>" + If(ExtendedClass <> NullTextIdentifier(), " " + ExtendedClass, "")`), turn C (harness screen), in one Mentor session.
 6. Publish; confirm the live revision.

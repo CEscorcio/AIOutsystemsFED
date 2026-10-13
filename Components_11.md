@@ -71,12 +71,30 @@ Start in a throwaway Reactive app. Move to the library once the steps work.
 | Claude Code | Drives the Model API edits | No OutSystems plugin or tenant sign-in needed for O11 |
 | `curl` and `diff` | Verifying the published files | Git Bash has both |
 
+## The golden rule: BEM class names
+
+Same rule as [Rule 0 in the ODC guide](Components_ODC.md#rules-for-every-custom-pattern), and it applies to every pattern on both platforms: **every CSS class the pattern owns follows BEM, with the pattern class as the block.**
+
+| BEM part | Form | GreetingCard | Who sets it |
+|---|---|---|---|
+| Block | `<pattern>` | `greeting-card` | The Block's main container, through its Style Classes |
+| Element | `<pattern>__<element>` | `greeting-card__body`, `__text`, `__title`, `__count`, `__button` | The TypeScript class |
+| Modifier | `<pattern>--<modifier>` or `<pattern>__<element>--<modifier>` | `greeting-card--compact` | A screen, through `ExtendedClass` |
+
+- Lowercase kebab-case, `__` before an element, `--` before a modifier. Elements are flat: `greeting-card__title`, never `greeting-card__text__title`.
+- OutSystems UI classes sit **next to** the BEM class, never instead of it: `card greeting-card__body`, `btn btn-primary greeting-card__button`.
+- Selectors are a single BEM class. The only nesting allowed is a modifier changing its elements: `.greeting-card--compact .greeting-card__body`.
+- No abbreviations or prefixes such as `gc-`. The block name keeps classes unique across patterns.
+- Modifiers are the public styling API: a screen sets `ExtendedClass = "greeting-card--compact"`. Document every modifier in `types.ts`.
+
+`npm test` enforces it, so the rule holds the same way on O11 as on ODC. In Service Studio, it also means a screen should never style a pattern through its OutSystems UI classes (`.card`, `.btn`) or by element (`.greeting-card p`): style through a modifier instead.
+
 ## Steps 1 to 5: identical to ODC
 
 Nothing in the repo depends on the platform. Follow the ODC guide for these:
 
-1. [Start from the reference layout](Components_ODC.md#step-1-start-from-the-reference-layout): copy `greeting-card/`, rename namespace, class and output file.
-2. [Write the contract first](Components_ODC.md#step-2-write-the-contract-first), including both [rules for every custom pattern](Components_ODC.md#rules-for-every-custom-pattern): the `ExtendedClass` Input Parameter, and the main container's Style Classes expression. The expression is valid O11 syntax as written:
+1. [Start from the reference layout](Components_ODC.md#step-1-start-from-the-reference-layout): copy `greeting-card/`, rename namespace, class, output file and the BEM block.
+2. [Write the contract first](Components_ODC.md#step-2-write-the-contract-first), including all three [rules for every custom pattern](Components_ODC.md#rules-for-every-custom-pattern): BEM class names (the golden rule above), the `ExtendedClass` Input Parameter, and the main container's Style Classes expression. The expression is valid O11 syntax as written:
    ```
    "greeting-card" + If(ExtendedClass <> NullTextIdentifier(), " " + ExtendedClass, "")
    ```
@@ -222,7 +240,7 @@ Check the same four things as on ODC: the guards survived (possibly rewritten as
 
 ### 8c. It works in a real browser
 
-Same click-through as [ODC step 8c](Components_ODC.md#8c-it-works-in-a-real-browser): the card renders, each click shows the Message with an increasing count, typing updates the greeting live, the main container carries `greeting-card` plus any `ExtendedClass`, and the console is clean.
+Same click-through as [ODC step 8c](Components_ODC.md#8c-it-works-in-a-real-browser): the card renders, each click shows the Message with an increasing count, typing updates the greeting live, the main container carries `greeting-card` plus any `ExtendedClass`, every class inside it is `greeting-card__*`, `greeting-card--*` or OutSystems UI, and the console is clean.
 
 ## Limits to know before you start
 
@@ -241,9 +259,9 @@ These are documented limits of the Service Studio MCP, not ones we hit on this p
 
 ## Making it yours
 
-1. Copy `greeting-card/`, rename namespace, class and output file.
-2. Write `types.ts`, including `ExtendedClass` (Text, not mandatory, default `""`), applied by the main container.
-3. Write the class to the three-member rules; `npm test` until green.
+1. Copy `greeting-card/`, rename namespace, class, output file and the BEM block.
+2. Write `types.ts`, including `ExtendedClass` (Text, not mandatory, default `""`), applied by the main container, and the modifiers it accepts.
+3. Write the class to the three-member rules, with every class BEM under the pattern block (the golden rule); `npm test` until green.
 4. Commit, including `dist/`.
 5. Open the module (and the consumer) in Service Studio.
 6. Request A (Script from file), request B (Block with bridge action and the main container's Style Classes), request C (harness). Review each Compare-and-Merge.

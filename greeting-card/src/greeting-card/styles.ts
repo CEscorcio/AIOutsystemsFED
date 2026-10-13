@@ -3,14 +3,16 @@
 // card and button keep the OutSystems UI classes (card, btn, btn-primary), so
 // the component follows the app theme.
 //
-// Selectors use two classes (.card.gc-card) to win over OutSystems UI's .card
-// without !important. This sheet is injected last, so a screen that customises
-// one instance through ExtendedClass needs one more class, e.g.
-// .greeting-card.my-variant .gc-card { ... }
-const STYLE_ID = "gc-greeting-card-styles";
+// Class names follow BEM, with the pattern class as the block:
+//   block     greeting-card              the Block's main container (set by the Block)
+//   elements  greeting-card__body, __text, __title, __count, __button
+//   modifiers greeting-card--compact     passed by a screen through ExtendedClass
+// Selectors are single BEM classes. This sheet is injected after the OutSystems
+// UI stylesheet, so .greeting-card__body wins over .card at equal specificity.
+const STYLE_ID = "greeting-card-styles";
 
 const CSS = `
-.card.gc-card {
+.greeting-card__body {
   position: relative;
   display: flex;
   align-items: center;
@@ -26,7 +28,7 @@ const CSS = `
   overflow: hidden;
   transition: box-shadow 0.2s ease, border-color 0.2s ease;
 }
-.card.gc-card::before {
+.greeting-card__body::before {
   content: "";
   position: absolute;
   top: 0;
@@ -35,12 +37,12 @@ const CSS = `
   width: 4px;
   background: var(--color-primary, #1068eb);
 }
-.card.gc-card:hover {
+.greeting-card__body:hover {
   border-color: var(--color-neutral-5, #cbd5e1);
   box-shadow: var(--shadow-s, 0 4px 12px rgba(15, 23, 42, 0.08));
 }
-.gc-text { display: flex; flex-direction: column; align-items: flex-start; gap: var(--space-xs, 6px); min-width: 0; }
-.gc-title {
+.greeting-card__text { display: flex; flex-direction: column; align-items: flex-start; gap: var(--space-xs, 6px); min-width: 0; }
+.greeting-card__title {
   margin: 0;
   font-size: var(--font-size-h5, 1.25rem);
   font-weight: var(--font-semi-bold, 600);
@@ -48,7 +50,7 @@ const CSS = `
   color: var(--color-neutral-10, #1e293b);
   overflow-wrap: anywhere;
 }
-.gc-count {
+.greeting-card__count {
   display: inline-flex;
   align-items: center;
   padding: 2px 10px;
@@ -59,16 +61,18 @@ const CSS = `
   background: rgba(16, 104, 235, 0.1);
   background: color-mix(in srgb, var(--color-primary, #1068eb) 12%, transparent);
 }
-.gc-card .btn { flex-shrink: 0; transition: transform 0.15s ease, box-shadow 0.15s ease; }
-.gc-card .btn:hover { transform: translateY(-1px); }
-.gc-card .btn:active { transform: translateY(0); }
-.gc-card .btn:focus-visible { outline: 2px solid var(--color-primary, #1068eb); outline-offset: 2px; }
+.greeting-card__button { flex-shrink: 0; transition: transform 0.15s ease, box-shadow 0.15s ease; }
+.greeting-card__button:hover { transform: translateY(-1px); }
+.greeting-card__button:active { transform: translateY(0); }
+.greeting-card__button:focus-visible { outline: 2px solid var(--color-primary, #1068eb); outline-offset: 2px; }
+.greeting-card--compact .greeting-card__body { padding: var(--space-s, 8px) var(--space-m, 16px); padding-left: calc(var(--space-m, 16px) + 4px); }
+.greeting-card--compact .greeting-card__title { font-size: var(--font-size-base, 1rem); }
 @media (max-width: 480px) {
-  .gc-card .btn { width: 100%; }
+  .greeting-card__button { width: 100%; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .card.gc-card, .gc-card .btn { transition: none; }
-  .gc-card .btn:hover { transform: none; }
+  .greeting-card__body, .greeting-card__button { transition: none; }
+  .greeting-card__button:hover { transform: none; }
 }
 `;
 
