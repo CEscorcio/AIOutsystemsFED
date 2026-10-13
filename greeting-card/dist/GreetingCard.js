@@ -17,6 +17,7 @@
   }
 
   // src/greeting-card/GreetingCard.ts
+  var ROOT_CLASS = "card gc-card";
   var GreetingCard = class {
     constructor(config) {
       this.count = 0;
@@ -34,7 +35,7 @@
       this.events = config.events || {};
       ensureStyles(document);
       this.root = document.createElement("div");
-      this.root.className = "card gc-card";
+      this.root.className = ROOT_CLASS;
       const text = document.createElement("div");
       text.className = "gc-text";
       this.title = document.createElement("p");
@@ -67,6 +68,9 @@
     applyParameters(params) {
       if (params.name !== void 0) this.title.textContent = `Hello, ${params.name || "there"}!`;
       if (params.buttonLabel !== void 0) this.button.textContent = params.buttonLabel || "Greet";
+      if (params.extendedClass !== void 0) {
+        this.root.className = `${ROOT_CLASS} ${params.extendedClass || ""}`.trim();
+      }
     }
     renderCount() {
       this.countLabel.textContent = this.count === 1 ? "Greeted 1 time" : `Greeted ${this.count} times`;

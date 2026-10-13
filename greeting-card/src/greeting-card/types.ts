@@ -2,8 +2,10 @@
 // disagree, this file is the arbiter.
 //
 // Block Input Parameters -> GreetingCardParameters
-//   Name         Text
-//   ButtonLabel  Text
+//   Name           Text
+//   ButtonLabel    Text
+//   ExtendedClass  Text, not mandatory, default "" (every pattern has one:
+//                  extra CSS classes added to the component's root element)
 //
 // Block Events -> GreetingCardEvents (each wired through a bridge Client Action,
 // because $actions in an ODC JS node resolves Client Actions only)
@@ -12,6 +14,7 @@
 export interface GreetingCardParameters {
   name: string;
   buttonLabel: string;
+  extendedClass?: string;
 }
 
 export interface GreetingCardEvents {

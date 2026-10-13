@@ -19,7 +19,7 @@ flowchart LR
   subgraph Git["Git repo (high-code)"]
     T[types.ts<br/>the contract] --> C[GreetingCard.ts<br/>the class]
     C --> B[esbuild] --> D[dist/GreetingCard.js]
-    D --> X[npm test<br/>20 checks in jsdom]
+    D --> X[npm test<br/>27 checks in jsdom]
   end
   subgraph ODC["ODC app (low-code)"]
     S[Script<br/>GreetingCard.js]
@@ -75,8 +75,9 @@ npm test        # typecheck + build + checks
 
 ```ts
 // Block Input Parameters -> GreetingCardParameters
-//   Name         Text
-//   ButtonLabel  Text
+//   Name           Text
+//   ButtonLabel    Text
+//   ExtendedClass  Text, not mandatory, default "" (every pattern has one)
 //
 // Block Events -> GreetingCardEvents (each wired through a bridge Client Action)
 //   OnGreetClicked(Count: Integer)  <- Client Action TriggerGreetClicked(Count)
@@ -84,6 +85,7 @@ npm test        # typecheck + build + checks
 export interface GreetingCardParameters {
   name: string;
   buttonLabel: string;
+  extendedClass?: string;
 }
 
 export interface GreetingCardEvents {
@@ -98,6 +100,33 @@ export interface GreetingCardConfig extends GreetingCardParameters {
 
 The comment block at the top is the most useful thing in the file: when you later write the Mentor prompt for the Block, you copy names straight from it.
 
+### Every pattern has an `ExtendedClass`
+
+Like the patterns in OutSystems UI, every custom pattern exposes an **`ExtendedClass`** Input Parameter:
+
+| Property | Value |
+|---|---|
+| Name | `ExtendedClass` |
+| Type | Text |
+| Mandatory | **No** |
+| Default | `""` |
+| Effect | its CSS classes are added to the component's **root element**, after the pattern's own classes |
+
+It's how a screen adapts one instance (spacing, a theme variant, a utility class) without touching the pattern. The rules the class must follow:
+
+- Apply it on creation **and** in `onParametersChanged`, so a value bound to a variable updates live.
+- A new value **replaces** the previous extra classes; it never accumulates.
+- The pattern's own classes are **always kept**. In GreetingCard they're `card gc-card`, kept in a `ROOT_CLASS` constant.
+- An empty value removes the extra classes; an update that doesn't include it leaves it alone.
+
+```ts
+const ROOT_CLASS = "card gc-card";
+
+if (params.extendedClass !== undefined) {
+  this.root.className = `${ROOT_CLASS} ${params.extendedClass || ""}`.trim();
+}
+```
+
 ## Step 3: write the class to the bridge's rules
 
 The Block will call exactly three things, so the class needs exactly three members:
@@ -105,7 +134,7 @@ The Block will call exactly three things, so the class needs exactly three membe
 | Member | Called from | Rules that matter |
 |---|---|---|
 | `constructor(config)` | `OnReady` | find the mount by `config.runtimeId`; throw a clear error if it's missing; render once |
-| `onParametersChanged(params)` | `OnParametersChanged` | accept a **partial** update; never reset internal state the user created (the count survives a name change) |
+| `onParametersChanged(params)` | `OnParametersChanged` | accept a **partial** update, `extendedClass` included; never reset internal state the user created (the count survives a name change) |
 | `destroy()` | `OnDestroy` | remove **every** listener and observer; make later calls no-ops instead of throwing |
 
 Plus three habits that saved us debugging time:
@@ -146,11 +175,14 @@ PASS  uses OutSystems UI card and button classes
 PASS  click fires OnGreetClicked with count 1
 PASS  onParametersChanged keeps the count
 PASS  markup in data renders as text, not HTML
+PASS  ExtendedClass adds classes to the root
+PASS  ExtendedClass keeps the base classes
+PASS  changing ExtendedClass replaces the previous extra classes
 PASS  destroy removes the click listener
 PASS  calls after destroy are safe
 PASS  missing mount id throws a clear error
 ...
-20/20 passed
+27/27 passed
 ```
 
 The same file runs in the browser at `preview/index.html?test=1`. Write a check for every lifecycle rule in step 3; that's what makes AI-written component code safe to accept. Mentor quota is counted per tenant, so every bug caught here is a turn you don't spend.
@@ -189,7 +221,7 @@ window.ClaudeTest.GreetingCard defined in the existing "GreetingCard" Script. On
 create this Block. Do not publish.
 
 1. Input Parameters: Name (Text, mandatory, default ""), ButtonLabel (Text, not
-   mandatory, default "Greet").
+   mandatory, default "Greet"), ExtendedClass (Text, NOT mandatory, default "").
 2. Event: OnGreetClicked with one input parameter Count (Integer).
 3. Local Variable: Instance (Object).
 4. Widget tree: a single empty Container named "MountPoint".
@@ -199,20 +231,22 @@ create this Block. Do not publish.
    JavaScript node cannot reference a Block Event directly.)
 7. Three lifecycle handlers, each with one JavaScript node:
 
-OnReady — inputs RuntimeId = MountPoint.Id, Name, ButtonLabel; output Instance,
-assigned to the local variable Instance:
+OnReady — inputs RuntimeId = MountPoint.Id, Name, ButtonLabel, ExtendedClass;
+output Instance, assigned to the local variable Instance:
 $parameters.Instance = new ClaudeTest.GreetingCard({
   runtimeId: $parameters.RuntimeId,
   name: $parameters.Name,
   buttonLabel: $parameters.ButtonLabel,
+  extendedClass: $parameters.ExtendedClass,
   events: { OnGreetClicked: $actions.TriggerGreetClicked }
 });
 
-OnParametersChanged — inputs Instance, Name, ButtonLabel:
+OnParametersChanged — inputs Instance, Name, ButtonLabel, ExtendedClass:
 if ($parameters.Instance) {
   $parameters.Instance.onParametersChanged({
     name: $parameters.Name,
-    buttonLabel: $parameters.ButtonLabel
+    buttonLabel: $parameters.ButtonLabel,
+    extendedClass: $parameters.ExtendedClass
   });
 }
 
@@ -318,7 +352,7 @@ All of these cost a turn or a question.
 ## Making it yours
 
 1. Copy `greeting-card/`, rename namespace, class and output file.
-2. Write `types.ts`: every Input Parameter, every Event and its payload.
+2. Write `types.ts`: every Input Parameter, every Event and its payload. Always include `ExtendedClass` (Text, not mandatory, default `""`).
 3. Write the class to the three-member rules; add a check for each rule; `npm test` until green.
 4. Commit, including `dist/`.
 5. Turn A (Script), turn B (Block, one bridge Client Action per Event), turn C (harness screen), in one Mentor session.

@@ -1,6 +1,8 @@
 import type { GreetingCardConfig, GreetingCardEvents, GreetingCardParameters } from "./types";
 import { ensureStyles } from "./styles";
 
+const ROOT_CLASS = "card gc-card";
+
 export class GreetingCard {
   private readonly mount: HTMLElement;
   private readonly events: GreetingCardEvents;
@@ -22,7 +24,7 @@ export class GreetingCard {
     ensureStyles(document);
 
     this.root = document.createElement("div");
-    this.root.className = "card gc-card";
+    this.root.className = ROOT_CLASS;
 
     const text = document.createElement("div");
     text.className = "gc-text";
@@ -68,6 +70,10 @@ export class GreetingCard {
   private applyParameters(params: Partial<GreetingCardParameters>): void {
     if (params.name !== undefined) this.title.textContent = `Hello, ${params.name || "there"}!`;
     if (params.buttonLabel !== undefined) this.button.textContent = params.buttonLabel || "Greet";
+    // ExtendedClass replaces the previous extra classes; the base classes always stay.
+    if (params.extendedClass !== undefined) {
+      this.root.className = `${ROOT_CLASS} ${params.extendedClass || ""}`.trim();
+    }
   }
 
   private renderCount(): void {

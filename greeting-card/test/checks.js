@@ -51,12 +51,29 @@ function runGreetingCardChecks(win) {
   check("markup in data renders as text, not HTML",
     host.querySelector("img") === null && title.textContent.indexOf("<img") !== -1);
 
+  var root = host.querySelector(".gc-card");
+  check("no ExtendedClass leaves only the base classes", root.className === "card gc-card");
+  card.onParametersChanged({ extendedClass: "my-theme  shadow-m" });
+  check("ExtendedClass adds classes to the root",
+    root.classList.contains("my-theme") && root.classList.contains("shadow-m"));
+  check("ExtendedClass keeps the base classes",
+    root.classList.contains("card") && root.classList.contains("gc-card"));
+  card.onParametersChanged({ extendedClass: "other" });
+  check("changing ExtendedClass replaces the previous extra classes",
+    root.classList.contains("other") && !root.classList.contains("my-theme"));
+  card.onParametersChanged({ name: "Ada" });
+  check("updates without ExtendedClass leave it alone", root.classList.contains("other"));
+  card.onParametersChanged({ extendedClass: "" });
+  check("empty ExtendedClass removes the extra classes", root.className === "card gc-card");
+
   check("styles injected into <head> once", doc.querySelectorAll("#gc-greeting-card-styles").length === 1);
   var host2 = doc.createElement("div");
   host2.id = "gc-test-mount-2";
   doc.body.appendChild(host2);
-  var card2 = new GreetingCard({ runtimeId: "gc-test-mount-2", name: "B", buttonLabel: "B" });
+  var card2 = new GreetingCard({ runtimeId: "gc-test-mount-2", name: "B", buttonLabel: "B", extendedClass: "from-config" });
   check("second instance does not duplicate styles", doc.querySelectorAll("#gc-greeting-card-styles").length === 1);
+  check("ExtendedClass from the constructor is applied",
+    host2.querySelector(".gc-card").className === "card gc-card from-config");
   card2.destroy();
 
   card.destroy();
