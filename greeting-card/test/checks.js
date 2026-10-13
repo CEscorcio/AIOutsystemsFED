@@ -95,6 +95,45 @@ function runGreetingCardChecks(win) {
   check("no raw colour outside a variable fallback" + (rawColours ? " (" + rawColours.join(", ") + ")" : ""), !rawColours);
   check("no !important", css.indexOf("!important") === -1);
 
+  // Style.md Rule 3: a selector is one BEM class of this block, optionally
+  // prefixed by a modifier/state of the block or one OutSystems UI context class.
+  var BLOCK = "greeting-card";
+  var OSUI_CONTEXT = [".desktop", ".tablet", ".phone", ".landscape", ".portrait", ".is-rtl",
+    ".has-accessible-features", ".os-high-contrast"];
+  var badSelectors = [];
+  var cssNoComments = css.replace(/\/\*[\s\S]*?\*\//g, "");
+  var RULE = /([^{}]+)\{[^{}]*\}/g;
+  var r;
+  while ((r = RULE.exec(cssNoComments)) !== null) {
+    r[1].split(",").forEach(function (raw) {
+      var sel = raw.trim();
+      if (!sel || sel.charAt(0) === "@") return;
+      var parts = sel.replace(/::?[a-z-]+(\([^)]*\))?/g, "").trim().split(/\s+/);
+      var last = parts[parts.length - 1];
+      var prefix = parts.length === 2 ? parts[0] : null;
+      var ok = parts.length <= 2 &&
+        /^\.[a-z0-9_-]+$/.test(last) && BEM.test(last.slice(1)) &&
+        (prefix === null || OSUI_CONTEXT.indexOf(prefix) !== -1 ||
+          (/^\.[a-z0-9_-]+$/.test(prefix) && BEM.test(prefix.slice(1)) && prefix.indexOf("--") !== -1));
+      if (!ok) badSelectors.push(sel);
+    });
+  }
+  check("every selector is one BEM class, prefixed at most by a modifier or OutSystems UI context class" +
+    (badSelectors.length ? " (" + badSelectors.join(" | ") + ")" : ""), badSelectors.length === 0);
+
+  // Style.md Rule 5: direction through logical properties only.
+  var physical = cssNoComments.match(/(^|[\s;{])(left|right|(margin|padding|border)-(left|right)[a-z-]*)\s*:|text-align\s*:\s*(left|right)/g);
+  check("no left/right properties (use logical properties)" + (physical ? " (" + physical.join(", ").replace(/[\s;{]/g, "") + ")" : ""), !physical);
+
+  // Style.md Rule 6: focus belongs to OutSystems UI; motion has a reduced-motion override.
+  check("no focus styles and no outline removal",
+    !/:focus/.test(cssNoComments) && !/outline\s*:\s*(none|0)\b/.test(cssNoComments));
+  check("transitions and animations have a prefers-reduced-motion override",
+    !/(transition|animation)\s*:/.test(cssNoComments) || cssNoComments.indexOf("prefers-reduced-motion") !== -1);
+
+  // Style.md Rule 4: widths switch on OutSystems UI device classes, not media queries.
+  check("no width media queries (use .phone / .tablet)", !/@media[^{]*(min|max)-width/.test(cssNoComments));
+
   // ExtendedClass is applied by the Block on its main container (the mount),
   // via Style Classes. The class must leave the container's classes alone and
   // never apply ExtendedClass itself, or every class would be applied twice.

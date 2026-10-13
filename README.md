@@ -55,7 +55,7 @@ The repo side is identical. Only the platform side changes:
 | **The class has three members** | `constructor`, `onParametersChanged` (partial updates, keeps state), `destroy` (removes every listener); platform data enters the DOM as text only | [ODC guide, step 3](Components_ODC.md#step-3-write-the-class-to-the-bridges-rules) |
 | **Events go through a bridge Client Action** | In a JS node, `$actions` reaches Client Actions only, so each Block Event is raised by a Client Action passed into the class | [ODC guide, turn B](Components_ODC.md#turn-b-the-block) |
 
-`npm test` enforces the rules a script can check: BEM class names, OutSystems UI variables and their fallbacks, no raw colours, no `!important`, the container's classes left alone, and the lifecycle.
+`npm test` enforces the rules a script can check: BEM class names and selectors, OutSystems UI variables and their fallbacks, no raw colours or `!important`, logical properties, focus left to OutSystems UI, the container's classes left alone, and the lifecycle.
 
 ## Try the example locally
 
@@ -69,7 +69,7 @@ npm test        # typecheck, build, then the checks in jsdom
 
 Then open `greeting-card/preview/index.html` in a browser to see the component, or `preview/index.html?test=1` to run the same checks there. No OutSystems environment is needed for any of this.
 
-To start your own pattern, copy `greeting-card/` and rename four things consistently: the global namespace (`ClaudeTest`), the class, the output file, and the BEM block (`greeting-card`).
+To start your own pattern, copy `greeting-card/` and rename four things consistently: the global namespace (`ClaudeTest`), the class, the output file, and the BEM block (`greeting-card`). `node .claude/skills/new-pattern/scaffold.mjs <Pattern> <Namespace>` does all four.
 
 ## Repository layout
 
@@ -78,12 +78,18 @@ README.md               this page
 Style.md                CSS rules for every pattern, both platforms
 Components_ODC.md       step-by-step guide for ODC (run end to end)
 Components_11.md        step-by-step guide for O11 Reactive (not yet run)
+CLAUDE.md               standing rules for the AI agent working in this repo
+.claude/skills/
+  new-pattern/          copy greeting-card and rename it consistently (scaffold.mjs)
+  publish-pattern-odc/  republish a pattern's Script to ODC and verify it (verify-script.sh)
 greeting-card/          the example pattern
   src/                  contract (types.ts), class, styles, global registration
   dist/                 the bundle that goes to OutSystems, committed on purpose
   test/                 checks shared by jsdom and the browser
   preview/              local page to see and test the component
 ```
+
+With Claude Code, the two skills turn the repetitive parts into one request: "create a StatusBadge pattern" or "republish GreetingCard to ODC".
 
 ## Credits
 

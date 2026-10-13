@@ -150,9 +150,13 @@ Use `.is-rtl .greeting-card__… { … }` only for what logical properties can't
 | Every `var()` is a known OutSystems UI variable, with a fallback equal to its base-theme value | 2 |
 | No raw colour (`#…`, `rgb()`, `hsl()`) outside a variable fallback | 2 |
 | No `!important` | 3 |
+| Every selector is one BEM class, prefixed at most by a modifier or state of the block, or by an OutSystems UI context class | 3 |
+| No width media queries | 4 |
+| No `left` / `right` properties, no `text-align: left` / `right` | 5 |
+| No focus styles, no outline removal; a `prefers-reduced-motion` override when there are transitions or animations | 6 |
 | The stylesheet is injected once, whatever the number of instances | 7 |
 
-The rest (selector shape, device classes, logical properties, focus, reduced motion) is for review. When you add a variable to the stylesheet, add it with its base value to `OSUI_TOKENS` in [`test/checks.js`](greeting-card/test/checks.js).
+What stays for review: semantic token choice, contrast, hover-only interactions, and whether a modifier belongs in the pattern at all. When you add a variable to the stylesheet, add it with its base value to `OSUI_TOKENS` in [`test/checks.js`](greeting-card/test/checks.js).
 
 ## Checklist for a new pattern
 

@@ -19,7 +19,7 @@ flowchart LR
   subgraph Git["Git repo (high-code)"]
     T[types.ts<br/>the contract] --> C[GreetingCard.ts<br/>the class]
     C --> B[esbuild] --> D[dist/GreetingCard.js]
-    D --> X[npm test<br/>29 checks in jsdom]
+    D --> X[npm test<br/>34 checks in jsdom]
   end
   subgraph ODC["ODC app (low-code)"]
     S[Script<br/>GreetingCard.js]
@@ -194,7 +194,7 @@ PASS  destroy removes the click listener
 PASS  calls after destroy are safe
 PASS  missing mount id throws a clear error
 ...
-29/29 passed
+34/34 passed
 ```
 
 The same file runs in the browser at `preview/index.html?test=1`. Write a check for every lifecycle rule in step 3; that's what makes AI-written component code safe to accept. Mentor quota is counted per tenant, so every bug caught here is a turn you don't spend.
