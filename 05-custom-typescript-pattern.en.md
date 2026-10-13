@@ -297,17 +297,18 @@ curl -s -o published.js "https://<your-host>/<that path>"
 sed '1s/^\xEF\xBB\xBF//' published.js | diff dist/GreetingCard.js - && echo IDENTICAL
 ```
 
-What we measured on this run (a 2,959-byte, 80-line, pure-ASCII bundle):
+What we measured on two publishes (pure-ASCII bundles; the second is the `ExtendedClass` update, sent as a full replacement of the Script):
 
-| | Local | Published |
+| | First publish | `ExtendedClass` update |
 |---|---|---|
-| Size | 2,959 bytes | 2,961 bytes |
-| BOM | no | **yes** (`EF BB BF`, +3 bytes) |
-| Final newline | yes | **no** (−1 byte) |
+| Local | 2,959 bytes, 80 lines | 3,127 bytes, 84 lines |
+| Published | 2,961 bytes | 3,129 bytes |
+| BOM added | **yes** (`EF BB BF`, +3 bytes) | **yes** |
+| Final newline | **dropped** (−1 byte) | **dropped** |
 | Line endings | LF | LF |
-| Code | — | **identical**, line for line |
+| Code | **identical**, line for line | **identical**, line for line |
 
-That's cleaner than an earlier 21 KB bundle, which came back reindented, with CRLF line endings and one escape sequence inside a comment changed (`\xE7` became `\xE3`). The likely difference is size and content: a small, ASCII-only file with no escape sequences in it. Don't assume you'll get the clean result; always run the diff.
+The result was the same both times, so it's repeatable for small files. It's still cleaner than an earlier 21 KB bundle, which came back reindented, with CRLF line endings and one escape sequence inside a comment changed (`\xE7` became `\xE3`). The likely difference is size and content: a small, ASCII-only file with no escape sequences in it. Don't assume you'll get the clean result; always run the diff.
 
 ### 8b. The JS nodes are wired as you asked
 
@@ -321,12 +322,13 @@ In the matching chunk the three nodes compile to small functions. What we found:
 
 ```js
 function re(r){ r.Instance && r.Instance.destroy() }
-function ie(r){ r.Instance && r.Instance.onParametersChanged({name:r.Name, buttonLabel:r.ButtonLabel}) }
+function ie(r){ r.Instance && r.Instance.onParametersChanged({name:r.Name, buttonLabel:r.ButtonLabel,
+  extendedClass:r.ExtendedClass}) }
 function ae(r,n){ r.Instance = new ClaudeTest.GreetingCard({runtimeId:r.RuntimeId, name:r.Name,
-  buttonLabel:r.ButtonLabel, events:{OnGreetClicked:n.TriggerGreetClicked}}) }
+  buttonLabel:r.ButtonLabel, extendedClass:r.ExtendedClass, events:{OnGreetClicked:n.TriggerGreetClicked}}) }
 ```
 
-Check three things: the guards survived (the compiler rewrites `if (x) { … }` as `x && …`, which is equivalent), every parameter name matches `types.ts`, and the event goes through the bridge action (`n.TriggerGreetClicked`), not the Block Event.
+Check four things: the guards survived (the compiler rewrites `if (x) { … }` as `x && …`, which is equivalent), every parameter name matches `types.ts`, `extendedClass` is passed in **both** `OnReady` and `OnParametersChanged`, and the event goes through the bridge action (`n.TriggerGreetClicked`), not the Block Event.
 
 ### 8c. It works in a real browser
 
@@ -335,7 +337,8 @@ Validation and the diff are static. Open the screen and click through what the h
 1. The card renders inside the Block with the starting name.
 2. Each click shows the Info message with the count going up (proves the event made it back to OutSystems through the bridge).
 3. Typing in the input updates the greeting live (proves `onParametersChanged`).
-4. DevTools → Console is clean.
+4. DevTools → Elements: the card's root has `card gc-card` plus whatever `ExtendedClass` the screen passes, and nothing extra when it passes none.
+5. DevTools → Console is clean.
 
 ## Platform limits we hit along the way
 
