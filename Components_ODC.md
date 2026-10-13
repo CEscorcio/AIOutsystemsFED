@@ -312,16 +312,16 @@ curl -s -o published.js "https://<your-host>/<that path>"
 sed '1s/^\xEF\xBB\xBF//' published.js | diff dist/GreetingCard.js - && echo IDENTICAL
 ```
 
-What we measured on three of those publishes (pure-ASCII bundles; each update was sent as a full replacement of the Script):
+What we measured on four of those publishes (pure-ASCII bundles; each update was sent as a full replacement of the Script):
 
-| | First publish | `ExtendedClass` update | BEM look-and-feel update |
-|---|---|---|---|
-| Local | 2,959 bytes, 80 lines | 3,127 bytes, 84 lines | 5,158 bytes, 138 lines |
-| Published | 2,961 bytes | 3,129 bytes | 5,160 bytes |
-| BOM added | **yes** (`EF BB BF`, +3 bytes) | **yes** | **yes** |
-| Final newline | **dropped** (−1 byte) | **dropped** | **dropped** |
-| Line endings | LF | LF | LF |
-| Code | **identical**, line for line | **identical**, line for line | **identical**, line for line |
+| | First publish | `ExtendedClass` update | BEM look-and-feel update | Style.md alignment |
+|---|---|---|---|---|
+| Local | 2,959 bytes, 80 lines | 3,127 bytes, 84 lines | 5,158 bytes, 138 lines | 5,233 bytes, 147 lines |
+| Published | 2,961 bytes | 3,129 bytes | 5,160 bytes | 5,235 bytes |
+| BOM added | **yes** (`EF BB BF`, +3 bytes) | **yes** | **yes** | **yes** |
+| Final newline | **dropped** (−1 byte) | **dropped** | **dropped** | **dropped** |
+| Line endings | LF | LF | LF | LF |
+| Code | **identical**, line for line | **identical**, line for line | **identical**, line for line | **identical**, line for line |
 
 The result was the same every time, including a publish not in the table (the main-container rule, which restored the 2,959-byte bundle), so it's repeatable for small files. The BEM update shows it also holds for a bundle carrying a 60-line CSS template literal; it took one Mentor turn for the Script and one to publish.
 
