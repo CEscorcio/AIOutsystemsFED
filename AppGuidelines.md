@@ -33,3 +33,29 @@ Every app screen is built inside the **`Layouts\LayoutTopMenu`** block. Don't pu
 **How to check:** in Service Studio, the screen's top widget is a `LayoutTopMenu` block instance. With the agent, read the screen and check that its first widget's source block is `LayoutTopMenu` and that its content sits in `MainContent`. In the published app, the screen's compiled file (`scripts/<App>.<Flow>.<Screen>.mvc.js`) references `LayoutTopMenu` and not `LayoutBlank`.
 
 **Measured on:** the `Wireframe` screen of the O11 Sandbox app. It was first built on `LayoutBlank`, then rebuilt on `LayoutTopMenu`: the logo container was dropped (the layout's app title replaces it), the nav links and Contact button went to `Header`, and the five content sections went to `MainContent`. After publishing, the compiled screen referenced `LayoutTopMenu` and no longer `LayoutBlank`.
+
+## Rule 2: new screens go in the `MainFlow` UI flow
+
+Every new app screen is created in the **`MainFlow`** UI flow. Don't add screens to `Common`, `Layouts` or a new flow.
+
+**Why:**
+
+- **Each flow has one job.** The app template splits the module into three flows, and only one of them is for the app's own screens:
+
+  | Flow | Holds | New screens? |
+  |---|---|---|
+  | `MainFlow` | The app's screens | **Yes** |
+  | `Common` | The template's system screens (`Login`, `InvalidPermissions`) and shared blocks (`Menu`, `ApplicationTitle`, `UserInfo`, `MenuIcon`) | No |
+  | `Layouts` | The layout blocks (`LayoutTopMenu`, `LayoutBlank`, `LayoutSideMenu`, …) | No |
+
+- **One place to find screens.** Navigation, the default screen and screen-to-screen links are all set up in one flow, and nobody has to search the module for where a screen lives.
+- **No accidental exposure.** Screens in `Common` sit next to the login and permissions screens, which are open to anonymous users. Keeping app screens out of there keeps their access settings a deliberate choice.
+
+**How to apply:**
+
+- **Place each new screen on the `MainFlow` canvas** next to the existing ones, not on top of them. Screens created through the agent all land at the same spot unless a position is set.
+- **A separate flow only when asked.** If an app grows enough to need feature flows (for example `Orders`, `Admin`), that's a decision for the team, recorded here as a new rule. Until then, everything goes in `MainFlow`.
+
+**How to check:** in Service Studio, the screen appears under **Interface → UI Flows → MainFlow**. With the agent, `getScreenNames` lists each screen with its `UIFlow`, which should be `MainFlow` for every screen except `Login` and `InvalidPermissions`.
+
+**Measured on:** the O11 Sandbox app. The template created `Layouts`, `Common` and `MainFlow`, with `MainFlow` empty, and the `Wireframe` screen was created in `MainFlow`.
