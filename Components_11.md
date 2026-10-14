@@ -3,6 +3,8 @@
 The O11 half of [Components.md](Components.md). It starts where that page's step 5 ends: you have a pattern with its contract, class, CSS and a green `npm test`. This page puts it into an O11 Reactive module as a Block, publishes it, and proves that what's live is what you wrote. Instead of the remote OutSystems MCP server and Mentor, the agent works through **Service Studio's own MCP server**, editing the module you have open with the OutSystems Model API, and you review every change in Service Studio's Compare-and-Merge window before it lands.
 
 > **Status: not yet run end to end on O11.** Steps 1 to 5 are the same code and the same tests that were run on ODC. Steps 6 to 8 are written from the Service Studio MCP's documented and verified behaviour, but this exact Block has not been built and published on O11 yet. Where an ODC finding may not carry over, the step says so. Replace this note with your measurements once you've run it.
+>
+> The Service Studio MCP workflow itself (editing a module, merging, publishing, checking what deployed) **has** been used on O11, to build two screens; what that showed is in [Working with the Service Studio MCP](#working-with-the-service-studio-mcp).
 
 **Reactive Web only.** The bridge relies on Block lifecycle events (`OnReady`, `OnParametersChanged`, `OnDestroy`) and JavaScript nodes with `$parameters` / `$actions`. Those exist in Reactive Web and Mobile modules. Traditional Web Blocks don't have that lifecycle, so this recipe doesn't apply to them.
 
@@ -42,7 +44,7 @@ Start in a throwaway Reactive app. Move to the library once the steps work.
 
 ## Before step 6: four O11 checks on steps 1 to 5
 
-- **Check the fallback values against your OutSystems UI version.** [Style.md](Style.md) lists the values from OutSystems UI 2.30.0 on ODC. An O11 environment may run an older version; read its `OutSystemsUI.css` `:root` from your app's `moduleinfo` and adjust `OSUI_TOKENS` in the tests if they differ.
+- **Check the fallback values against your OutSystems UI version.** [Style.md](Style.md) lists the values from OutSystems UI 2.30.0 on ODC. Our O11 Sandbox app also loads OutSystems UI 2.30.0 (read from its stylesheet's header; the individual token values weren't compared). Another O11 environment may run an older version; read its `OutSystemsUI.css` `:root` from your app's `moduleinfo` and adjust `OSUI_TOKENS` in the tests if they differ.
 - **Check that the OutSystems UI classes you reuse exist in your version.** The card uses `card` and `btn btn-primary`; both are in OutSystems UI 2.x.
 - **Keep the CSS in the bundle**, as `styles.ts` already does. Edits to a non-empty Block stylesheet don't publish reliably through the Service Studio MCP (the merge succeeds, but the old CSS is still served). If you need app-wide CSS, put it in the theme stylesheet, which publishes reliably.
 - **In Service Studio, never style a pattern from a screen** through its OutSystems UI classes (`.card`, `.btn`) or by element (`.greeting-card p`). Pick a modifier through `ExtendedClass` instead.
@@ -189,6 +191,27 @@ Open the harness screen and click through:
 3. Typing in the input updates the greeting live (proves `onParametersChanged`).
 4. DevTools → Elements: the main container carries `greeting-card` plus any `ExtendedClass`, and every class inside it is `greeting-card__*`, `greeting-card--*` or OutSystems UI.
 5. DevTools → Console is clean.
+
+## Working with the Service Studio MCP
+
+What building the Sandbox app's `Wireframe` and `Design` screens through the Service Studio MCP showed. It applies to step 6 onwards here, and to any other edit made through it.
+
+**Connecting:**
+
+- **After Service Studio restarts, reconnect from Claude Code.** Claude Code doesn't retry a connection it lost: the server is back up, but the agent's tools stay unavailable until you run `/mcp` and reconnect `servicestudio`.
+- **After a restart, the agent needs a new session token.** The server's instructions say to keep reusing the first token, but tokens don't survive a Service Studio restart: the old one is rejected with "requires a valid session token". The agent requests a new one, and Service Studio may ask you to approve it.
+- **Don't identify a module by the key the agent lists.** The same Sandbox module was listed with a different key after a restart, though its contents were unchanged. Identify it by name and by what it contains.
+
+**Editing:**
+
+- **Read the module before changing it.** You or a colleague may have changed it in Service Studio since the agent last looked: a header container the agent had built was gone the next time it read the screen.
+- **Dry-run each edit before applying it.** The agent runs the edit once with a deliberate exception at the end, which returns Service Studio's validation messages without saving anything, then runs it again for real. On the `Design` screen this caught a Date/DateTime comparison error before anything was saved.
+
+**Publishing:**
+
+- **Publishing is blocked until you allow it.** The agent's 1-Click Publish returns `blocked`, and publishes nothing, until **automatic merge and publish** is allowed in Service Studio's MCP Server dialog. Until then, publish from Service Studio yourself.
+- **A small module published in about 15 to 20 seconds** (upload, compile, deploy).
+- **Check what deployed in the compiled screen file.** `https://<server>/<App>/moduleservices/moduleinfo` lists `scripts/<App>.<Flow>.<Screen>.mvc.js`. Download it and search it for what you changed (the layout block, a section's text, an aggregate's name) to confirm the change is live.
 
 ## Limits to know before you start
 

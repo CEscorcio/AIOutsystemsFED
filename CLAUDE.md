@@ -19,6 +19,8 @@ Custom front-end patterns for OutSystems, built in TypeScript and shipped into a
 - **O11 has not been run end to end.** Follow Components_11.md. When you run it, record what actually happened in the guide (and remove its "not yet run" status) before writing an O11 publish skill.
 - **One Mentor turn does one thing**: one Script, or one Block, or one publish. Mentor quota is shared by the whole tenant.
 - **A publish is confirmed only when** `env_app` shows the new revision **and** the published Script matches `dist/` after stripping the BOM ODC adds (it also drops the final newline).
+- **On O11, dry-run every Model API edit first.** Run the lambda once ending in `throw new Exception("PROBE:...")`: it returns the validation messages without saving. Fix every error, then run it again without the throw, and merge once at the end. Read the screen or module before editing, since the user may have changed it in Service Studio.
+- **Identify O11 modules by name and contents, not by the key `listApps` reports**; the same module's key changed after a Service Studio restart. After a restart, request a new session token (the old one is rejected) and, if the tools are missing, ask the user to reconnect `servicestudio` from `/mcp`. See Components_11.md, "Working with the Service Studio MCP".
 
 ## Writing docs
 
