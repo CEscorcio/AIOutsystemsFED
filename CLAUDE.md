@@ -5,6 +5,7 @@ Custom front-end patterns for OutSystems, built in TypeScript and shipped into a
 ## Standing rules
 
 - **[Style.md](Style.md) governs all pattern CSS.** BEM under the pattern block is the golden rule (Rule 0). Every visual value is an OutSystems UI variable whose fallback is its exact base-theme value. Read Style.md before writing or reviewing any CSS.
+- **[AppGuidelines.md](AppGuidelines.md) governs app screens.** Read it before creating or changing a screen; new screens use `Layouts\LayoutTopMenu`, not `LayoutBlank` (Rule 1).
 - **`greeting-card/` is an example**, not the product. New patterns are copies of it (use the `new-pattern` skill). Don't add features to it unless asked.
 - **`npm test` must be green** (in the pattern's folder) before anything goes to OutSystems. When a test fails, fix the code, never the test, unless the rule itself changed in Style.md.
 - **Every new Style.md rule that a script can check gets a check** in `test/checks.js`. Add a variable you start using to `OSUI_TOKENS` with its base-theme value.

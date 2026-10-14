@@ -42,6 +42,7 @@ The repo side is identical. Only the platform side changes:
 
 1. **[Components.md](Components.md)**: the idea, the rules every pattern follows, and steps 1 to 5 (contract, class, build, local tests). The same on both platforms.
 2. **[Style.md](Style.md)**: the CSS rules every pattern follows.
+   **[AppGuidelines.md](AppGuidelines.md)**: the rules for the screens around them, such as which layout to use.
 3. **Steps 6 to 8 for your platform**: [Components_ODC.md](Components_ODC.md) or [Components_11.md](Components_11.md). Script, Block and harness screen through the agent, then publish and verify, with the exact prompts.
 4. **[`greeting-card/`](greeting-card/)**: a worked example to copy. It's deliberately small (a card that greets a name and counts clicks), so every part of the bridge is visible. Replace the class with your own component; the rest stays the same.
 
@@ -77,6 +78,7 @@ To start your own pattern, copy `greeting-card/` and rename four things consiste
 ```
 README.md               this page
 Style.md                CSS rules for every pattern, both platforms
+AppGuidelines.md        rules for app screens (layout, placeholders), both platforms
 Components.md           the idea, the rules and steps 1 to 5, both platforms
 Components_ODC.md       steps 6 to 8 on ODC (run end to end)
 Components_11.md        steps 6 to 8 on O11 Reactive (not yet run)
