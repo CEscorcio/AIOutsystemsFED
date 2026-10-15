@@ -12,7 +12,7 @@ You can do every step by hand, or ask Claude Code. Where Claude Code helps, the 
 |---|---|
 | Node.js LTS | `node --version` prints v20 or later |
 | The repo, installed once at the root | `npm install` at the repo root, then `npm test` passes |
-| A place to test it | ODC: a throwaway web app you created. O11: a throwaway Reactive Web app open in Service Studio |
+| A place to test it | A throwaway Reactive Web app on your OutSystems 11 environment, open in Service Studio, with Claude Code connected to Service Studio's MCP server |
 | A design for the component | What it shows, what the screen passes in, what it reports back |
 
 Work on a branch: `git switch -c component/status-badge`.
@@ -129,15 +129,15 @@ Commit `dist/` along with the source: `StatusBadge.js` and `StatusBadge.css` are
 
 ## Step 8: put it in OutSystems
 
-Pick your platform and follow its guide. Both have four parts: the **Script** (your bundle), the **stylesheet** (your CSS, in the app's theme stylesheet), the **Block** (Input Parameters, Event, the main container's Style Classes, the bridge Client Action, three lifecycle JavaScript nodes), and a **harness screen** that uses the Block.
+Follow [Components_11.md](Components_11.md). There are four parts: the **Script** (your bundle), the **stylesheet** (your CSS, in the app's theme stylesheet), the **Block** (Input Parameters, Event, the main container's Style Classes, the bridge Client Action, three lifecycle JavaScript nodes), and a **harness screen** that uses the Block.
 
-| | ODC | O11 Reactive |
-|---|---|---|
-| Guide | [Components_ODC.md, step 6](Components_ODC.md#step-6-the-platform-side-in-three-mentor-turns) | [Components_11.md, step 6](Components_11.md#step-6-the-platform-side-reviewed-in-service-studio) |
-| How | Three Mentor turns, one element each | Three Model API edits, each reviewed in Compare-and-Merge |
-| Before you start | [ODC prerequisites](Components_ODC.md#prerequisites) | [O11 prerequisites](Components_11.md#prerequisites) and the [four O11 checks](Components_11.md#before-step-6-four-o11-checks-on-steps-1-to-5) |
+| | |
+|---|---|
+| Guide | [Components_11.md, step 6](Components_11.md#step-6-the-platform-side-reviewed-in-service-studio) |
+| How | Model API edits, one element each, each reviewed in Service Studio's Compare-and-Merge |
+| Before you start | [Prerequisites](Components_11.md#prerequisites) and the [four checks on steps 1 to 5](Components_11.md#before-step-6-four-o11-checks-on-steps-1-to-5) |
 
-> **With Claude Code:** "Add the StatusBadge Script, Block and a test screen to the \<app\> app." It follows the guide for the platform the app is on, one element at a time, and won't publish until you ask.
+> **With Claude Code:** "Add the StatusBadge Script, Block and a test screen to the \<app\> app." It follows Components_11.md, one element at a time, and won't publish until you ask.
 
 The main container's Style Classes are always:
 
@@ -153,11 +153,11 @@ The main container's Style Classes are always:
 
 Publish, then check three things. A "published successfully" message alone isn't proof.
 
-1. **The live version is the new one.** ODC: the environment reports the new revision. O11: Service Center shows the new module version.
-2. **The published files are yours.** Download the Script and compare it with `dist/StatusBadge.js` (on ODC, `verify-script.sh` does it for you), and check the theme's CSS holds your stylesheet section with the right timestamp ([ODC 8a](Components_ODC.md#8a-the-script-is-your-bundle), [O11 8a](Components_11.md#8a-the-script-is-your-bundle)).
+1. **The live version is the new one.** Service Center shows the new module version.
+2. **The published files are yours.** Download the Script and compare it with `dist/StatusBadge.js`, and check the theme's CSS holds your stylesheet section with the right timestamp ([Components_11.md, 8a](Components_11.md#8a-the-script-is-your-bundle)).
 3. **It works in a browser.** Open the harness screen: it renders, each Input Parameter change shows, each Event reaches OutSystems, the main container has `status-badge` plus any `ExtendedClass`, and the console is clean.
 
-> **With Claude Code:** "Publish \<app\> and verify the StatusBadge Script." On ODC, later updates are one request: "Republish StatusBadge to ODC" (the `publish-pattern-odc` skill).
+> **With Claude Code:** "Publish \<app\> and verify the StatusBadge Script and stylesheet."
 
 **Done when:** all three checks pass.
 

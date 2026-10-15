@@ -1,26 +1,26 @@
 # Shipping a pattern to OutSystems 11: steps 6 to 8
 
-The O11 half of [Components.md](Components.md). It starts where that page's step 5 ends: you have a pattern with its contract, class, CSS and a green `npm test`. This page puts it into an O11 Reactive module as a Block, publishes it, and proves that what's live is what you wrote. Instead of the remote OutSystems MCP server and Mentor, the agent works through **Service Studio's own MCP server**, editing the module you have open with the OutSystems Model API, and you review every change in Service Studio's Compare-and-Merge window before it lands.
+The OutSystems side of [Components.md](Components.md). It starts where that page's step 5 ends: you have a pattern with its contract, class, CSS and a green `npm test`. This page puts it into an O11 Reactive module as a Block, publishes it, and proves that what's live is what you wrote. The agent works through **Service Studio's own MCP server**, editing the module you have open with the OutSystems Model API, and you review every change in Service Studio's Compare-and-Merge window before it lands.
 
-> **Status: not yet run end to end on O11.** Steps 1 to 5 are the same code and the same tests that were run on ODC. Steps 6 to 8 are written from the Service Studio MCP's documented and verified behaviour, but this exact Block has not been built and published on O11 yet. Where an ODC finding may not carry over, the step says so. Replace this note with your measurements once you've run it.
+> **Status: not yet run end to end.** Steps 1 to 5 are built and tested. Steps 6 to 8 are written from the Service Studio MCP's documented and verified behaviour, but this exact Block has not been built and published yet. Replace this note with your measurements once you've run it.
 >
 > The Service Studio MCP workflow itself (editing a module, merging, publishing, checking what deployed) **has** been used on O11, to build two screens; what that showed is in [Working with the Service Studio MCP](#working-with-the-service-studio-mcp).
 
 **Reactive Web only.** The bridge relies on Block lifecycle events (`OnReady`, `OnParametersChanged`, `OnDestroy`) and JavaScript nodes with `$parameters` / `$actions`. Those exist in Reactive Web and Mobile modules. Traditional Web Blocks don't have that lifecycle, so this recipe doesn't apply to them.
 
-## What's different from ODC
+## How the agent works here
 
-| | ODC | O11 |
-|---|---|---|
-| Agent's channel | Remote OutSystems MCP server, Mentor edits the app | Service Studio MCP on your machine, the agent edits the open module with C# Model API code |
-| What it can reach | Every app in the tenant | Only modules open in Service Studio, plus their references |
-| Quota | Mentor turns, counted per tenant | None. Edits run locally |
-| Reviewing a change | Read the run's events | Service Studio's **Compare-and-Merge** window, before anything is merged |
-| Script content | Pasted into a Mentor prompt, and an AI model copies it (risk of "improvements") | Assigned directly to the Script's `JavaScript` property. No model rewrites it |
-| Publishing | A Mentor turn | 1-Click Publish, through the MCP tool or by you in Service Studio |
-| Confirming the live version | `env_app` revision check | Service Center module version, or the `moduleinfo` manifest |
-| Deploying to other environments | Deployment tools in the same MCP | LifeTime, by hand. Not covered here |
-| Adding a module dependency | Mentor does it | **You do it** in Manage Dependencies. The agent can't add a new dependency |
+| | |
+|---|---|
+| Agent's channel | Service Studio's MCP server on your machine; the agent edits the open module with C# Model API code |
+| What it can reach | Only modules open in Service Studio, plus their references |
+| Cost | None. Edits run locally |
+| Reviewing a change | Service Studio's **Compare-and-Merge** window, before anything is merged |
+| Script and stylesheet content | Assigned directly from the files in `dist/`. No AI model retypes them, so nothing gets "improved" on the way |
+| Publishing | 1-Click Publish, through the MCP tool or by you in Service Studio |
+| Confirming the live version | Service Center module version, or the `moduleinfo` manifest |
+| Deploying to other environments | LifeTime, by hand. Not covered here |
+| Adding a module dependency | **You do it** in Manage Dependencies. The agent can't add a new dependency |
 
 ## Where to put it
 
@@ -38,13 +38,13 @@ Start in a throwaway Reactive app. Move to the library once the steps work.
 | An O11 environment you can publish to | The target | A personal or development environment. Never production |
 | Service Studio 11 with the **MCP Server** enabled | The agent's channel | Approve the agent's session when Service Studio asks. To let the agent merge and publish without a dialog, allow **automatic merge and publish** in the MCP Server dialog; otherwise you'll do those two steps yourself |
 | The module open in Service Studio | The agent only sees open modules | Open the consuming app too, if the harness lives there |
-| Claude Code | Drives the Model API edits | No OutSystems plugin or tenant sign-in needed for O11 |
+| Claude Code | Drives the Model API edits | Connected to Service Studio's MCP server (`/mcp`) |
 | `curl` and `diff` | Verifying the published files | Git Bash has both |
 | Steps 1 to 5 of [Components.md](Components.md) done | The bundle to ship | `npm test` green, `dist/` committed |
 
 ## Before step 6: four O11 checks on steps 1 to 5
 
-- **Check the fallback values against your OutSystems UI version.** [Style.md](Style.md) lists the values from OutSystems UI 2.30.0 on ODC. Our O11 Sandbox app also loads OutSystems UI 2.30.0 (read from its stylesheet's header; the individual token values weren't compared). Another O11 environment may run an older version; read its `OutSystemsUI.css` `:root` from your app's `moduleinfo` and adjust `OSUI_TOKENS` in the tests if they differ.
+- **Check the fallback values against your OutSystems UI version.** [Style.md](Style.md) lists the values from OutSystems UI 2.30.0, which our O11 Sandbox app loads (read from its stylesheet's header; the individual token values weren't compared one by one). Another O11 environment may run an older version; read its `OutSystemsUI.css` `:root` from your app's `moduleinfo` and adjust `OSUI_TOKENS` in the tests if they differ.
 - **Check that the OutSystems UI classes you reuse exist in your version.** The card uses `card` and `btn btn-primary`; both are in OutSystems UI 2.x.
 - **Put the component's CSS in the theme stylesheet, never the Block's.** It ships as its own file (`dist/<Name>.css`, or `dist/components.css` from `npm run build:all`). Edits to a non-empty Block stylesheet don't publish reliably through the Service Studio MCP (the merge succeeds, but the old CSS is still served), while theme stylesheet edits did publish every time they were tried.
 - **In Service Studio, never style a pattern from a screen** through its OutSystems UI classes (`.card`, `.btn`) or by element (`.greeting-card p`). Pick a modifier through `ExtendedClass` instead.
@@ -75,7 +75,7 @@ If the module is a library and consumers should load the Script through the Bloc
 
 ### Request B: the Block
 
-The same Block as on ODC. Copy the names from `types.ts`. The bridge Client Action and the guards are there for the reasons in [Components.md, "What the Block does with it"](Components.md#what-the-block-does-with-it): in a Reactive JavaScript node, too, `$actions` lists Client Actions, not Block Events.
+Copy the names from `types.ts`. The bridge Client Action and the guards are there for the reasons in [Components.md, "What the Block does with it"](Components.md#what-the-block-does-with-it): in a Reactive JavaScript node, too, `$actions` lists Client Actions, not Block Events.
 
 ```text
 In module <Module>, create a Block "GreetingCard" (Public = <Yes for a library, No
@@ -177,7 +177,7 @@ A "published" result isn't proof on its own. Confirm in **Service Center → Fac
 
 ### 8a. The Script is your bundle
 
-O11 Reactive modules list their versioned files at `https://<server>/<App>/moduleservices/moduleinfo`. Find your Script in that manifest by name rather than guessing the path, since the naming differs from ODC's `UserScripts` and a library's Script is served through the consuming app:
+O11 Reactive modules list their versioned files at `https://<server>/<App>/moduleservices/moduleinfo`. Find your Script in that manifest by name rather than guessing the path; a library's Script is served through the consuming app:
 
 ```bash
 APP=https://<server>/<App>
@@ -188,9 +188,7 @@ curl -s -o published.js "https://<server>/<App>/<that path>"
 sed '1s/^\xEF\xBB\xBF//' published.js | diff dist/GreetingCard.js - && echo IDENTICAL
 ```
 
-The repo's `verify-script.sh` (in `.claude/skills/publish-pattern-odc/`) looks for ODC's `UserScripts` naming, so it won't find an O11 Script as it is.
-
-On ODC the platform added a BOM and dropped the final newline; the code itself was identical ([ODC step 8a](Components_ODC.md#8a-the-script-is-your-bundle)). **Measure it on O11** and record a table here the same way. Because the Script was set from the file rather than retyped by a model, any difference you find comes from the platform or from escaping, not from AI rewriting.
+Expect the platform to possibly add a byte-order mark and drop the final newline; the code itself should match line for line. **Measure it** the first time and record a table here: local and published sizes, BOM, final newline, line endings, and whether the code is identical. Because the Script was set from the file rather than retyped by a model, any difference you find comes from the platform or from escaping, not from AI rewriting.
 
 ### 8b. The JS nodes are wired as you asked
 
@@ -261,5 +259,4 @@ These are documented limits of the Service Studio MCP, not ones we hit on this p
 ## References
 
 - [Components.md](Components.md): the idea, the rules and steps 1 to 5
-- [Components_ODC.md](Components_ODC.md): the ODC half, run end to end
 - [Style.md](Style.md): the CSS rules for every pattern

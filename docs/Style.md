@@ -1,6 +1,6 @@
 # Style rules for custom patterns
 
-The CSS rules every custom pattern follows, on ODC and O11. The build guides ([Components.md](Components.md), then [Components_ODC.md](Components_ODC.md) or [Components_11.md](Components_11.md)) say *how* to build and ship a pattern; this page says how its CSS must be written. [`greeting-card/`](../components/greeting-card/) follows every rule here, and its `npm test` enforces the ones a script can check.
+The CSS rules every custom pattern follows. The build guides ([Components.md](Components.md), then [Components_11.md](Components_11.md)) say *how* to build and ship a pattern; this page says how its CSS must be written. [`greeting-card/`](../components/greeting-card/) follows every rule here, and its `npm test` enforces the ones a script can check.
 
 **The base theme is OutSystems UI** (`OutSystemsUI.css`). A pattern doesn't bring its own design system: it extends OutSystems UI, takes every visual value from its variables, and keeps working when an app's theme changes them.
 
@@ -16,7 +16,7 @@ What a published app loads, in order (taken from the `moduleinfo` manifest of th
 
 Because the patterns' stylesheet loads after `OutSystemsUI.css`, a single class selector is enough to win over an OutSystems UI rule of the same specificity. That is what lets the rules below ban `!important` and long selectors. Wherever you put it, it must load after `OutSystemsUI.css`.
 
-Measured base: **OutSystems UI 2.30.0** on ODC. O11 environments may run an older OutSystems UI; check your version's `:root` before reusing the fallback values below.
+Measured base: **OutSystems UI 2.30.0**, the version our O11 environment loads. Another environment may run an older OutSystems UI; check your version's `:root` before reusing the fallback values below.
 
 ## Rule 0, the golden rule: BEM class names
 
@@ -140,7 +140,7 @@ Use `.is-rtl .greeting-card__… { … }` only for what logical properties can't
 | Brand colours, fonts, spacing for the whole app | The app's theme: change the OutSystems UI variables there, and every pattern follows |
 
 - **The component's JavaScript adds no CSS.** Styles ship as a stylesheet of their own, separate from the Script. `npm test` checks that the component never injects a `<style>` or `<link>`.
-- **Put it in the theme stylesheet, not the Block's.** On O11, edits to a non-empty Block stylesheet don't reliably reach the published CSS when made through the Service Studio MCP, while theme stylesheet edits did publish every time we tried. Paste `dist/components.css` into the theme stylesheet as one marked section, after Theme Editor's own block, and replace that section whole on each release. (Not yet done on either platform with a component stylesheet; record what happens in the platform guide the first time.)
+- **Put it in the theme stylesheet, not the Block's.** On O11, edits to a non-empty Block stylesheet don't reliably reach the published CSS when made through the Service Studio MCP, while theme stylesheet edits did publish every time we tried. Paste `dist/components.css` into the theme stylesheet as one marked section, after Theme Editor's own block, and replace that section whole on each release. (Not yet done with a component stylesheet; record what happens in [Components_11.md](Components_11.md#the-stylesheet) the first time.)
 - **Ship the stylesheet and the Script together.** A release is one `npm run build:all`: upload `dist/components.js` and `dist/components.css` from the same build, so their timestamps match.
 - **Document every modifier** in `types.ts`, next to `ExtendedClass`. Modifiers are the pattern's public styling API; an undocumented one is a private class a screen shouldn't rely on.
 

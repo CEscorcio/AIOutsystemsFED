@@ -1,11 +1,6 @@
 # Building a custom TypeScript pattern, step by step
 
-How to build your own front-end pattern: written in TypeScript, kept in Git with a build and tests, and shipped into an OutSystems app as a Block, with an AI agent doing the platform work. This page is the part that's the same on every platform: the idea, the rules, and steps 1 to 5. Steps 6 to 8 depend on where you ship:
-
-| Platform | Steps 6 to 8 | Status |
-|---|---|---|
-| ODC | [Components_ODC.md](Components_ODC.md): three Mentor turns, publish, verify | **Run end to end** on a throwaway app, several publishes measured |
-| O11 Reactive | [Components_11.md](Components_11.md): three Model API edits reviewed in Service Studio, 1-Click Publish, verify | **Not yet run end to end** |
+How to build your own front-end pattern: written in TypeScript, kept in Git with a build and tests, and shipped into an OutSystems 11 (Reactive Web) module as a Block, with an AI agent doing the platform work through Service Studio. This page covers the idea, the rules, and steps 1 to 5, everything done in the repo. Steps 6 to 8, in OutSystems, are in [Components_11.md](Components_11.md): Model API edits reviewed in Service Studio, 1-Click Publish, verify. Those platform steps **haven't been run end to end yet** for a component.
 
 The CSS rules every pattern follows are in [Style.md](Style.md). The worked example used on this page is [`greeting-card/`](../components/greeting-card/).
 
@@ -48,7 +43,7 @@ The example component is deliberately small: a card that greets a name and count
 | Node.js LTS | Build and tests | `winget install OpenJS.NodeJS.LTS` on Windows. **Needs admin rights**; if the installer is cancelled at the elevation prompt it exits with `1602` and nothing is installed |
 | Git | The component lives in a repo | Keep `* text=auto eol=lf` in `.gitattributes` (step 4) |
 
-Nothing in steps 1 to 5 needs an OutSystems environment. Each platform guide lists what step 6 onwards needs.
+Nothing in steps 1 to 5 needs an OutSystems environment. [Components_11.md](Components_11.md#prerequisites) lists what step 6 onwards needs.
 
 ## Step 1: start from the example
 
@@ -113,7 +108,7 @@ The comment block at the top is the most useful thing in the file: when you late
 
 ### Rules for every custom pattern
 
-Three conventions apply to every pattern, on both platforms, so they behave like the patterns in OutSystems UI. Rule 0 is the golden rule: no pattern ships without it.
+Three conventions apply to every pattern, so they behave like the patterns in OutSystems UI. Rule 0 is the golden rule: no pattern ships without it.
 
 **Rule 0 (golden rule): every CSS class the pattern owns follows BEM, with the pattern class as the block.**
 
@@ -136,7 +131,7 @@ OutSystems UI classes go next to the BEM class, never instead of it (`card greet
 
 It's how a screen adapts one instance (spacing, a theme variant, a utility class) without touching the pattern.
 
-**Rule 2: the pattern's main container carries the pattern class plus `ExtendedClass`.** The main container is the Block's outermost widget, the one the component mounts into (`MountPoint` in GreetingCard). Set its **Style Classes** property to the pattern's own class followed by this expression, which is valid on ODC and O11 alike:
+**Rule 2: the pattern's main container carries the pattern class plus `ExtendedClass`.** The main container is the Block's outermost widget, the one the component mounts into (`MountPoint` in GreetingCard). Set its **Style Classes** property to the pattern's own class followed by this expression, which is a standard OutSystems expression:
 
 ```
 "greeting-card" + If(ExtendedClass <> NullTextIdentifier(), " " + ExtendedClass, "")
@@ -168,9 +163,9 @@ See [`GreetingCard.ts`](../components/greeting-card/src/greeting-card/GreetingCa
 
 ### What the Block does with it
 
-Step 6 builds this on the platform. The reasons behind two of its parts apply on both platforms:
+Step 6 builds this in OutSystems. Two of its parts need explaining:
 
-- **One bridge Client Action per Event.** Inside a JavaScript node, `$actions` reaches Client Actions only, never a Block Event. So each Event gets a Client Action whose only step triggers it, and that action is what's passed into the class (`events: { OnGreetClicked: $actions.TriggerGreetClicked }`). Passing the Event directly is rejected on ODC with `Unknown 'OnGreetClicked' action`; it's the most common reason this technique "mysteriously does not fire anything".
+- **One bridge Client Action per Event.** Inside a JavaScript node, `$actions` reaches Client Actions only, never a Block Event. So each Event gets a Client Action whose only step triggers it, and that action is what's passed into the class (`events: { OnGreetClicked: $actions.TriggerGreetClicked }`). Passing the Event directly is rejected with `Unknown 'OnGreetClicked' action`; it's the most common reason this technique "mysteriously does not fire anything".
 - **Guards in `OnParametersChanged` and `OnDestroy`** (`if ($parameters.Instance) { … }`). `OnParametersChanged` can fire before `OnReady` has finished, and without the guard you get a null reference that's hard to trace back to lifecycle order.
 
 ## Step 4: build for diffability, not size
@@ -188,7 +183,7 @@ await build({
 });
 ```
 
-Not minifying is the point: step 8 compares the published Script with this file line by line. The platform serves it as is (measured on ODC), so you lose nothing.
+Not minifying is the point: step 8 compares the published Script with this file line by line. Compare the published copy with this file before trusting it; the platform may add a byte-order mark or drop the final newline, but the code itself should match line for line.
 
 Commit `dist/` too. It's the artifact that goes to OutSystems, and having it in Git is what lets you answer "is what's live what we reviewed?". Keep `* text=auto eol=lf` in `.gitattributes`: Git for Windows converts files to CRLF on checkout by default, which would make every comparison report a difference that isn't really there. Keep the bundle ASCII-only too; content with escape sequences has come back altered from a publish.
 
@@ -223,15 +218,15 @@ PASS  missing mount id throws a clear error
 34/34 passed
 ```
 
-The same file runs in the browser at `preview/index.html?test=1`. Write a check for every lifecycle rule in step 3; that's what makes AI-written component code safe to accept. Every bug caught here is a platform round trip you don't make, and on ODC a Mentor turn your tenant doesn't spend.
+The same file runs in the browser at `preview/index.html?test=1`. Write a check for every lifecycle rule in step 3; that's what makes AI-written component code safe to accept. Every bug caught here is a round trip through Service Studio you don't make.
 
-## Steps 6 to 8: ship it on your platform
+## Steps 6 to 8: ship it in OutSystems 11
 
-| | ODC | O11 Reactive |
+| Step | What happens | Guide |
 |---|---|---|
-| 6. Platform side | [Three Mentor turns](Components_ODC.md#step-6-the-platform-side-in-three-mentor-turns): Script, Block, harness screen | [Three Model API edits](Components_11.md#step-6-the-platform-side-reviewed-in-service-studio), each reviewed in Compare-and-Merge |
-| 7. Publish | [A Mentor turn, then check the live revision](Components_ODC.md#step-7-publish) | [1-Click Publish, then check the module version](Components_11.md#step-7-publish) |
-| 8. Verify | [Diff the published Script, find the JS nodes, click through](Components_ODC.md#step-8-verify-what-was-actually-published) | [The same, with O11's paths](Components_11.md#step-8-verify-what-was-actually-published) |
+| 6. Platform side | Script, stylesheet, Block and harness screen, each a Model API edit reviewed in Compare-and-Merge | [Components_11.md, step 6](Components_11.md#step-6-the-platform-side-reviewed-in-service-studio) |
+| 7. Publish | 1-Click Publish, then check the module version | [Components_11.md, step 7](Components_11.md#step-7-publish) |
+| 8. Verify | Diff the published Script and stylesheet, find the JS nodes, click through | [Components_11.md, step 8](Components_11.md#step-8-verify-what-was-actually-published) |
 
 ## Making it yours
 
@@ -239,7 +234,7 @@ The same file runs in the browser at `preview/index.html?test=1`. Write a check 
 2. Write `types.ts`: every Input Parameter, every Event and its payload, and the modifiers `ExtendedClass` accepts. Every pattern gets `ExtendedClass` (Text, not mandatory, default `""`), documented as applied by the main container, not the class.
 3. Write the class to the three-member rules and the CSS to [Style.md](Style.md); keep every structural check and add one for each new behaviour; `npm test` until green.
 4. Commit, including `dist/`.
-5. Steps 6 to 8 in your platform's guide: Script, Block (one bridge Client Action per Event; the main container's Style Classes set to `"<pattern>" + If(ExtendedClass <> NullTextIdentifier(), " " + ExtendedClass, "")`), harness screen, publish, verify.
+5. Steps 6 to 8 in [Components_11.md](Components_11.md): Script, stylesheet, Block (one bridge Client Action per Event; the main container's Style Classes set to `"<pattern>" + If(ExtendedClass <> NullTextIdentifier(), " " + ExtendedClass, "")`), harness screen, publish, verify.
 6. Only then use the Block on real screens.
 
 For a component with real behaviour (a data table, a chart, a rich editor) the platform side barely grows: more Input Parameters and more bridge actions, still three JS nodes. The growth is all in the repo, which is where you want it.
@@ -248,9 +243,9 @@ For a component with real behaviour (a data table, a chart, a rich editor) the p
 
 Not tested here, but the obvious next steps:
 
-- **Structured data.** Pass lists as JSON Text parameters and parse in the class. Don't send that JSON through an AI agent's prompt: on ODC a column-configuration JSON once came back rewritten (labels changed, columns reordered, keys translated) while still valid, so nothing failed loudly but nothing matched the data either. Paste it by hand, or have it set from a file, and re-read any value that has to match data from the published app.
+- **Structured data.** Pass lists as JSON Text parameters and parse in the class. Don't have an AI agent retype that JSON from a prompt: a column-configuration JSON once came back rewritten that way (labels changed, columns reordered, keys translated) while still valid, so nothing failed loudly but nothing matched the data either. Paste it by hand, or have it set from a file, and re-read any value that has to match data from the published app.
 - **Placeholders.** Let low-code content render inside the component by putting a Placeholder in the Block next to the mount Container and having the class leave it alone.
-- **A library instead of an app.** Put the Script and Block in a library so several apps consume one reviewed copy. Each platform guide covers what changes.
+- **A library instead of an app.** Put the Script and Block in a Reactive library so several apps consume one reviewed copy. [Components_11.md, "Where to put it"](Components_11.md#where-to-put-it) covers what changes.
 
 ## References
 

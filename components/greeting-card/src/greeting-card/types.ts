@@ -13,7 +13,7 @@
 //                    greeting-card--compact   tighter padding, smaller title
 //
 // Block Events -> GreetingCardEvents (each wired through a bridge Client Action,
-// because $actions in an ODC JS node resolves Client Actions only)
+// because $actions in a JS node resolves Client Actions only)
 //   OnGreetClicked(Count: Integer)  <- Client Action TriggerGreetClicked(Count)
 
 export interface GreetingCardParameters {

@@ -1,6 +1,6 @@
 # App guidelines
 
-Rules for building screens in our OutSystems apps, on O11 and ODC. They sit alongside [Style.md](Style.md), which covers the CSS of custom patterns, and [Components.md](Components.md), which covers building the patterns themselves. These rules cover the app around them: screens, layouts, and how they're assembled.
+Rules for building screens in our OutSystems 11 apps. They sit alongside [Style.md](Style.md), which covers the CSS of custom patterns, and [Components.md](Components.md), which covers building the patterns themselves. These rules cover the app around them: screens, layouts, and how they're assembled.
 
 Each rule says what to do, why, and how to check it. Add new rules at the end, numbered.
 

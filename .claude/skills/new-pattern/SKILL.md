@@ -6,7 +6,7 @@ description: >-
   bundle and tests. Then reshape the contract, class and CSS for the new
   component and get npm test green. Use when the user asks to create, start,
   scaffold or add a new pattern, component or Block (e.g. "make a StatusBadge
-  pattern"). Not for publishing (publish-pattern-odc) or for changing an
+  pattern"). Not for publishing (docs/Components_11.md) or for changing an
   existing pattern.
 ---
 
@@ -64,4 +64,4 @@ Work in this order. Run `npm test` after each step.
 
 - `npm test` green, `dist/<Pattern>.js` built.
 - Ask before committing, then commit the new folder including `dist/`.
-- Tell the user the next step is the platform side: [Components_ODC.md](../../../docs/Components_ODC.md) step 6 (Script, Block, harness screen) or [Components_11.md](../../../docs/Components_11.md). It's not part of this skill.
+- Tell the user the next step is the platform side: [Components_11.md](../../../docs/Components_11.md) step 6 (Script, stylesheet, Block, harness screen). It's not part of this skill.

@@ -1,6 +1,6 @@
 # Working in this repo
 
-Custom front-end patterns for OutSystems, built in TypeScript and shipped into an app as a Block that bridges to the bundle. [Components.md](docs/Components.md) holds what's shared (the idea, the rules, steps 1 to 5); steps 6 to 8 are per platform: ODC ([Components_ODC.md](docs/Components_ODC.md)) and O11 Reactive ([Components_11.md](docs/Components_11.md)). Put platform-neutral content in Components.md, never in a platform guide. [README.md](README.md) has the overview.
+Custom front-end patterns for **OutSystems 11** (Reactive Web), built in TypeScript and shipped into a module as a Block that bridges to the bundle. [Components.md](docs/Components.md) covers the idea, the rules and steps 1 to 5 (everything done in the repo); [Components_11.md](docs/Components_11.md) covers steps 6 to 8 in OutSystems 11 through Service Studio's MCP server. [README.md](README.md) has the overview. This repo targets O11 only; don't add ODC content.
 
 ## Standing rules
 
@@ -17,11 +17,10 @@ Custom front-end patterns for OutSystems, built in TypeScript and shipped into a
 
 ## OutSystems actions
 
-- **Never publish, deploy, create an app or change a Script without the user asking** in the current request. Reading (app lists, `env_app`, context lookups, downloading published files) needs no confirmation.
-- **To update a pattern on ODC, use the `publish-pattern-odc` skill.** It covers the Mentor prompt, publish, live-revision check and the byte-level diff.
-- **O11 has not been run end to end.** Follow Components_11.md. When you run it, record what actually happened in the guide (and remove its "not yet run" status) before writing an O11 publish skill.
-- **One Mentor turn does one thing**: one Script, or one Block, or one publish. Mentor quota is shared by the whole tenant.
-- **A publish is confirmed only when** `env_app` shows the new revision **and** the published Script matches `dist/` after stripping the BOM ODC adds (it also drops the final newline).
+- **Never publish, merge, create a module or change a Script or stylesheet without the user asking** in the current request. Reading (listing modules, reading screens or actions, downloading published files) needs no confirmation.
+- **A component's platform side hasn't been run end to end yet.** Follow Components_11.md. When you run it, record what actually happened in the guide (and remove its "not yet run" status) before writing a publish skill for it.
+- **One request does one thing**: one Script, or one stylesheet section, or one Block, or one screen, each reviewed in its own Compare-and-Merge.
+- **A publish is confirmed only when** Service Studio reports it done **and** the files the server serves (from `/<App>/moduleservices/moduleinfo`) match `dist/`: the Script, the theme's component section, and the compiled screen.
 - **On O11, dry-run every Model API edit first.** Run the lambda once ending in `throw new Exception("PROBE:...")`: it returns the validation messages without saving. Fix every error, then run it again without the throw, and merge once at the end. Read the screen or module before editing, since the user may have changed it in Service Studio.
 - **Identify O11 modules by name and contents, not by the key `listApps` reports**; the same module's key changed after a Service Studio restart. After a restart, request a new session token (the old one is rejected) and, if the tools are missing, ask the user to reconnect `servicestudio` from `/mcp`. See Components_11.md, "Working with the Service Studio MCP".
 
@@ -30,4 +29,4 @@ Custom front-end patterns for OutSystems, built in TypeScript and shipped into a
 - The guides record what was **measured**. Mark anything not run as not verified.
 - Edit Markdown tables with the Edit tool, one table at a time. A broad `sed` on `|---|` lines rewrote the wrong table once.
 - Don't assume Python is available (it isn't on the main development machine). Node is, since the build needs it; use it or the Edit tool for scripted edits.
-- Keep tenant hostnames, app keys and URLs out of committed docs; use placeholders such as `<your-app-url>`.
+- Keep server hostnames, module keys and URLs out of committed docs; use placeholders such as `<server>` and `<App>`.
