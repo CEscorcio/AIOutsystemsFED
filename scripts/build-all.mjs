@@ -1,7 +1,13 @@
 // Builds every component and joins their output into two files, each of which
-// starts with the same build timestamp:
+// starts with the same version and build timestamp:
 //   dist/components.js    every component's JS bundle (one Script)
 //   dist/components.css   every component's stylesheet (one stylesheet)
+//
+// Version: <ISO year>.<ISO week>.<N>, from the build's UTC date, no padding
+// (e.g. 2026.42.1). N counts committed releases within that ISO week: it is the
+// N of the last committed dist/components.js plus 1 when that one is from the
+// same week, otherwise 1. Test builds don't use up numbers; every build shows
+// the next release number until one is committed.
 //
 // Usage (from the repo root):
 //   npm run build:all              runs each component's npm test, then joins
@@ -68,9 +74,39 @@ for (const name of components) {
   styles.push(...readOutputs(name, ".css"));
 }
 
-const builtAt = new Date().toISOString();
+const now = new Date();
+const builtAt = now.toISOString();
+
+// ISO 8601 week of a date, in UTC: weeks start on Monday, and the week's
+// Thursday decides which year it belongs to (so 31 Dec 2029 is 2030 week 1).
+function isoWeek(date) {
+  const t = new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()));
+  const day = t.getUTCDay() || 7; // Monday 1 ... Sunday 7
+  t.setUTCDate(t.getUTCDate() + 4 - day);
+  const yearStart = new Date(Date.UTC(t.getUTCFullYear(), 0, 1));
+  return { year: t.getUTCFullYear(), week: Math.ceil(((t - yearStart) / 86400000 + 1) / 7) };
+}
+
+// The version of the last committed release, read from git (empty if there is
+// none, or no git).
+function lastCommittedVersion() {
+  try {
+    const committed = execSync("git show HEAD:dist/components.js", { cwd: root, stdio: ["ignore", "pipe", "ignore"] }).toString();
+    const m = committed.match(/^ \* Version: (\d+)\.(\d+)\.(\d+)$/m);
+    return m ? { year: Number(m[1]), week: Number(m[2]), n: Number(m[3]) } : null;
+  } catch {
+    return null;
+  }
+}
+
+const { year, week } = isoWeek(now);
+const previous = lastCommittedVersion();
+const n = previous && previous.year === year && previous.week === week ? previous.n + 1 : 1;
+const version = `${year}.${week}.${n}`;
+
 const header = (title, parts) => [
   "/*!",
+  ` * Version: ${version}`,
   ` * ${title}`,
   ` * Built: ${builtAt}`,
   " * Contains:",
@@ -119,4 +155,4 @@ mkdirSync(join(root, "dist"), { recursive: true });
 writeFileSync(join(root, "dist", "components.js"), jsOut);
 writeFileSync(join(root, "dist", "components.css"), cssOut);
 const plural = (n, word) => `${n} ${word}${n === 1 ? "" : "s"}`;
-console.log(`\nWrote dist/components.js (${plural(scripts.length, "bundle")}) and dist/components.css (${plural(styles.length, "stylesheet")}), built ${builtAt}`);
+console.log(`\nWrote dist/components.js (${plural(scripts.length, "bundle")}) and dist/components.css (${plural(styles.length, "stylesheet")}): version ${version}, built ${builtAt}`);

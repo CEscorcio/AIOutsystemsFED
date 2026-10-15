@@ -65,7 +65,21 @@ To build **every** component for a release:
 npm run build:all
 ```
 
-It runs each component's `npm test`, stops at the first failure, and writes two files, each starting with a header that gives the same build timestamp and lists what it contains:
+It runs each component's `npm test`, stops at the first failure, and writes two files, each starting with a header that gives the same version, build timestamp and contents:
+
+```
+/*!
+ * Version: 2026.42.1
+ * OutSystems front-end components
+ * Built: 2026-10-15T10:55:17.753Z
+ * Contains:
+ *   components/greeting-card/dist/GreetingCard.js
+ */
+```
+
+The **version** is `<ISO year>.<ISO week>.<N>` from the build's UTC date, with no padding (for example `2026.42.1`). Weeks follow ISO 8601: they start on Monday, and the week's Thursday decides its year, so 31 Dec 2029 is `2030.1.N`. N counts committed releases within the week: one more than the version in the last committed `dist/components.js` if that's from the same week, otherwise 1. Test builds don't use up numbers, which is why the files are committed only when they're uploaded.
+
+The two files:
 
 - `dist/components.js`: every component's JavaScript, added to the module as one Script.
 - `dist/components.css`: every component's stylesheet, pasted into the module's theme stylesheet. Components never inject their own CSS.
