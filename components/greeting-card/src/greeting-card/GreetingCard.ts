@@ -1,5 +1,7 @@
 import type { GreetingCardConfig, GreetingCardEvents, GreetingCardParameters } from "./types";
-import { ensureStyles } from "./styles";
+
+// Styles live in style/greeting-card.css and ship as their own stylesheet
+// (dist/GreetingCard.css); this class only renders markup with the BEM classes.
 
 export class GreetingCard {
   private readonly mount: HTMLElement;
@@ -18,8 +20,6 @@ export class GreetingCard {
     }
     this.mount = mount;
     this.events = config.events || {};
-
-    ensureStyles(document);
 
     this.root = document.createElement("div");
     this.root.className = "card greeting-card__body";

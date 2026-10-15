@@ -78,7 +78,12 @@ To build **every** component into one file:
 npm run build:all
 ```
 
-It runs each component's `npm test`, stops at the first failure, and writes `dist/components.js`: a header with the build timestamp and the list of bundles it contains, then each component's bundle in alphabetical order. Upload that single file as one Script instead of one Script per component. Add `-- --no-test` to skip the tests during local experiments, never for something going to OutSystems.
+It runs each component's `npm test`, stops at the first failure, and writes two files, each starting with a header that gives the same build timestamp and lists what it contains:
+
+- `dist/components.js`: every component's JavaScript, uploaded as one Script.
+- `dist/components.css`: every component's stylesheet, pasted into the app's theme stylesheet. Components never inject their own CSS.
+
+Before writing them, it smoke-tests both: `components.js` must load and register every component, and `components.css` must style every component and nothing outside their blocks. Upload both from the same build. Add `-- --no-test` to skip the tests during local experiments, never for something going to OutSystems.
 
 To start your own component, copy `components/greeting-card/` into `components/<your-component>/` and rename four things consistently: the global namespace (`ClaudeTest`), the class, the output file, and the BEM block (`greeting-card`). `node .claude/skills/new-pattern/scaffold.mjs <Pattern> <Namespace>` does all of it; then run `npm install` at the root to register the new workspace.
 
@@ -98,20 +103,22 @@ docs/
   NewComponent.md       step-by-step checklist for building a new component
 components/             one folder per component, each an npm workspace
   greeting-card/        the example component new ones are copied from
-    src/                contract (types.ts), class, styles, global registration
-    dist/               the bundle that goes to OutSystems, committed on purpose
+    src/                contract (types.ts), class, global registration
+    style/              the component's CSS (greeting-card.css)
+    dist/               GreetingCard.js and GreetingCard.css, what goes to OutSystems, committed on purpose
     test/               checks shared by jsdom and the browser
     preview/            local page to see and test the component
 scripts/
-  build-all.mjs         builds every component and joins the bundles into dist/components.js
+  build-all.mjs         builds every component and joins the output into dist/components.js and .css
 dist/
-  components.js         all components in one file, with the build timestamp at the top
+  components.js         every component's JavaScript, with the build timestamp at the top
+  components.css        every component's stylesheet, with the same timestamp
 .claude/skills/
   new-pattern/          copy greeting-card into components/ and rename it consistently (scaffold.mjs)
   publish-pattern-odc/  republish a component's Script to ODC and verify it (verify-script.sh)
 ```
 
-`dist/components.js` includes every folder in `components/`, the example included, so remove or move `greeting-card/` once real components replace it.
+`dist/components.js` and `dist/components.css` include every folder in `components/`, the example included, so remove or move `greeting-card/` once real components replace it.
 
 With Claude Code, the two skills turn the repetitive parts into one request: "create a StatusBadge pattern" or "republish GreetingCard to ODC".
 

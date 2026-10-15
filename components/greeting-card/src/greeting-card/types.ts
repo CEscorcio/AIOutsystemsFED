@@ -9,7 +9,7 @@
 //                  container has Style Classes =
 //                  "greeting-card" + If(ExtendedClass <> NullTextIdentifier(), " " + ExtendedClass, "")
 //                  so it is deliberately absent from GreetingCardParameters.
-//                  Modifiers it accepts (BEM, see styles.ts):
+//                  Modifiers it accepts (BEM, see style/greeting-card.css):
 //                    greeting-card--compact   tighter padding, smaller title
 //
 // Block Events -> GreetingCardEvents (each wired through a bridge Client Action,

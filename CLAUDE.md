@@ -11,7 +11,8 @@ Custom front-end patterns for OutSystems, built in TypeScript and shipped into a
 - **`npm test` must be green** (at the repo root for every component, or `npm test -w components/<name>` for one) before anything goes to OutSystems. When a test fails, fix the code, never the test, unless the rule itself changed in Style.md.
 - **Every new Style.md rule that a script can check gets a check** in `test/checks.js`. Add a variable you start using to `OSUI_TOKENS` with its base-theme value.
 - **`dist/` is committed.** It's what goes to OutSystems; rebuild it with `npm test`, never edit it by hand.
-- **`dist/components.js` (from `npm run build:all`) is committed only when it's uploaded.** Every build writes a new timestamp, so commit the exact file that went to OutSystems, together with where it went, and leave other builds uncommitted.
+- **A component's CSS lives in `style/<name>.css` and ships as its own stylesheet** (`dist/<Name>.css`, in the app's theme stylesheet), never from the JavaScript. See Style.md, Rule 7.
+- **`dist/components.js` and `dist/components.css` (from `npm run build:all`) are committed only when they're uploaded.** Every build writes a new timestamp, so commit the exact files that went to OutSystems, together with where they went, and leave other builds uncommitted. Upload both from the same build.
 - **Line endings are LF** (`.gitattributes`). Keep bundles ASCII-only, since non-ASCII content has come back altered from a publish.
 
 ## OutSystems actions

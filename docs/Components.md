@@ -64,14 +64,14 @@ The layout:
 src/index.ts                         registers window.<Namespace>.<Component>
 src/greeting-card/types.ts           the contract with the Block
 src/greeting-card/GreetingCard.ts    the class
-src/greeting-card/styles.ts          the component's CSS, injected once into <head>
-build.mjs                            esbuild -> dist/GreetingCard.js
+style/greeting-card.css              the component's CSS, shipped as its own stylesheet
+build.mjs                            esbuild -> dist/GreetingCard.js; style/ -> dist/GreetingCard.css
 test/checks.js                       scripted checks, shared by browser and Node
 test/run.mjs                         runs the checks in jsdom (npm test)
 preview/index.html                   local page; ?test=1 runs the checks in the browser
 ```
 
-Four things to rename consistently: the **namespace** (`ClaudeTest` → yours, e.g. `MyCompany`), the **class name**, the **output file**, and the **BEM block** (`greeting-card` → your pattern in kebab-case, in every CSS class, the stylesheet id and the tests; see [Rule 0](#rules-for-every-custom-pattern)). The namespace is global, so make it unique to your team.
+Four things to rename consistently: the **namespace** (`ClaudeTest` → yours, e.g. `MyCompany`), the **class name**, the **output file**, and the **BEM block** (`greeting-card` → your pattern in kebab-case, in every CSS class, the stylesheet's file name and the tests; see [Rule 0](#rules-for-every-custom-pattern)). The namespace is global, so make it unique to your team.
 
 ```
 npm install
@@ -162,7 +162,7 @@ Plus three habits that saved us debugging time:
 
 - **Platform data enters the DOM through `textContent`, never `innerHTML`.** One of the checks feeds `<img src=x onerror=alert(1)>` as the name and asserts it shows up as text.
 - **Reuse OutSystems UI classes for anything themed.** The card uses `card` and the button uses `btn btn-primary`, so it follows the app theme. Each of those elements also carries its BEM class (`greeting-card__body`, `greeting-card__button`), which is what your own stylesheet targets. That stylesheet takes every colour, radius, spacing and shadow from OutSystems UI variables, with the base theme's value as fallback for the local preview. See [Style.md](Style.md).
-- **Inject the stylesheet once**, keyed by an element id (`<pattern>-styles`), so two instances on one screen don't duplicate it. Keep the CSS in the bundle rather than in the Block's stylesheet: it's reviewed and tested with the component, and on O11 Block stylesheet edits don't reliably publish through the agent.
+- **Keep the CSS out of the class.** It lives in `style/<pattern>.css` and ships as a stylesheet of its own (`dist/<Name>.css`), so the class never injects styles and two instances on one screen can't duplicate them. It goes in the app's theme stylesheet, not the Block's: on O11, Block stylesheet edits don't reliably publish through the agent. See [Style.md, Rule 7](Style.md#rule-7-where-a-patterns-css-lives).
 
 See [`GreetingCard.ts`](../components/greeting-card/src/greeting-card/GreetingCard.ts) for the full class (about 80 lines).
 
@@ -192,7 +192,14 @@ Not minifying is the point: step 8 compares the published Script with this file 
 
 Commit `dist/` too. It's the artifact that goes to OutSystems, and having it in Git is what lets you answer "is what's live what we reviewed?". Keep `* text=auto eol=lf` in `.gitattributes`: Git for Windows converts files to CRLF on checkout by default, which would make every comparison report a difference that isn't really there. Keep the bundle ASCII-only too; content with escape sequences has come back altered from a publish.
 
-**Several components, one file.** When an app uses more than one component, `npm run build:all` at the repo root runs every component's `npm test` and joins their bundles into `dist/components.js`. The file starts with a header giving the build timestamp (UTC) and the bundles it contains, so the published Script says when it was built and from what. It declares `"use strict"` once at the top, then has each component's bundle in alphabetical order. Ship it as one Script (for example `Components`) instead of one Script per component, and check it after publishing the same way as a single bundle: the published Script must match `dist/components.js`. Every build gets a new timestamp, so rebuild just before uploading and commit the file you uploaded.
+Each component's build also writes `dist/<Name>.css` from its `style/` folder: every `.css` file there, joined in alphabetical order.
+
+**Several components, one release.** `npm run build:all` at the repo root runs every component's `npm test` and writes two files, each starting with a header that gives the same build timestamp (UTC) and lists what it contains:
+
+- `dist/components.js`: every component's bundle, with `"use strict"` declared once at the top. Ship it as one Script (for example `Components`) instead of one Script per component.
+- `dist/components.css`: every component's stylesheet. Ship it in the app's theme stylesheet ([Style.md, Rule 7](Style.md#rule-7-where-a-patterns-css-lives)).
+
+Upload both files from the same build, so their timestamps match, and check them after publishing the same way as a single bundle: the published Script must match `dist/components.js`. Every build gets a new timestamp, so rebuild just before uploading and commit the files you uploaded.
 
 ## Step 5: prove it locally before going to the platform
 

@@ -43,7 +43,7 @@ npm test -w components/status-badge          # the copy passes all its checks
 
 > **With Claude Code:** "Create a StatusBadge component in the MyCompany namespace."
 
-This copies `components/greeting-card/` to `components/status-badge/` and renames the class, BEM block, stylesheet id, namespace, bundle and test names.
+This copies `components/greeting-card/` to `components/status-badge/` and renames the class, BEM block, stylesheet (`style/status-badge.css`), namespace, bundle and test names.
 
 **Done when:** `npm test -w components/status-badge` is green, and this prints nothing:
 
@@ -86,7 +86,7 @@ Details: [Components.md, step 3](Components.md#step-3-write-the-class-to-the-bri
 
 ## Step 5: write the CSS
 
-Edit `components/status-badge/src/status-badge/styles.ts`, following [Style.md](Style.md). In short:
+Edit `components/status-badge/style/status-badge.css`, following [Style.md](Style.md). The build turns the files in `style/` into `dist/StatusBadge.css`, which ships as a stylesheet of its own; the class never adds CSS. In short:
 
 - one BEM class per selector (`.status-badge__label`); the only allowed prefixes are a modifier of the block (`.status-badge--compact`) or an OutSystems UI context class (`.phone`, `.is-rtl`, …)
 - every colour, space, radius, border, shadow and font value is an OutSystems UI variable, with its exact base-theme value as fallback: `var(--space-base, 16px)`
@@ -104,7 +104,7 @@ When you use a variable the tests don't know yet, add it with its base value to 
 In `components/status-badge/test/checks.js`:
 
 - **Replace** the greeting card's behaviour checks (greeting text, click counting) with your component's: what it renders, what each Input Parameter changes, what each Event sends.
-- **Keep every structural check**: BEM classes and selectors, tokens and fallbacks, raw colours, `!important`, logical properties, focus, reduced motion, container classes untouched, styles injected once, destroy, calls after destroy, missing mount id.
+- **Keep every structural check**: BEM classes and selectors, tokens and fallbacks, raw colours, `!important`, logical properties, focus, reduced motion, container classes untouched, the component adds no stylesheet, destroy, calls after destroy, missing mount id.
 
 In `components/status-badge/preview/index.html`, change the demo instance's parameters and events so the page shows your component.
 
@@ -123,13 +123,13 @@ git add components/status-badge package-lock.json
 git commit -m "Add the StatusBadge component"
 ```
 
-Commit `dist/` along with the source: it's the exact file that goes to OutSystems.
+Commit `dist/` along with the source: `StatusBadge.js` and `StatusBadge.css` are the exact files that go to OutSystems.
 
 **Done when:** `git status` is clean, and a reviewer can read the contract, class, CSS and tests in one change.
 
 ## Step 8: put it in OutSystems
 
-Pick your platform and follow its guide. Both have three parts: the **Script** (your bundle), the **Block** (Input Parameters, Event, the main container's Style Classes, the bridge Client Action, three lifecycle JavaScript nodes), and a **harness screen** that uses the Block.
+Pick your platform and follow its guide. Both have four parts: the **Script** (your bundle), the **stylesheet** (your CSS, in the app's theme stylesheet), the **Block** (Input Parameters, Event, the main container's Style Classes, the bridge Client Action, three lifecycle JavaScript nodes), and a **harness screen** that uses the Block.
 
 | | ODC | O11 Reactive |
 |---|---|---|
@@ -145,16 +145,16 @@ The main container's Style Classes are always:
 "status-badge" + If(ExtendedClass <> NullTextIdentifier(), " " + ExtendedClass, "")
 ```
 
-**Done when:** the Script, the Block and the harness screen exist, with no validation errors.
+**Done when:** the Script, the stylesheet section, the Block and the harness screen exist, with no validation errors.
 
-**Several components in one app?** Instead of one Script per component, you can ship them all as one file: `npm run build:all` writes `dist/components.js` with a build timestamp at the top. See [Components.md, step 4](Components.md#step-4-build-for-diffability-not-size).
+**Several components in one app?** Ship them all in one release: `npm run build:all` writes `dist/components.js` (one Script) and `dist/components.css` (one stylesheet), both starting with the same build timestamp. See [Components.md, step 4](Components.md#step-4-build-for-diffability-not-size).
 
 ## Step 9: publish and prove it
 
 Publish, then check three things. A "published successfully" message alone isn't proof.
 
 1. **The live version is the new one.** ODC: the environment reports the new revision. O11: Service Center shows the new module version.
-2. **The published Script is your bundle.** Download it and compare it with `dist/StatusBadge.js`; on ODC, `verify-script.sh` does it for you ([ODC 8a](Components_ODC.md#8a-the-script-is-your-bundle), [O11 8a](Components_11.md#8a-the-script-is-your-bundle)).
+2. **The published files are yours.** Download the Script and compare it with `dist/StatusBadge.js` (on ODC, `verify-script.sh` does it for you), and check the theme's CSS holds your stylesheet section with the right timestamp ([ODC 8a](Components_ODC.md#8a-the-script-is-your-bundle), [O11 8a](Components_11.md#8a-the-script-is-your-bundle)).
 3. **It works in a browser.** Open the harness screen: it renders, each Input Parameter change shows, each Event reaches OutSystems, the main container has `status-badge` plus any `ExtendedClass`, and the console is clean.
 
 > **With Claude Code:** "Publish \<app\> and verify the StatusBadge Script." On ODC, later updates are one request: "Republish StatusBadge to ODC" (the `publish-pattern-odc` skill).
@@ -173,9 +173,9 @@ Publish, then check three things. A "published successfully" message alone isn't
 2. Scaffolded, `npm install`, copy's tests green, no `GreetingCard` left.
 3. `types.ts`: every input, event, modifier and bridge action listed.
 4. Class: three members, `textContent` only, mount classes untouched.
-5. CSS: BEM, OutSystems UI variables with base fallbacks, Style.md checklist.
+5. CSS in `style/`: BEM, OutSystems UI variables with base fallbacks, Style.md checklist.
 6. Tests rewritten with every structural check kept; preview updated; `npm test` green.
 7. Committed with `dist/`.
-8. Script, Block and harness in OutSystems, no validation errors.
+8. Script, stylesheet, Block and harness in OutSystems, no validation errors.
 9. Published; live version, Script diff and browser check all pass.
 10. On real screens through modifiers; pull request opened.

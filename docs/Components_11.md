@@ -46,7 +46,7 @@ Start in a throwaway Reactive app. Move to the library once the steps work.
 
 - **Check the fallback values against your OutSystems UI version.** [Style.md](Style.md) lists the values from OutSystems UI 2.30.0 on ODC. Our O11 Sandbox app also loads OutSystems UI 2.30.0 (read from its stylesheet's header; the individual token values weren't compared). Another O11 environment may run an older version; read its `OutSystemsUI.css` `:root` from your app's `moduleinfo` and adjust `OSUI_TOKENS` in the tests if they differ.
 - **Check that the OutSystems UI classes you reuse exist in your version.** The card uses `card` and `btn btn-primary`; both are in OutSystems UI 2.x.
-- **Keep the CSS in the bundle**, as `styles.ts` already does. Edits to a non-empty Block stylesheet don't publish reliably through the Service Studio MCP (the merge succeeds, but the old CSS is still served). If you need app-wide CSS, put it in the theme stylesheet, which publishes reliably.
+- **Put the component's CSS in the theme stylesheet, never the Block's.** It ships as its own file (`dist/<Name>.css`, or `dist/components.css` from `npm run build:all`). Edits to a non-empty Block stylesheet don't publish reliably through the Service Studio MCP (the merge succeeds, but the old CSS is still served), while theme stylesheet edits did publish every time they were tried.
 - **In Service Studio, never style a pattern from a screen** through its OutSystems UI classes (`.card`, `.btn`) or by element (`.greeting-card p`). Pick a modifier through `ExtendedClass` instead.
 
 ## Step 6: the platform side, reviewed in Service Studio
@@ -123,6 +123,26 @@ where needed, End) before merging.
 ```
 
 In the Compare-and-Merge window, check the four things step 8b checks after publishing: the guards are there, the names match `types.ts`, `ExtendedClass` reaches no JS node, and the event goes through `TriggerGreetClicked`.
+
+### The stylesheet
+
+The component's CSS goes in the module's **theme stylesheet**, as one marked section after Theme Editor's own block ([Style.md, Rule 7](Style.md#rule-7-where-a-patterns-css-lives)). The agent sets it directly from the file, like the Script:
+
+```text
+In module <Module>, add the contents of dist/components.css (or dist/<Name>.css) to the
+theme stylesheet as one section at the end, after Theme Editor's own block. Start it
+with the guard rule ".components-start { }", then the line
+/* ==== components: start (built <timestamp from the file's header>) ==== */
+then the file, then /* ==== components: end ==== */. If such a section already
+exists, replace it whole. Change nothing else in the theme. Merge, don't publish.
+```
+
+Two things the Service Studio MCP has shown about theme stylesheet edits:
+
+- **The first 2 characters after Theme Editor's block are dropped**, which can turn a leading `/*` into a stray `*/` that kills the next rule. The guard rule `.components-start { }` absorbs that, so start the section with it.
+- **The agent may report an `InvalidIconLibrary` error** after editing the theme stylesheet. It comes from the agent's own validator; Service Studio's validation of the merged module was clean and the edits published. Any other error still blocks the merge.
+
+**Not yet done with a component stylesheet**; record what happens here the first time.
 
 ### Request C: a screen that uses it
 
@@ -222,7 +242,7 @@ These are documented limits of the Service Studio MCP, not ones we hit on this p
 | The agent can only edit modules **open** in Service Studio | Open the library and the consumer before asking |
 | The agent **can't add a new dependency** | Add it in Manage Dependencies yourself, then ask the agent to continue |
 | Refreshing references drops any unmerged edits from the agent's view | Merge first, then refresh |
-| **Block stylesheet** edits may not reach the published CSS | Ship the CSS in the bundle; use the theme for app-wide CSS |
+| **Block stylesheet** edits may not reach the published CSS | Put component CSS in the theme stylesheet ([The stylesheet](#the-stylesheet)) |
 | Publishing is blocked unless you allow automatic merge and publish | Allow it in the MCP Server dialog, or publish from Service Studio |
 | A screen's anonymous-access flag is dropped by the merge | Add the Anonymous role to the screen's roles |
 | The write tools are a **Beta Feature** | See the [Beta Features agreement](https://www.outsystems.com/legal/beta-features-agreement) |

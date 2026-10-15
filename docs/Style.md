@@ -12,9 +12,9 @@ What a published app loads, in order (taken from the `moduleinfo` manifest of th
 |---|---|---|
 | 1 | `OutSystemsUI.css` | The base theme: `:root` variables, reset, layout, widgets (`.card`, `.btn`, …), device and accessibility classes |
 | 2 | The app's theme (Theme Editor, theme stylesheet) | Overrides of the variables: brand colours, fonts, spacing |
-| 3 | The pattern's stylesheet, injected at runtime by the component | The pattern's own look, built from those variables |
+| 3 | The patterns' stylesheet (`dist/components.css`, or one component's `dist/<Name>.css`), placed in the app's theme stylesheet after the variable overrides | Each pattern's own look, built from those variables |
 
-Because the pattern's stylesheet is injected last, a single class selector is enough to win over an OutSystems UI rule of the same specificity. That is what lets the rules below ban `!important` and long selectors.
+Because the patterns' stylesheet loads after `OutSystemsUI.css`, a single class selector is enough to win over an OutSystems UI rule of the same specificity. That is what lets the rules below ban `!important` and long selectors. Wherever you put it, it must load after `OutSystemsUI.css`.
 
 Measured base: **OutSystems UI 2.30.0** on ODC. O11 environments may run an older OutSystems UI; check your version's `:root` before reusing the fallback values below.
 
@@ -34,7 +34,7 @@ Every CSS class the pattern owns follows BEM, with the pattern class as the bloc
 - **States use `--is-*`**, as OutSystems UI does (`--is-open`, `--is-disabled`). The component adds and removes them; screens never set them.
 - **No abbreviations or prefixes** (`gc-title`). The block name is what keeps classes unique.
 - **The block name must not be an OutSystems UI class.** Don't name a pattern `card`, `tabs` or `popup`; its elements would collide with the base theme.
-- **Ids follow the block too.** The injected stylesheet's id is `<pattern>-styles`.
+- **Files follow the block too.** The pattern's stylesheet is `style/<pattern>.css`.
 
 ## Rule 1: OutSystems UI classes go next to the BEM class, never instead of it
 
@@ -134,12 +134,14 @@ Use `.is-rtl .greeting-card__… { … }` only for what logical properties can't
 
 | CSS | Where it goes |
 |---|---|
-| The pattern's own look | The component's bundle (`styles.ts`), injected once into `<head>` under the id `<pattern>-styles` |
+| The pattern's own look | `components/<pattern>/style/<pattern>.css`. The build copies it to `dist/<Name>.css`, and `npm run build:all` joins every pattern's stylesheet into `dist/components.css`, which starts with the build timestamp. The app loads it from its theme stylesheet |
 | A variant one screen needs | A modifier in the pattern's stylesheet, chosen by the screen through `ExtendedClass` |
 | A one-off adjustment on one screen | An OutSystems UI utility class in `ExtendedClass` (`margin-top-m`); otherwise a screen class targeting `.<the-screen-class> .greeting-card__…` in the screen's stylesheet |
 | Brand colours, fonts, spacing for the whole app | The app's theme: change the OutSystems UI variables there, and every pattern follows |
 
-- **Not the Block's stylesheet.** On O11, edits to a non-empty Block stylesheet don't reliably reach the published CSS when made through the Service Studio MCP, and on both platforms CSS in the bundle is reviewed, tested and diffed with the rest of the component.
+- **The component's JavaScript adds no CSS.** Styles ship as a stylesheet of their own, separate from the Script. `npm test` checks that the component never injects a `<style>` or `<link>`.
+- **Put it in the theme stylesheet, not the Block's.** On O11, edits to a non-empty Block stylesheet don't reliably reach the published CSS when made through the Service Studio MCP, while theme stylesheet edits did publish every time we tried. Paste `dist/components.css` into the theme stylesheet as one marked section, after Theme Editor's own block, and replace that section whole on each release. (Not yet done on either platform with a component stylesheet; record what happens in the platform guide the first time.)
+- **Ship the stylesheet and the Script together.** A release is one `npm run build:all`: upload `dist/components.js` and `dist/components.css` from the same build, so their timestamps match.
 - **Document every modifier** in `types.ts`, next to `ExtendedClass`. Modifiers are the pattern's public styling API; an undocumented one is a private class a screen shouldn't rely on.
 
 ## What `npm test` checks
@@ -154,7 +156,9 @@ Use `.is-rtl .greeting-card__… { … }` only for what logical properties can't
 | No width media queries | 4 |
 | No `left` / `right` properties, no `text-align: left` / `right` | 5 |
 | No focus styles, no outline removal; a `prefers-reduced-motion` override when there are transitions or animations | 6 |
-| The stylesheet is injected once, whatever the number of instances | 7 |
+| The component adds no `<style>` or `<link>` to the page; its stylesheet is ASCII-only and has rules for the block's elements | 7 |
+
+`npm run build:all` adds a smoke test of the combined files before writing them: `components.js` loads and registers every component's class, and `components.css` has rules for every component and none outside their blocks. If any of that fails, nothing is written.
 
 What stays for review: semantic token choice, contrast, hover-only interactions, and whether a modifier belongs in the pattern at all. When you add a variable to the stylesheet, add it with its base value to `OSUI_TOKENS` in [`test/checks.js`](../components/greeting-card/test/checks.js).
 
@@ -168,5 +172,5 @@ What stays for review: semantic token choice, contrast, hover-only interactions,
 6. Widths switch on `.phone` / `.tablet`, not media queries.
 7. Logical properties for anything left or right.
 8. No focus styles; a reduced-motion override for every transition.
-9. CSS in the bundle; modifiers documented in `types.ts`.
+9. CSS in `style/<pattern>.css`, none in the JavaScript; modifiers documented in `types.ts`.
 10. `npm test` green.

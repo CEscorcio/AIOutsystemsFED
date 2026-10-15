@@ -11,8 +11,10 @@
     .btn { padding: 8px 16px; border-radius: 6px; border: 0; cursor: pointer; }
     .btn-primary { background: #1068eb; color: #fff; }
     #log { font-family: ui-monospace, monospace; font-size: 13px; white-space: pre-wrap; }
-    .pass { color: #0a7a2f; } .fail { color: #b00020; font-weight: 600; }
+    .pass { color: #0a7a2f; } .fail { color: #b00020; font-weight: 600; } .skip { color: #6a7178; }
   </style>
+  <!-- The component's own stylesheet, as the app loads it -->
+  <link rel="stylesheet" href="../dist/GreetingCard.css">
 </head>
 <body>
   <h1>GreetingCard</h1>
@@ -43,8 +45,8 @@
       results.forEach(function (r) {
         if (!r.ok) failed++;
         var line = document.createElement("div");
-        line.className = r.ok ? "pass" : "fail";
-        line.textContent = (r.ok ? "PASS  " : "FAIL  ") + r.name;
+        line.className = r.skipped ? "skip" : r.ok ? "pass" : "fail";
+        line.textContent = (r.skipped ? "SKIP  " : r.ok ? "PASS  " : "FAIL  ") + r.name + (r.skipped ? " (CSS checks run in npm test)" : "");
         log.appendChild(line);
       });
       var summary = document.createElement("div");

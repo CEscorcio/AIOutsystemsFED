@@ -8,7 +8,7 @@
 //
 // Renames, in file contents and paths:
 //   GreetingCard   -> <PatternName>   (class, types, file names, runXChecks)
-//   greeting-card  -> <pattern-name>  (BEM block, stylesheet id, folder, package name)
+//   greeting-card  -> <pattern-name>  (BEM block, style/ file, folder, package name)
 //   ClaudeTest     -> <Namespace>     (window.<Namespace>.<PatternName>)
 //   gc-test-mount  -> <pattern-name>-test-mount
 // Skips node_modules and dist (dist is rebuilt by npm test).

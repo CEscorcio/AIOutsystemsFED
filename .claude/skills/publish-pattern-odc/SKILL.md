@@ -13,7 +13,9 @@ description: >-
 
 # Publish a pattern's Script to ODC
 
-Ships a rebuilt bundle into an ODC app that already has the pattern's Script, Block and harness screen. Only the Script changes; that's the normal case when you change the component's TypeScript or CSS without changing the contract in `types.ts`.
+Ships a rebuilt bundle into an ODC app that already has the pattern's Script, Block and harness screen. Only the Script changes; that's the normal case when you change the component's TypeScript without changing the contract in `types.ts`.
+
+**If the CSS changed** (`style/*.css`), the Script isn't enough: the theme stylesheet's component section must be replaced with the new `dist/<Name>.css` (or `dist/components.css`) from the same build. That part is done by hand in ODC Studio, per [Components_ODC.md](../../../docs/Components_ODC.md), step 6, "The stylesheet". Tell the user before you start, and include it in the report.
 
 **If `types.ts` changed** (a new Input Parameter, Event or modifier that the Block must pass on), the Block has to change too. Stop and follow [Components_ODC.md](../../../docs/Components_ODC.md) step 6, turn B, for that part.
 

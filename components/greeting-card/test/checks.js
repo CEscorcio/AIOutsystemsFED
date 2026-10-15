@@ -1,10 +1,17 @@
 // Scripted click-through of the component. Runs in the preview page
 // (preview/index.html?test=1) and under jsdom (npm test). No publish needed.
+//
+// css is the text of dist/GreetingCard.css. npm test always passes it; the
+// preview page can't read a file:// stylesheet's text, so there the CSS checks
+// are reported as skipped.
 // eslint-disable-next-line no-unused-vars
-function runGreetingCardChecks(win) {
+function runGreetingCardChecks(win, css) {
   var doc = win.document;
   var results = [];
+  var hasCss = typeof css === "string";
   function check(name, ok) { results.push({ name: name, ok: !!ok }); }
+  function checkCss(name, ok) { if (hasCss) check(name, ok); else results.push({ name: name, ok: true, skipped: true }); }
+  var stylesBefore = doc.querySelectorAll("style, link[rel=stylesheet]").length;
 
   var GreetingCard = win.ClaudeTest && win.ClaudeTest.GreetingCard;
   check("bundle registers window.ClaudeTest.GreetingCard", typeof GreetingCard === "function");
@@ -65,7 +72,8 @@ function runGreetingCardChecks(win) {
   check("markup in data renders as text, not HTML",
     host.querySelector("img") === null && title.textContent.indexOf("<img") !== -1);
 
-  check("styles injected into <head> once", doc.querySelectorAll("#greeting-card-styles").length === 1);
+  check("the component adds no stylesheet (CSS ships as dist/GreetingCard.css)",
+    doc.querySelectorAll("style, link[rel=stylesheet]").length === stylesBefore);
 
   // Style.md: every OutSystems UI variable is used with a fallback equal to its
   // value in the base theme, and no raw colour appears outside such a fallback.
@@ -80,7 +88,10 @@ function runGreetingCardChecks(win) {
     "--shadow-xs": "0 1px 2px rgba(0, 0, 0, .1)", "--shadow-s": "0 2px 4px rgba(0, 0, 0, .1)",
     "--font-size-h5": "20px", "--font-size-base": "16px", "--font-size-xs": "12px", "--font-semi-bold": "600"
   };
-  var css = (doc.getElementById("greeting-card-styles") || {}).textContent || "";
+  css = hasCss ? css : "";
+  var nonAscii = css.match(/[^\x00-\x7F]/);
+  checkCss("the stylesheet is ASCII-only" + (nonAscii ? " (" + JSON.stringify(nonAscii[0]) + ")" : ""), !nonAscii);
+  checkCss("the stylesheet styles the block's elements (.greeting-card__*)", /\.greeting-card__[a-z0-9-]+[^{]*\{/.test(css));
   var VAR_WITH_FALLBACK = /var\((--[a-z0-9-]+)\s*(?:,\s*([^()]*(?:\([^()]*\))?[^()]*))?\)/g;
   var tokenProblems = [];
   var m;
@@ -89,11 +100,11 @@ function runGreetingCardChecks(win) {
     else if (m[2] === undefined) tokenProblems.push(m[1] + " has no fallback");
     else if (m[2].trim() !== OSUI_TOKENS[m[1]]) tokenProblems.push(m[1] + " fallback " + m[2].trim() + " != " + OSUI_TOKENS[m[1]]);
   }
-  check("every variable is an OutSystems UI token with its base-theme fallback" +
+  checkCss("every variable is an OutSystems UI token with its base-theme fallback" +
     (tokenProblems.length ? " (" + tokenProblems.join("; ") + ")" : ""), tokenProblems.length === 0);
   var rawColours = css.replace(VAR_WITH_FALLBACK, "").match(/#[0-9a-fA-F]{3,8}\b|rgba?\(|hsla?\(/g);
-  check("no raw colour outside a variable fallback" + (rawColours ? " (" + rawColours.join(", ") + ")" : ""), !rawColours);
-  check("no !important", css.indexOf("!important") === -1);
+  checkCss("no raw colour outside a variable fallback" + (rawColours ? " (" + rawColours.join(", ") + ")" : ""), !rawColours);
+  checkCss("no !important", css.indexOf("!important") === -1);
 
   // Style.md Rule 3: a selector is one BEM class of this block, optionally
   // prefixed by a modifier/state of the block or one OutSystems UI context class.
@@ -118,21 +129,21 @@ function runGreetingCardChecks(win) {
       if (!ok) badSelectors.push(sel);
     });
   }
-  check("every selector is one BEM class, prefixed at most by a modifier or OutSystems UI context class" +
+  checkCss("every selector is one BEM class, prefixed at most by a modifier or OutSystems UI context class" +
     (badSelectors.length ? " (" + badSelectors.join(" | ") + ")" : ""), badSelectors.length === 0);
 
   // Style.md Rule 5: direction through logical properties only.
   var physical = cssNoComments.match(/(^|[\s;{])(left|right|(margin|padding|border)-(left|right)[a-z-]*)\s*:|text-align\s*:\s*(left|right)/g);
-  check("no left/right properties (use logical properties)" + (physical ? " (" + physical.join(", ").replace(/[\s;{]/g, "") + ")" : ""), !physical);
+  checkCss("no left/right properties (use logical properties)" + (physical ? " (" + physical.join(", ").replace(/[\s;{]/g, "") + ")" : ""), !physical);
 
   // Style.md Rule 6: focus belongs to OutSystems UI; motion has a reduced-motion override.
-  check("no focus styles and no outline removal",
+  checkCss("no focus styles and no outline removal",
     !/:focus/.test(cssNoComments) && !/outline\s*:\s*(none|0)\b/.test(cssNoComments));
-  check("transitions and animations have a prefers-reduced-motion override",
+  checkCss("transitions and animations have a prefers-reduced-motion override",
     !/(transition|animation)\s*:/.test(cssNoComments) || cssNoComments.indexOf("prefers-reduced-motion") !== -1);
 
   // Style.md Rule 4: widths switch on OutSystems UI device classes, not media queries.
-  check("no width media queries (use .phone / .tablet)", !/@media[^{]*(min|max)-width/.test(cssNoComments));
+  checkCss("no width media queries (use .phone / .tablet)", !/@media[^{]*(min|max)-width/.test(cssNoComments));
 
   // ExtendedClass is applied by the Block on its main container (the mount),
   // via Style Classes. The class must leave the container's classes alone and
@@ -142,7 +153,7 @@ function runGreetingCardChecks(win) {
   host2.className = "greeting-card my-theme";
   doc.body.appendChild(host2);
   var card2 = new GreetingCard({ runtimeId: "gc-test-mount-2", name: "B", buttonLabel: "B" });
-  check("second instance does not duplicate styles", doc.querySelectorAll("#greeting-card-styles").length === 1);
+  check("a second instance adds no stylesheet either", doc.querySelectorAll("style, link[rel=stylesheet]").length === stylesBefore);
   check("container classes (pattern class + ExtendedClass) are untouched on create",
     host2.className === "greeting-card my-theme");
   card2.onParametersChanged({ name: "C", buttonLabel: "C" });

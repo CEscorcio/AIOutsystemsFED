@@ -6,7 +6,7 @@ The ODC half of [Components.md](Components.md). It starts where that page's step
 
 **If your tenant is shared:** Mentor's quota is counted per tenant, so the turns you spend are your colleagues' turns too. Step 6 is designed to keep the number of turns low, and every bug [step 5](Components.md#step-5-prove-it-locally-before-going-to-the-platform) catches locally is a turn you don't spend.
 
-**Republishing after a change** to the TypeScript or CSS only replaces the Script: one Mentor turn, one publish turn, then the checks in step 8. With Claude Code, ask to republish the pattern (the `publish-pattern-odc` skill does all of it).
+**Republishing after a change** replaces what changed: the Script for TypeScript changes, the theme's component section for CSS changes (both, from one build, when both changed), then a publish turn and the checks in step 8. With Claude Code, ask to republish the pattern (the `publish-pattern-odc` skill covers the Script).
 
 ## Prerequisites
 
@@ -89,6 +89,20 @@ if ($parameters.Instance) {
 Keep the JavaScript exactly as written, including the guards.
 ```
 
+### The stylesheet
+
+The component's CSS ships separately from the Script ([Style.md, Rule 7](Style.md#rule-7-where-a-patterns-css-lives)): `dist/<Name>.css` for one component, or `dist/components.css` from `npm run build:all` for all of them. It goes in the app's **theme stylesheet**, as one marked section after Theme Editor's own block:
+
+```css
+/* ==== components: start (built <timestamp from the file's header>) ==== */
+<contents of dist/components.css>
+/* ==== components: end ==== */
+```
+
+Paste it in ODC Studio by hand rather than through Mentor: a ~106 KB stylesheet sent through Mentor once killed the turn, and hand-pasting uses no quota. On each release, replace the whole section.
+
+**Not yet done on ODC with a component stylesheet.** The publishes measured in step 8 were made while the CSS was still inside the Script. Record here what happens the first time.
+
 ### Turn C: a screen that uses it
 
 A Block that no screen uses isn't included in the published JavaScript, so you can't audit it. Build a harness that exercises every direction of the contract: an input bound to a parameter (tests `onParametersChanged`) and a visible reaction to the event (tests the bridge).
@@ -134,7 +148,7 @@ curl -s -o published.js "https://<your-host>/<that path>"
 sed '1s/^\xEF\xBB\xBF//' published.js | diff dist/GreetingCard.js -
 ```
 
-What we measured on four of those publishes (pure-ASCII bundles; each update was sent as a full replacement of the Script):
+What we measured on four of those publishes (pure-ASCII bundles, which at the time also carried the CSS; each update was sent as a full replacement of the Script):
 
 | | First publish | `ExtendedClass` update | BEM look-and-feel update | Style.md alignment |
 |---|---|---|---|---|
@@ -148,6 +162,8 @@ What we measured on four of those publishes (pure-ASCII bundles; each update was
 The result was the same every time, including a publish not in the table (the main-container rule, which restored the 2,959-byte bundle), so it's repeatable for small files. The BEM update shows it also holds for a bundle carrying a 60-line CSS template literal; it took one Mentor turn for the Script and one to publish.
 
 The container rule is visible in the compiled screen code too: `MountPoint`'s style compiles to `"greeting-card" + (extendedClassIn !== nullTextIdentifier() ? " " + extendedClassIn : "")`, recalculated whenever `ExtendedClass` changes. It's still cleaner than an earlier 21 KB bundle, which came back reindented, with CRLF line endings and one escape sequence inside a comment changed (`\xE7` became `\xE3`). The likely difference is size and content: a small, ASCII-only file with no escape sequences in it. Don't assume you'll get the clean result; always run the diff.
+
+The theme's CSS is listed in the same manifest, as `css/<App>.<Theme>.css`. Download it and check that the component section matches the `dist/` file you pasted, timestamp included.
 
 ### 8b. The JS nodes are wired as you asked
 

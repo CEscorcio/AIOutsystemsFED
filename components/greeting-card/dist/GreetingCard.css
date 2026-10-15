@@ -1,18 +1,19 @@
-// Component look and feel, written to the rules in Style.md.
-//
-// - Base theme is OutSystems UI. Every colour, space, radius, border, shadow
-//   and font value is an OutSystems UI variable; the fallback after the comma
-//   is that variable's exact value in the base theme (OutSystems UI 2.30.0),
-//   so the local preview matches an unthemed app.
-// - Class names are BEM under the block greeting-card:
-//     elements  greeting-card__body, __text, __title, __count, __button
-//     modifiers greeting-card--compact   (passed by a screen through ExtendedClass)
-// - Selectors are single BEM classes. Allowed prefixes: a modifier of this
-//   block, or an OutSystems UI context class (.phone, .tablet, .is-rtl, ...).
-// - Focus is left to OutSystems UI (.has-accessible-features); don't restyle it.
-const STYLE_ID = "greeting-card-styles";
-
-const CSS = `
+/*
+ * GreetingCard styles, written to the rules in docs/Style.md.
+ *
+ * - Base theme is OutSystems UI. Every colour, space, radius, border, shadow
+ *   and font value is an OutSystems UI variable; the fallback after the comma
+ *   is that variable's exact value in the base theme (OutSystems UI 2.30.0),
+ *   so the local preview matches an unthemed app.
+ * - Class names are BEM under the block greeting-card:
+ *     elements  greeting-card__body, __text, __title, __count, __button
+ *     modifiers greeting-card--compact   (passed by a screen through ExtendedClass)
+ * - Selectors are single BEM classes. Allowed prefixes: a modifier of this
+ *   block, or an OutSystems UI context class (.phone, .tablet, .is-rtl, ...).
+ * - Focus is left to OutSystems UI (.has-accessible-features); don't restyle it.
+ *
+ * Shipped as a stylesheet of its own (dist/GreetingCard.css), not by the JS.
+ */
 .greeting-card__body {
   position: relative;
   display: flex;
@@ -83,14 +84,4 @@ const CSS = `
 @media (prefers-reduced-motion: reduce) {
   .greeting-card__body, .greeting-card__button { transition: none; }
   .greeting-card__button:hover { transform: none; }
-}
-`;
-
-/** Injects the component styles into <head> once, however many instances exist. */
-export function ensureStyles(doc: Document): void {
-  if (doc.getElementById(STYLE_ID)) return;
-  const style = doc.createElement("style");
-  style.id = STYLE_ID;
-  style.textContent = CSS;
-  doc.head.appendChild(style);
 }
