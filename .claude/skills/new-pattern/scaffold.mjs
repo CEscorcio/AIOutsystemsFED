@@ -3,8 +3,8 @@
 // Usage: node scaffold.mjs <PatternName> <Namespace> [--from <example-dir>] [--to <target-dir>]
 //   PatternName  PascalCase class name, e.g. StatusBadge
 //   Namespace    global namespace the bundle registers on window, e.g. MyCompany
-//   --from       example to copy (default: <repo>/greeting-card)
-//   --to         new folder (default: <repo>/<pattern-name>)
+//   --from       example to copy (default: <repo>/components/greeting-card)
+//   --to         new folder (default: <repo>/components/<pattern-name>)
 //
 // Renames, in file contents and paths:
 //   GreetingCard   -> <PatternName>   (class, types, file names, runXChecks)
@@ -45,8 +45,8 @@ const kebab = pascal.replace(/([a-z0-9])([A-Z])/g, "$1-$2").replace(/([A-Z])([A-
 if (OSUI_CLASS_NAMES.has(kebab)) fail(`"${kebab}" is an OutSystems UI class; the BEM block must not collide with it (Style.md, Rule 0)`);
 
 const repo = resolve(dirname(fileURLToPath(import.meta.url)), "../../..");
-const from = resolve(option("from") || join(repo, "greeting-card"));
-const to = resolve(option("to") || join(repo, kebab));
+const from = resolve(option("from") || join(repo, "components", "greeting-card"));
+const to = resolve(option("to") || join(repo, "components", kebab));
 if (!existsSync(join(from, "package.json"))) fail(`no example at ${from}`);
 if (existsSync(to)) fail(`${to} already exists`);
 
@@ -91,4 +91,4 @@ console.log(`  class      ${pascal}`);
 console.log(`  BEM block  ${kebab}`);
 console.log(`  global     window.${namespace}.${pascal}`);
 console.log(`  bundle     dist/${pascal}.js`);
-console.log(`Rewrote ${changed.length} files. Next: cd ${to} && npm install && npm test`);
+console.log(`Rewrote ${changed.length} files. Next, from the repo root: npm install (registers the new workspace), then npm test`);

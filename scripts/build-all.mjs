@@ -5,35 +5,38 @@
 //   npm run build:all              runs each component's npm test, then joins
 //   npm run build:all -- --no-test skips the tests (local experiments only)
 //
-// A component is any top-level folder with a package.json and a build.mjs
-// (e.g. greeting-card/). Its bundle is every .js file in its dist/ folder.
+// A component is any folder in components/ with a package.json and a build.mjs
+// (e.g. components/greeting-card/). Its bundle is every .js file in its dist/
+// folder. Dependencies come from the root install (npm workspaces).
 // Components are joined in alphabetical order.
 import { execSync } from "node:child_process";
 import { existsSync, mkdirSync, readdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 
-const root = import.meta.dirname;
+const root = join(import.meta.dirname, "..");
+const componentsDir = join(root, "components");
 const runTests = !process.argv.includes("--no-test");
 const outFile = join(root, "dist", "components.js");
 
-const components = readdirSync(root)
-  .filter((name) => !name.startsWith(".") && name !== "node_modules" && name !== "dist")
-  .filter((name) => statSync(join(root, name)).isDirectory())
-  .filter((name) => existsSync(join(root, name, "package.json")) && existsSync(join(root, name, "build.mjs")))
+if (!existsSync(join(root, "node_modules"))) {
+  console.error('build-all: no node_modules at the repo root; run "npm install" there first');
+  process.exit(1);
+}
+
+const components = (existsSync(componentsDir) ? readdirSync(componentsDir) : [])
+  .filter((name) => !name.startsWith("."))
+  .filter((name) => statSync(join(componentsDir, name)).isDirectory())
+  .filter((name) => existsSync(join(componentsDir, name, "package.json")) && existsSync(join(componentsDir, name, "build.mjs")))
   .sort();
 
 if (components.length === 0) {
-  console.error("build-all: no components found (folders with package.json and build.mjs)");
+  console.error("build-all: no components found (folders in components/ with package.json and build.mjs)");
   process.exit(1);
 }
 
 const parts = [];
 for (const name of components) {
-  const dir = join(root, name);
-  if (!existsSync(join(dir, "node_modules"))) {
-    console.error(`build-all: ${name} has no node_modules; run "npm install" in ${name}/ first`);
-    process.exit(1);
-  }
+  const dir = join(componentsDir, name);
   console.log(`\n== ${name}: ${runTests ? "npm test" : "npm run build"}`);
   try {
     execSync(runTests ? "npm test" : "npm run build", { cwd: dir, stdio: "inherit" });
@@ -56,7 +59,7 @@ for (const name of components) {
     }
     // A "use strict" directive only works as a file's first statement, so the
     // combined file declares it once at the top and each bundle's copy is dropped.
-    parts.push({ label: `${name}/dist/${file}`, code: code.replace(/^"use strict";\s*/, "") });
+    parts.push({ label: `components/${name}/dist/${file}`, code: code.replace(/^"use strict";\s*/, "") });
   }
 }
 

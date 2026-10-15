@@ -1,13 +1,13 @@
 # Working in this repo
 
-Custom front-end patterns for OutSystems, built in TypeScript and shipped into an app as a Block that bridges to the bundle. [Components.md](Components.md) holds what's shared (the idea, the rules, steps 1 to 5); steps 6 to 8 are per platform: ODC ([Components_ODC.md](Components_ODC.md)) and O11 Reactive ([Components_11.md](Components_11.md)). Put platform-neutral content in Components.md, never in a platform guide. [README.md](README.md) has the overview.
+Custom front-end patterns for OutSystems, built in TypeScript and shipped into an app as a Block that bridges to the bundle. [Components.md](docs/Components.md) holds what's shared (the idea, the rules, steps 1 to 5); steps 6 to 8 are per platform: ODC ([Components_ODC.md](docs/Components_ODC.md)) and O11 Reactive ([Components_11.md](docs/Components_11.md)). Put platform-neutral content in Components.md, never in a platform guide. [README.md](README.md) has the overview.
 
 ## Standing rules
 
-- **[Style.md](Style.md) governs all pattern CSS.** BEM under the pattern block is the golden rule (Rule 0). Every visual value is an OutSystems UI variable whose fallback is its exact base-theme value. Read Style.md before writing or reviewing any CSS.
-- **[AppGuidelines.md](AppGuidelines.md) governs app screens.** Read it before creating or changing a screen; new screens use `Layouts\LayoutTopMenu`, not `LayoutBlank` (Rule 1), and are created in the `MainFlow` UI flow (Rule 2).
-- **`greeting-card/` is an example**, not the product. New patterns are copies of it (use the `new-pattern` skill). Don't add features to it unless asked.
-- **`npm test` must be green** (in the pattern's folder) before anything goes to OutSystems. When a test fails, fix the code, never the test, unless the rule itself changed in Style.md.
+- **[Style.md](docs/Style.md) governs all pattern CSS.** BEM under the pattern block is the golden rule (Rule 0). Every visual value is an OutSystems UI variable whose fallback is its exact base-theme value. Read Style.md before writing or reviewing any CSS.
+- **[AppGuidelines.md](docs/AppGuidelines.md) governs app screens.** Read it before creating or changing a screen; new screens use `Layouts\LayoutTopMenu`, not `LayoutBlank` (Rule 1), and are created in the `MainFlow` UI flow (Rule 2).
+- **Components live in `components/<name>/`**, one npm workspace each; install once at the repo root. **`components/greeting-card/` is an example**, not the product. New components are copies of it (use the `new-pattern` skill). Don't add features to it unless asked. `npm run build:all` ships every folder in `components/`, the example included.
+- **`npm test` must be green** (at the repo root for every component, or `npm test -w components/<name>` for one) before anything goes to OutSystems. When a test fails, fix the code, never the test, unless the rule itself changed in Style.md.
 - **Every new Style.md rule that a script can check gets a check** in `test/checks.js`. Add a variable you start using to `OSUI_TOKENS` with its base-theme value.
 - **`dist/` is committed.** It's what goes to OutSystems; rebuild it with `npm test`, never edit it by hand.
 - **`dist/components.js` (from `npm run build:all`) is committed only when it's uploaded.** Every build writes a new timestamp, so commit the exact file that went to OutSystems, together with where it went, and leave other builds uncommitted.

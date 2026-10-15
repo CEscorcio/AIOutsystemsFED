@@ -1,6 +1,6 @@
 # Style rules for custom patterns
 
-The CSS rules every custom pattern follows, on ODC and O11. The build guides ([Components.md](Components.md), then [Components_ODC.md](Components_ODC.md) or [Components_11.md](Components_11.md)) say *how* to build and ship a pattern; this page says how its CSS must be written. [`greeting-card/`](greeting-card/) follows every rule here, and its `npm test` enforces the ones a script can check.
+The CSS rules every custom pattern follows, on ODC and O11. The build guides ([Components.md](Components.md), then [Components_ODC.md](Components_ODC.md) or [Components_11.md](Components_11.md)) say *how* to build and ship a pattern; this page says how its CSS must be written. [`greeting-card/`](../components/greeting-card/) follows every rule here, and its `npm test` enforces the ones a script can check.
 
 **The base theme is OutSystems UI** (`OutSystemsUI.css`). A pattern doesn't bring its own design system: it extends OutSystems UI, takes every visual value from its variables, and keeps working when an app's theme changes them.
 
@@ -156,7 +156,7 @@ Use `.is-rtl .greeting-card__… { … }` only for what logical properties can't
 | No focus styles, no outline removal; a `prefers-reduced-motion` override when there are transitions or animations | 6 |
 | The stylesheet is injected once, whatever the number of instances | 7 |
 
-What stays for review: semantic token choice, contrast, hover-only interactions, and whether a modifier belongs in the pattern at all. When you add a variable to the stylesheet, add it with its base value to `OSUI_TOKENS` in [`test/checks.js`](greeting-card/test/checks.js).
+What stays for review: semantic token choice, contrast, hover-only interactions, and whether a modifier belongs in the pattern at all. When you add a variable to the stylesheet, add it with its base value to `OSUI_TOKENS` in [`test/checks.js`](../components/greeting-card/test/checks.js).
 
 ## Checklist for a new pattern
 

@@ -15,7 +15,7 @@ description: >-
 
 Ships a rebuilt bundle into an ODC app that already has the pattern's Script, Block and harness screen. Only the Script changes; that's the normal case when you change the component's TypeScript or CSS without changing the contract in `types.ts`.
 
-**If `types.ts` changed** (a new Input Parameter, Event or modifier that the Block must pass on), the Block has to change too. Stop and follow [Components_ODC.md](../../../Components_ODC.md) step 6, turn B, for that part.
+**If `types.ts` changed** (a new Input Parameter, Event or modifier that the Block must pass on), the Block has to change too. Stop and follow [Components_ODC.md](../../../docs/Components_ODC.md) step 6, turn B, for that part.
 
 ## Before anything: ask
 
@@ -24,8 +24,7 @@ Publishing changes tenant state and spends Mentor quota for the whole tenant. Do
 ## 1. Gate locally
 
 ```bash
-cd <pattern-folder>          # e.g. greeting-card
-npm test
+npm test -w components/<pattern>   # e.g. components/greeting-card; run at the repo root
 git status --short           # dist/ must be rebuilt and committed with the source
 ```
 
@@ -92,14 +91,14 @@ Then `mentor_close_session { sessionId }`.
 2. Diff the published Script against the bundle:
 
    ```bash
-   bash .claude/skills/publish-pattern-odc/verify-script.sh <url-from-env_app> <Name> <pattern-folder>/dist/<Name>.js <scratchpad-dir>
+   bash .claude/skills/publish-pattern-odc/verify-script.sh <url-from-env_app> <Name> components/<pattern>/dist/<Name>.js <scratchpad-dir>
    ```
 
    Exit 0 and `code: IDENTICAL, line for line` is the pass. Every publish so far: BOM added, final newline dropped, LF line endings. The script accounts for both. Exit 1 means the Script differs: show the diff to the user, and don't call the publish done.
 
 ## 7. Record and commit
 
-Add a column to the measurements table in [Components_ODC.md](../../../Components_ODC.md) step 8a ("What we measured on … publishes"): local bytes and lines, published bytes, BOM, final newline, line endings, code. Update the count in the sentence above the table.
+Add a column to the measurements table in [Components_ODC.md](../../../docs/Components_ODC.md) step 8a ("What we measured on … publishes"): local bytes and lines, published bytes, BOM, final newline, line endings, code. Update the count in the sentence above the table.
 
 - **Use the Edit tool on that one table.** Don't use `sed` on `|---|` lines: other tables in the file have the same separator, and one was broken that way once.
 - Don't commit the tenant hostname or app key; the guide uses placeholders.

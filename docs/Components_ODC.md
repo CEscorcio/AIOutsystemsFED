@@ -2,7 +2,7 @@
 
 The ODC half of [Components.md](Components.md). It starts where that page's step 5 ends: you have a pattern with its contract, class, CSS and a green `npm test`. This page puts it into an ODC app as a Block, publishes it, and proves that what's live is what you wrote. The agent does the platform work through the official OutSystems MCP server, with Mentor editing the app.
 
-**Everything here was run end to end on ODC**, on a throwaway app, with the [`greeting-card/`](greeting-card/) example. The measurements in step 8 come from those publishes.
+**Everything here was run end to end on ODC**, on a throwaway app, with the [`greeting-card/`](../components/greeting-card/) example. The measurements in step 8 come from those publishes.
 
 **If your tenant is shared:** Mentor's quota is counted per tenant, so the turns you spend are your colleagues' turns too. Step 6 is designed to keep the number of turns low, and every bug [step 5](Components.md#step-5-prove-it-locally-before-going-to-the-platform) catches locally is a turn you don't spend.
 
@@ -120,7 +120,7 @@ A "published successfully" message on its own is not that confirmation. If a pub
 Every app lists its versioned files at `https://<your-app-url>/moduleservices/moduleinfo`. User Scripts appear as `scripts/<App>.UserScripts.<Name>__<hash>.js`. The repo has a script that finds, downloads and compares it:
 
 ```bash
-bash .claude/skills/publish-pattern-odc/verify-script.sh https://<your-app-url> GreetingCard greeting-card/dist/GreetingCard.js
+bash .claude/skills/publish-pattern-odc/verify-script.sh https://<your-app-url> GreetingCard components/greeting-card/dist/GreetingCard.js
 ```
 
 Or by hand:

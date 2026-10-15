@@ -1,9 +1,13 @@
 {
   "name": "outsystems-front-end-ia",
   "private": true,
-  "description": "Builds every component and joins their bundles into dist/components.js",
+  "description": "Custom front-end components for OutSystems. Each folder in components/ is an npm workspace with its own build and tests.",
   "type": "module",
+  "workspaces": [
+    "components/*"
+  ],
   "scripts": {
-    "build:all": "node build-all.mjs"
+    "test": "npm test --workspaces",
+    "build:all": "node scripts/build-all.mjs"
   }
 }

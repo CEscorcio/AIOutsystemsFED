@@ -66,7 +66,7 @@ The agent reads `dist/GreetingCard.js` and assigns it to the Script's `JavaScrip
 
 ```text
 In module <Module>, add a Script named "GreetingCard" whose JavaScript is the exact
-contents of greeting-card/dist/GreetingCard.js. Set the property directly from the
+contents of components/greeting-card/dist/GreetingCard.js. Set the property directly from the
 file; don't reformat anything. After applying, read the Script back and confirm its
 length and line count match the file. Create nothing else. Merge, don't publish.
 ```

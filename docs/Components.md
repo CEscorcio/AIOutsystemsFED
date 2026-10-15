@@ -7,7 +7,7 @@ How to build your own front-end pattern: written in TypeScript, kept in Git with
 | ODC | [Components_ODC.md](Components_ODC.md): three Mentor turns, publish, verify | **Run end to end** on a throwaway app, several publishes measured |
 | O11 Reactive | [Components_11.md](Components_11.md): three Model API edits reviewed in Service Studio, 1-Click Publish, verify | **Not yet run end to end** |
 
-The CSS rules every pattern follows are in [Style.md](Style.md). The worked example used on this page is [`greeting-card/`](greeting-card/).
+The CSS rules every pattern follows are in [Style.md](Style.md). The worked example used on this page is [`greeting-card/`](../components/greeting-card/).
 
 ## The idea
 
@@ -52,7 +52,7 @@ Nothing in steps 1 to 5 needs an OutSystems environment. Each platform guide lis
 
 ## Step 1: start from the example
 
-Copy [`greeting-card/`](greeting-card/) and rename. With Claude Code, ask for a new pattern (the `new-pattern` skill), or run the script it uses:
+Copy [`greeting-card/`](../components/greeting-card/) and rename. With Claude Code, ask for a new pattern (the `new-pattern` skill), or run the script it uses:
 
 ```bash
 node .claude/skills/new-pattern/scaffold.mjs <Pattern> <Namespace>    # e.g. StatusBadge MyCompany
@@ -164,7 +164,7 @@ Plus three habits that saved us debugging time:
 - **Reuse OutSystems UI classes for anything themed.** The card uses `card` and the button uses `btn btn-primary`, so it follows the app theme. Each of those elements also carries its BEM class (`greeting-card__body`, `greeting-card__button`), which is what your own stylesheet targets. That stylesheet takes every colour, radius, spacing and shadow from OutSystems UI variables, with the base theme's value as fallback for the local preview. See [Style.md](Style.md).
 - **Inject the stylesheet once**, keyed by an element id (`<pattern>-styles`), so two instances on one screen don't duplicate it. Keep the CSS in the bundle rather than in the Block's stylesheet: it's reviewed and tested with the component, and on O11 Block stylesheet edits don't reliably publish through the agent.
 
-See [`GreetingCard.ts`](greeting-card/src/greeting-card/GreetingCard.ts) for the full class (about 80 lines).
+See [`GreetingCard.ts`](../components/greeting-card/src/greeting-card/GreetingCard.ts) for the full class (about 80 lines).
 
 ### What the Block does with it
 
@@ -196,7 +196,7 @@ Commit `dist/` too. It's the artifact that goes to OutSystems, and having it in 
 
 ## Step 5: prove it locally before going to the platform
 
-`npm test` runs `tsc --noEmit`, builds, and then runs [`test/checks.js`](greeting-card/test/checks.js) against the bundle in jsdom:
+`npm test` runs `tsc --noEmit`, builds, and then runs [`test/checks.js`](../components/greeting-card/test/checks.js) against the bundle in jsdom:
 
 ```
 PASS  bundle registers window.ClaudeTest.GreetingCard
@@ -228,7 +228,7 @@ The same file runs in the browser at `preview/index.html?test=1`. Write a check 
 
 ## Making it yours
 
-1. Copy `greeting-card/` with the `new-pattern` skill or `scaffold.mjs`.
+1. Copy `components/greeting-card/` into `components/<your-component>/` with the `new-pattern` skill or `scaffold.mjs`, then run `npm install` at the repo root.
 2. Write `types.ts`: every Input Parameter, every Event and its payload, and the modifiers `ExtendedClass` accepts. Every pattern gets `ExtendedClass` (Text, not mandatory, default `""`), documented as applied by the main container, not the class.
 3. Write the class to the three-member rules and the CSS to [Style.md](Style.md); keep every structural check and add one for each new behaviour; `npm test` until green.
 4. Commit, including `dist/`.
@@ -248,5 +248,5 @@ Not tested here, but the obvious next steps:
 ## References
 
 - [Style.md](Style.md): the CSS rules for every pattern
-- [`greeting-card/`](greeting-card/): the example used on this page
+- [`greeting-card/`](../components/greeting-card/): the example used on this page
 - [AI-Powered Frontend Development in OutSystems O11 and ODC](https://antonio-carvalho.medium.com/ai-powered-frontend-development-in-outsystems-o11-and-odc-4d408fdb4ade): António Carvalho, the source of the technique
