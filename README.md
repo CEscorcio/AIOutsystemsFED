@@ -40,6 +40,8 @@ The repo side is identical. Only the platform side changes:
 
 ## Start here
 
+Building a new component? Follow **[docs/NewComponent.md](docs/NewComponent.md)**, a step-by-step checklist from naming it to proving it live. The pages below are what it links to.
+
 1. **[Components.md](docs/Components.md)**: the idea, the rules every pattern follows, and steps 1 to 5 (contract, class, build, local tests). The same on both platforms.
 2. **[Style.md](docs/Style.md)**: the CSS rules every pattern follows.
    **[AppGuidelines.md](docs/AppGuidelines.md)**: the rules for the screens around them, such as which layout to use.
@@ -93,6 +95,7 @@ docs/
   Components_11.md      steps 6 to 8 on O11 Reactive (not yet run)
   Style.md              CSS rules for every component, both platforms
   AppGuidelines.md      rules for app screens (layout, placeholders, classes), both platforms
+  NewComponent.md       step-by-step checklist for building a new component
 components/             one folder per component, each an npm workspace
   greeting-card/        the example component new ones are copied from
     src/                contract (types.ts), class, styles, global registration

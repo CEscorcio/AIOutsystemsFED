@@ -6,6 +6,7 @@ Custom front-end patterns for OutSystems, built in TypeScript and shipped into a
 
 - **[Style.md](docs/Style.md) governs all pattern CSS.** BEM under the pattern block is the golden rule (Rule 0). Every visual value is an OutSystems UI variable whose fallback is its exact base-theme value. Read Style.md before writing or reviewing any CSS.
 - **[AppGuidelines.md](docs/AppGuidelines.md) governs app screens.** Read it before creating or changing a screen; new screens use `Layouts\LayoutTopMenu`, not `LayoutBlank` (Rule 1), and are created in the `MainFlow` UI flow (Rule 2).
+- **New components follow [NewComponent.md](docs/NewComponent.md)**, step by step; walk the user through it when they start one.
 - **Components live in `components/<name>/`**, one npm workspace each; install once at the repo root. **`components/greeting-card/` is an example**, not the product. New components are copies of it (use the `new-pattern` skill). Don't add features to it unless asked. `npm run build:all` ships every folder in `components/`, the example included.
 - **`npm test` must be green** (at the repo root for every component, or `npm test -w components/<name>` for one) before anything goes to OutSystems. When a test fails, fix the code, never the test, unless the rule itself changed in Style.md.
 - **Every new Style.md rule that a script can check gets a check** in `test/checks.js`. Add a variable you start using to `OSUI_TOKENS` with its base-theme value.
