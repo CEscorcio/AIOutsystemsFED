@@ -71,6 +71,14 @@ npm test        # typecheck, build, then the checks in jsdom
 
 Then open `greeting-card/preview/index.html` in a browser to see the component, or `preview/index.html?test=1` to run the same checks there. No OutSystems environment is needed for any of this.
 
+To build **every** component into one file, run this from the repo root:
+
+```bash
+npm run build:all
+```
+
+It runs each component's `npm test`, stops at the first failure, and writes `dist/components.js`: a header with the build timestamp and the list of bundles it contains, then each component's bundle in alphabetical order. Upload that single file as one Script instead of one Script per component. Add `-- --no-test` to skip the tests during local experiments, never for something going to OutSystems.
+
 To start your own pattern, copy `greeting-card/` and rename four things consistently: the global namespace (`ClaudeTest`), the class, the output file, and the BEM block (`greeting-card`). `node .claude/skills/new-pattern/scaffold.mjs <Pattern> <Namespace>` does all four.
 
 ## Repository layout
@@ -83,6 +91,9 @@ Components.md           the idea, the rules and steps 1 to 5, both platforms
 Components_ODC.md       steps 6 to 8 on ODC (run end to end)
 Components_11.md        steps 6 to 8 on O11 Reactive (not yet run)
 CLAUDE.md               standing rules for the AI agent working in this repo
+package.json            the build:all command (no dependencies)
+build-all.mjs           builds every component and joins the bundles into dist/components.js
+dist/components.js      all components in one file, with the build timestamp at the top
 .claude/skills/
   new-pattern/          copy greeting-card and rename it consistently (scaffold.mjs)
   publish-pattern-odc/  republish a pattern's Script to ODC and verify it (verify-script.sh)

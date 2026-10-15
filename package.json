@@ -1,0 +1,9 @@
+{
+  "name": "outsystems-front-end-ia",
+  "private": true,
+  "description": "Builds every component and joins their bundles into dist/components.js",
+  "type": "module",
+  "scripts": {
+    "build:all": "node build-all.mjs"
+  }
+}

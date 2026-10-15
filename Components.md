@@ -192,6 +192,8 @@ Not minifying is the point: step 8 compares the published Script with this file 
 
 Commit `dist/` too. It's the artifact that goes to OutSystems, and having it in Git is what lets you answer "is what's live what we reviewed?". Keep `* text=auto eol=lf` in `.gitattributes`: Git for Windows converts files to CRLF on checkout by default, which would make every comparison report a difference that isn't really there. Keep the bundle ASCII-only too; content with escape sequences has come back altered from a publish.
 
+**Several components, one file.** When an app uses more than one component, `npm run build:all` at the repo root runs every component's `npm test` and joins their bundles into `dist/components.js`. The file starts with a header giving the build timestamp (UTC) and the bundles it contains, so the published Script says when it was built and from what. It declares `"use strict"` once at the top, then has each component's bundle in alphabetical order. Ship it as one Script (for example `Components`) instead of one Script per component, and check it after publishing the same way as a single bundle: the published Script must match `dist/components.js`. Every build gets a new timestamp, so rebuild just before uploading and commit the file you uploaded.
+
 ## Step 5: prove it locally before going to the platform
 
 `npm test` runs `tsc --noEmit`, builds, and then runs [`test/checks.js`](greeting-card/test/checks.js) against the bundle in jsdom:
