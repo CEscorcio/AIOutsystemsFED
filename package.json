@@ -7,8 +7,8 @@
 		"components/*"
 	],
 	"scripts": {
-		"lint": "eslint . && stylelint \"components/*/style/**/*.css\" && prettier --check .",
-		"format": "prettier --write . && stylelint \"components/*/style/**/*.css\" --fix && eslint . --fix",
+		"lint": "eslint . && stylelint \"components/*/style/**/*.{css,scss}\" && prettier --check .",
+		"format": "prettier --write . && stylelint \"components/*/style/**/*.{css,scss}\" --fix && eslint . --fix",
 		"test": "npm run lint && npm test --workspaces",
 		"build:all": "node scripts/build-all.mjs"
 	},
@@ -21,6 +21,7 @@
 		"prettier": "^3.9.10",
 		"stylelint": "^17.16.0",
 		"stylelint-config-standard": "^40.0.0",
+		"stylelint-config-standard-scss": "^17.0.0",
 		"stylelint-order": "^8.1.2",
 		"typescript-eslint": "^8.72.0"
 	}

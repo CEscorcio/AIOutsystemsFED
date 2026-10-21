@@ -34,7 +34,7 @@ Every CSS class the pattern owns follows BEM, with the pattern class as the bloc
 - **States use `--is-*`**, as OutSystems UI does (`--is-open`, `--is-disabled`). The component adds and removes them; screens never set them.
 - **No abbreviations or prefixes** (`gc-title`). The block name is what keeps classes unique.
 - **The block name must not be an OutSystems UI class.** Don't name a pattern `card`, `tabs` or `popup`; its elements would collide with the base theme.
-- **Files follow the block too.** The pattern's stylesheet is `style/<pattern>.css`.
+- **Files follow the block too.** The pattern's stylesheet is `style/<pattern>.scss`.
 
 ## Rule 1: OutSystems UI classes go next to the BEM class, never instead of it
 
@@ -134,7 +134,7 @@ Use `.is-rtl .greeting-card__… { … }` only for what logical properties can't
 
 | CSS | Where it goes |
 |---|---|
-| The pattern's own look | `components/<pattern>/style/<pattern>.css`. The build copies it to `dist/<Name>.css`, and `npm run build:all` joins every pattern's stylesheet into `dist/components.css`, which starts with the build timestamp. The app loads it from its theme stylesheet |
+| The pattern's own look | `components/<pattern>/style/<pattern>.scss`. The build compiles it to `dist/<Name>.css` ([Rule 8](#rule-8-scss-grouping-not-values)), and `npm run build:all` joins every pattern's stylesheet into `dist/components.css`, which starts with the build timestamp. The app loads it from its theme stylesheet |
 | A variant one screen needs | A modifier in the pattern's stylesheet, chosen by the screen through `ExtendedClass` |
 | A one-off adjustment on one screen | An OutSystems UI utility class in `ExtendedClass` (`margin-top-m`); otherwise a screen class targeting `.<the-screen-class> .greeting-card__…` in the screen's stylesheet |
 | Brand colours, fonts, spacing for the whole app | The app's theme: change the OutSystems UI variables there, and every pattern follows |
@@ -143,6 +143,37 @@ Use `.is-rtl .greeting-card__… { … }` only for what logical properties can't
 - **Put it in the theme stylesheet, not the Block's.** On O11, edits to a non-empty Block stylesheet don't reliably reach the published CSS when made through the Service Studio MCP, while theme stylesheet edits did publish every time we tried. Paste `dist/components.css` into the theme stylesheet as one marked section, after Theme Editor's own block, and replace that section whole on each release. (Not yet done with a component stylesheet; record what happens in [Components_11.md](Components_11.md#the-stylesheet) the first time.)
 - **Ship the stylesheet and the Script together.** A release is one `npm run build:all`: upload `dist/components.js` and `dist/components.css` from the same build, so their timestamps match.
 - **Document every modifier** in `types.ts`, next to `ExtendedClass`. Modifiers are the pattern's public styling API; an undocumented one is a private class a screen shouldn't rely on.
+
+## Rule 8: SCSS, grouping not values
+
+A pattern's styles are written in SCSS (`style/<pattern>.scss`). The component's build compiles them with Dart Sass and formats the result with the repo's Prettier config, so `dist/<Name>.css` is flat CSS that reads like hand-written CSS. Plain `.css` files in `style/` still work; the build joins them with the compiled ones in alphabetical order.
+
+SCSS is there to group a block's rules in one place, nothing more:
+
+```scss
+.greeting-card {
+	&__body {
+		padding: var(--space-base, 16px);
+
+		&:hover { … }              // .greeting-card__body:hover
+	}
+
+	&--compact &__body { … }       // .greeting-card--compact .greeting-card__body
+	.phone &__button { … }         // .phone .greeting-card__button
+
+	@media (prefers-reduced-motion: reduce) {
+		&__body { transition: none; }
+	}
+}
+```
+
+- **Every compiled selector still follows Rule 3.** Nest elements under the block with `&__element`, pseudo-classes with `&:hover`, and write a prefix as `&--modifier &__element` or `.phone &__element`. Never nest an element in another element: `&__title` inside `&__text` compiles to `greeting-card__text__title`, which breaks "elements are flat".
+- **Don't style the block itself.** `.greeting-card { … }` only groups; a declaration on it would land on the Block's main container, which OutSystems owns.
+- **Values are OutSystems UI variables, written out.** A Sass variable, function or calculation compiles to a fixed value that the app's theme can't change, so none of them produce a colour, space, radius, shadow or font value. `var(--space-base, 16px)` stays in the source as it is.
+- **One reduced-motion `@media` at block level**, as above, so the compiled CSS has one override block.
+- **No `@extend`** (it merges selectors from distant rules into comma lists that are hard to trace back) **and no `@import`** (deprecated; use `@use`). Mixins shared inside a pattern go in a partial, `style/_<name>.scss`, loaded with `@use`. Don't share partials between patterns; each pattern stays a folder you can copy.
+
+**How it's checked.** stylelint lints the SCSS source as you type (`stylelint-config-standard-scss` plus the rules above). It can't resolve `&__suffix` class names, so a badly named nested element is only caught by `npm test`, which runs every check below on the compiled `dist/<Name>.css`. To find where a class is styled, search for its suffix (`__title`) in `style/`, or read the full names in `dist/<Name>.css`.
 
 ## What `npm test` checks
 
@@ -158,6 +189,8 @@ Use `.is-rtl .greeting-card__… { … }` only for what logical properties can't
 | No focus styles, no outline removal; a `prefers-reduced-motion` override when there are transitions or animations | 6 |
 | The component adds no `<style>` or `<link>` to the page; its stylesheet is ASCII-only and has rules for the block's elements | 7 |
 
+The checks read the compiled CSS, so they hold whether the source is SCSS or plain CSS.
+
 `npm run build:all` adds a smoke test of the combined files before writing them: `components.js` loads and registers every component's class, and `components.css` has rules for every component and none outside their blocks. If any of that fails, nothing is written.
 
 What stays for review: semantic token choice, contrast, hover-only interactions, and whether a modifier belongs in the pattern at all. The tests read every OutSystems UI variable and its value from the installed `outsystems-ui` package (`dist/O11.OutSystemsUI.css`, pinned in the root `package.json`), so there's no list to maintain. Many of these rules are also checked by stylelint (`.stylelintrc.json`) as you type, in an editor with the stylelint extension.
@@ -172,5 +205,6 @@ What stays for review: semantic token choice, contrast, hover-only interactions,
 6. Widths switch on `.phone` / `.tablet`, not media queries.
 7. Logical properties for anything left or right.
 8. No focus styles; a reduced-motion override for every transition.
-9. CSS in `style/<pattern>.css`, none in the JavaScript; modifiers documented in `types.ts`.
-10. `npm test` green.
+9. Styles in `style/<pattern>.scss`, none in the JavaScript; modifiers documented in `types.ts`.
+10. SCSS only groups rules: elements flat, no Sass variables for values, no `@extend`.
+11. `npm test` green.

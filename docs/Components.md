@@ -59,8 +59,8 @@ The layout:
 src/index.ts                         registers window.<Namespace>.<Component>
 src/greeting-card/types.ts           the contract with the Block
 src/greeting-card/GreetingCard.ts    the class
-style/greeting-card.css              the component's CSS, shipped as its own stylesheet
-build.mjs                            esbuild -> dist/GreetingCard.js; style/ -> dist/GreetingCard.css
+style/greeting-card.scss             the component's styles (SCSS), shipped as their own stylesheet
+build.mjs                            esbuild -> dist/GreetingCard.js; Dart Sass, style/ -> dist/GreetingCard.css
 test/checks.js                       scripted checks, shared by browser and Node
 test/run.mjs                         runs the checks in jsdom (npm test)
 preview/index.html                   local page; ?test=1 runs the checks in the browser
@@ -157,7 +157,7 @@ Plus three habits that saved us debugging time:
 
 - **Platform data enters the DOM through `textContent`, never `innerHTML`.** One of the checks feeds `<img src=x onerror=alert(1)>` as the name and asserts it shows up as text.
 - **Reuse OutSystems UI classes for anything themed.** The card uses `card` and the button uses `btn btn-primary`, so it follows the app theme. Each of those elements also carries its BEM class (`greeting-card__body`, `greeting-card__button`), which is what your own stylesheet targets. That stylesheet takes every colour, radius, spacing and shadow from OutSystems UI variables, with the base theme's value as fallback for the local preview. See [Style.md](Style.md).
-- **Keep the CSS out of the class.** It lives in `style/<pattern>.css` and ships as a stylesheet of its own (`dist/<Name>.css`), so the class never injects styles and two instances on one screen can't duplicate them. It goes in the app's theme stylesheet, not the Block's: on O11, Block stylesheet edits don't reliably publish through the agent. See [Style.md, Rule 7](Style.md#rule-7-where-a-patterns-css-lives).
+- **Keep the CSS out of the class.** It lives in `style/<pattern>.scss` and ships as a stylesheet of its own (`dist/<Name>.css`), so the class never injects styles and two instances on one screen can't duplicate them. It goes in the app's theme stylesheet, not the Block's: on O11, Block stylesheet edits don't reliably publish through the agent. See [Style.md, Rule 7](Style.md#rule-7-where-a-patterns-css-lives).
 
 See [`GreetingCard.ts`](../components/greeting-card/src/greeting-card/GreetingCard.ts) for the full class (about 80 lines).
 
@@ -187,7 +187,7 @@ Not minifying is the point: step 8 compares the published Script with this file 
 
 Commit `dist/` too. It's the artifact that goes to OutSystems, and having it in Git is what lets you answer "is what's live what we reviewed?". Keep `* text=auto eol=lf` in `.gitattributes`: Git for Windows converts files to CRLF on checkout by default, which would make every comparison report a difference that isn't really there. Keep the bundle ASCII-only too; content with escape sequences has come back altered from a publish.
 
-Each component's build also writes `dist/<Name>.css` from its `style/` folder: every `.css` file there, joined in alphabetical order.
+Each component's build also writes `dist/<Name>.css` from its `style/` folder: every `.scss` file there compiled with Dart Sass and formatted with Prettier, and every `.css` file as it is, joined in alphabetical order. Partials (`_name.scss`) are only included through `@use`. See [Style.md, Rule 8](Style.md#rule-8-scss-grouping-not-values).
 
 **Several components, one release.** `npm run build:all` at the repo root runs every component's `npm test` and writes two files, each starting with a header that gives the same version, build timestamp (UTC) and contents. The **version** is `<ISO year>.<ISO week>.<N>` from the build's UTC date, with no padding (for example `2026.42.1`). Weeks follow ISO 8601: they start on Monday, and the week's Thursday decides its year, so 31 Dec 2029 is `2030.1.N`. N counts committed releases within the week: one more than the version in the last committed `dist/components.js` if that's from the same week, otherwise 1. Test builds don't use up numbers, which is why the files are committed only when they're uploaded. The two files:
 

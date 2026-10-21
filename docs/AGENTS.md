@@ -11,7 +11,7 @@ Custom front-end patterns for **OutSystems 11** (Reactive Web), built in TypeScr
 - **`npm test` must be green** (at the repo root for every component, or `npm test -w components/<name>` for one) before anything goes to OutSystems. When a test fails, fix the code, never the test, unless the rule itself changed in Style.md.
 - **Every new Style.md rule that a script can check gets a check** in `test/checks.js`. Base-theme values come from the installed `outsystems-ui` package; don't hand-copy them.
 - **`dist/` is committed.** It's what goes to OutSystems; rebuild it with `npm test`, never edit it by hand.
-- **A component's CSS lives in `style/<name>.css` and ships as its own stylesheet** (`dist/<Name>.css`, in the app's theme stylesheet), never from the JavaScript. See Style.md, Rule 7.
+- **A component's CSS is written in SCSS in `style/<name>.scss` and ships compiled as its own stylesheet** (`dist/<Name>.css`, in the app's theme stylesheet), never from the JavaScript. See Style.md, Rules 7 and 8. SCSS groups a block's rules; it never computes a visual value.
 - **`dist/components.js` and `dist/components.css` (from `npm run build:all`) are committed only when they're uploaded.** Every build writes a new timestamp, so commit the exact files that went to OutSystems, together with where they went, and leave other builds uncommitted. Upload both from the same build. Their `Version: <ISO year>.<ISO week>.<N>` (UTC) takes N from the last committed `dist/components.js`, so committing a build that wasn't uploaded uses up a release number; never edit the version by hand.
 - **Line endings are LF** (`.gitattributes`). Keep bundles ASCII-only, since non-ASCII content has come back altered from a publish.
 

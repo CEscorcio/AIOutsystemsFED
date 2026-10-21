@@ -43,7 +43,7 @@ npm test -w components/status-badge          # the copy passes all its checks
 
 > **With Claude Code:** "Create a StatusBadge component in the MyCompany namespace."
 
-This copies `components/greeting-card/` to `components/status-badge/` and renames the class, BEM block, stylesheet (`style/status-badge.css`), namespace, bundle and test names.
+This copies `components/greeting-card/` to `components/status-badge/` and renames the class, BEM block, stylesheet (`style/status-badge.scss`), namespace, bundle and test names.
 
 **Done when:** `npm test -w components/status-badge` is green, and this prints nothing:
 
@@ -86,7 +86,7 @@ Details: [Components.md, step 3](Components.md#step-3-write-the-class-to-the-bri
 
 ## Step 5: write the CSS
 
-Edit `components/status-badge/style/status-badge.css`, following [Style.md](Style.md). The build turns the files in `style/` into `dist/StatusBadge.css`, which ships as a stylesheet of its own; the class never adds CSS. In short:
+Edit `components/status-badge/style/status-badge.scss`, following [Style.md](Style.md). The build compiles the files in `style/` into `dist/StatusBadge.css`, which ships as a stylesheet of its own; the class never adds CSS. In short:
 
 - one BEM class per selector (`.status-badge__label`); the only allowed prefixes are a modifier of the block (`.status-badge--compact`) or an OutSystems UI context class (`.phone`, `.is-rtl`, …)
 - every colour, space, radius, border, shadow and font value is an OutSystems UI variable, with its exact base-theme value as fallback: `var(--space-base, 16px)`
@@ -94,6 +94,7 @@ Edit `components/status-badge/style/status-badge.css`, following [Style.md](Styl
 - `padding-inline-start`, not `padding-left`
 - no focus styles; a `prefers-reduced-motion` override for any transition
 - no `!important`
+- SCSS only groups the block's rules (`&__label`, `&:hover`, `&--compact &__label`, `.phone &__label`); values are still OutSystems UI variables, never Sass variables, and there's no `@extend` ([Rule 8](Style.md#rule-8-scss-grouping-not-values))
 
 The tests read every OutSystems UI variable and its value from the installed `outsystems-ui` package (`dist/O11.OutSystemsUI.css`, pinned in the root `package.json`), so there's no list to maintain. The values are in [Style.md's variable table](Style.md#the-variables-we-use-and-their-base-values).
 

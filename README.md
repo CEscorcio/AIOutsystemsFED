@@ -120,7 +120,7 @@ AIOutsystemsFED/
 ├── components/                 # One folder per component (npm workspace)
 │   └── greeting-card/          # The example new components are copied from
 │       ├── src/                # TypeScript: contract (types.ts), class, registration
-│       ├── style/              # The component's CSS
+│       ├── style/              # The component's styles (SCSS)
 │       ├── test/               # Checks run in jsdom and in the browser
 │       ├── preview/            # Local preview page
 │       └── dist/               # Built GreetingCard.js and GreetingCard.css
@@ -145,23 +145,24 @@ AIOutsystemsFED/
 ## Considerations
 
 1. **OutSystems UI is the base theme.** Every colour, space, radius, shadow and font value in a component's CSS is an OutSystems UI variable, with its base-theme value as fallback. The `outsystems-ui` package is pinned to the version the O11 environment runs (2.30.0); the tests read its tokens, and the preview loads its stylesheet.
-2. **Components never inject CSS.** Each component's styles live in `style/<name>.css` and ship as a stylesheet of their own, in the module's theme stylesheet. Don't use the Block's stylesheet: edits to it don't reliably publish through the agent.
+2. **Components never inject CSS.** Each component's styles live in `style/<name>.scss` and ship as a stylesheet of their own, in the module's theme stylesheet. Don't use the Block's stylesheet: edits to it don't reliably publish through the agent.
 3. **The JS bundle isn't minified on purpose,** so the copy OutSystems serves can be compared with `dist/` line for line. Keep bundles ASCII-only.
 4. **Class names are BEM** under the component's block (`greeting-card__title`, `greeting-card--compact`). stylelint enforces it, together with the other rules in [Style.md](docs/Style.md).
+5. **Styles are SCSS, compiled to plain CSS.** Each component's build compiles `style/*.scss` with Dart Sass and formats it with Prettier, so `dist/<Name>.css` reads like hand-written CSS (converting `greeting-card` produced a byte-identical file). SCSS only groups a block's rules: visual values stay OutSystems UI variables, never Sass variables, and `@extend` is not allowed ([Style.md, Rule 8](docs/Style.md#rule-8-scss-grouping-not-values)).
 
 ## Limitations
 
 1. **The OutSystems side hasn't been run end to end yet** for a component (Script, stylesheet, Block and publish through Service Studio). [Components_11.md](docs/Components_11.md) marks those steps as not verified; record what happens the first time.
 2. **The preview page can't run the CSS checks.** A page opened from `file://` can't read a stylesheet's text, so those checks show as skipped there; `npm test` runs them.
-3. **Prettier prints a warning on every run** about the `css` / `scss` `remove_blank_lines` entries in `.prettierrc.json`. They aren't Prettier options and are ignored.
-4. **`npm audit` reports a "high" advisory in `braces`,** a dependency of stylelint. No fixed version exists, and it only applies to malicious file patterns, which this repo doesn't have.
-5. **The example ships too.** `dist/components.js` and `.css` include every folder in `components/`, `greeting-card` included, until it's removed or moved.
+3. **stylelint can't check nested BEM names** (`&__title`) in SCSS. `npm test` catches them in the compiled CSS instead.
+4. **Prettier prints a warning on every run** about the `css` / `scss` `remove_blank_lines` entries in `.prettierrc.json`. They aren't Prettier options and are ignored.
+5. **`npm audit` reports a "high" advisory in `braces`,** a dependency of stylelint. No fixed version exists, and it only applies to malicious file patterns, which this repo doesn't have.
+6. **The example ships too.** `dist/components.js` and `.css` include every folder in `components/`, `greeting-card` included, until it's removed or moved.
 
 ## Next Steps
 
 1. Run the first component end to end in OutSystems 11 and record the results in [Components_11.md](docs/Components_11.md)
 2. Replace or move the `greeting-card` example once real components exist
-3. Evaluate SCSS for component styles
 4. Evaluate automated release notes on commit
 
 ## Notes

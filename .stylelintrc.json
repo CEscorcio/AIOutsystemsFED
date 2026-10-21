@@ -31,5 +31,14 @@
 		"color-function-alias-notation": null,
 		"alpha-value-notation": null,
 		"comment-empty-line-before": null
-	}
+	},
+	"overrides": [
+		{
+			"files": ["**/*.scss"],
+			"extends": ["stylelint-config-standard-scss"],
+			"rules": {
+				"at-rule-disallowed-list": [["extend", "import"], { "message": "No @extend, and @use instead of @import (docs/Style.md, Rule 8)" }]
+			}
+		}
+	]
 }
