@@ -8,8 +8,6 @@ The CSS rules every pattern follows are in [Style.md](Style.md). The worked exam
 
 Don't try to make Web Components work natively in OutSystems. Use the **Block as a thin bridge** instead: it receives data through Input Parameters, raises Events, and in its lifecycle handlers it creates and drives an instance of a class that lives in a JavaScript bundle built outside the platform. The Block is the small part you see in Studio; the component, with its types, build and tests, is ordinary high-code that evolves in Git and can change without republishing the Block as long as the contract holds.
 
-The technique comes from [*AI-Powered Frontend Development in OutSystems O11 and ODC*](https://antonio-carvalho.medium.com/ai-powered-frontend-development-in-outsystems-o11-and-odc-4d408fdb4ade) by **António Carvalho**.
-
 ## What you end up with
 
 ```mermaid
@@ -251,4 +249,3 @@ Not tested here, but the obvious next steps:
 
 - [Style.md](Style.md): the CSS rules for every pattern
 - [`greeting-card/`](../../templates/greeting-card/): the example used on this page
-- [AI-Powered Frontend Development in OutSystems O11 and ODC](https://antonio-carvalho.medium.com/ai-powered-frontend-development-in-outsystems-o11-and-odc-4d408fdb4ade): António Carvalho, the source of the technique

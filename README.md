@@ -264,6 +264,6 @@ npm install lodash@latest
 
 Keep `outsystems-ui` pinned to the version your OutSystems 11 environment runs, rather than updating it to the latest.
 
-## Credits
+## Third-party code
 
-The Block-as-bridge technique comes from [_AI-Powered Frontend Development in OutSystems O11 and ODC_](https://antonio-carvalho.medium.com/ai-powered-frontend-development-in-outsystems-o11-and-odc-4d408fdb4ade) by António Carvalho. The example reuses OutSystems UI class names and variables (BSD-3-Clause) and copies none of its code.
+The example reuses OutSystems UI class names and variables (BSD-3-Clause) and copies none of its code.

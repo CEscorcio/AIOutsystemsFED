@@ -2,7 +2,7 @@
 	"name": "greeting-card",
 	"version": "1.0.0",
 	"private": true,
-	"description": "TypeScript component driven from an OutSystems Block (Block-as-bridge POC)",
+	"description": "Example component: a TypeScript class driven from an OutSystems Block. The template new components are copied from.",
 	"scripts": {
 		"build": "node build.mjs",
 		"typecheck": "tsc --noEmit",
