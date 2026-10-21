@@ -226,8 +226,14 @@ const intro = [
 	'Release notes for `dist/components.js` and `dist/components.css`, newest first. The pre-commit hook adds a section when a commit includes a new version ([scripts/release-notes.mjs](scripts/release-notes.mjs)); the commit message says where the release was uploaded.',
 	'',
 ].join('\n');
-const changelog = existsSync(changelogPath) ? readFileSync(changelogPath, 'utf8').replace(/\r\n/g, '\n') : intro;
-if (new RegExp(`^## ${next.version.replace(/\./g, '\\.')}\\b`, 'm').test(changelog)) {
+let changelog = intro;
+try {
+	changelog = readFileSync(changelogPath, 'utf8').replace(/\r\n/g, '\n');
+} catch (e) {
+	if (e.code !== 'ENOENT') throw e;
+}
+// Is this version's section already there (a retried commit)? Compared line by line, no regex.
+if (changelog.split('\n').some((line) => line === `## ${next.version}` || line.startsWith(`## ${next.version} `))) {
 	console.log(`release-notes: CHANGELOG.md already has ${next.version}`);
 } else {
 	const at = changelog.search(/^## /m);

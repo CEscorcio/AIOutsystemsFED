@@ -77,7 +77,8 @@ export function contractChanges(previous, current) {
 }
 
 const short = (sha) => (sha ? sha.slice(0, 12) : '');
-const cell = (text) => String(text).replace(/\|/g, '\\|').replace(/\n/g, ' ');
+// A Markdown table cell: backslashes first, then pipes, so neither can end the cell early.
+const cell = (text) => String(text).replace(/\\/g, '\\\\').replace(/\|/g, '\\|').replace(/\r?\n/g, ' ');
 
 export function renderPage(releases) {
 	const newest = [...releases].reverse();
