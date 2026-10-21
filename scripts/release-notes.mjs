@@ -111,11 +111,18 @@ if (!next) {
 }
 
 // The previous release: the last commit up to tip that changed dist/components.js
-// to a versioned build (early test builds were committed without a version).
+// to a versioned build (early test builds were committed without a version). A
+// commit that deleted it ends the search: that's npm run init starting a new
+// project, and the blueprint's releases before it aren't this project's.
 let base = null;
 let oldJs = null;
+let projectStart = null;
 for (const rev of tip ? git('log', '--format=%H', tip, '--', 'dist/components.js').split('\n').filter(Boolean) : []) {
 	const text = show(`${rev}:dist/components.js`);
+	if (text === null) {
+		projectStart = rev;
+		break;
+	}
 	if (parseHeader(text)) {
 		[base, oldJs] = [rev, text];
 		break;
@@ -177,7 +184,8 @@ if (unchanged.length) componentLines.push(`- Unchanged: ${unchanged.join(', ')}`
 // before the components/ folder existed).
 const commitLines = { components: [], other: [] };
 if (tip) {
-	const range = base ? `${base}..${tip}` : tip;
+	const from = base || projectStart;
+	const range = from ? `${from}..${tip}` : tip;
 	const log = git('log', '--no-merges', '--format=%x1e%h%x1f%s', '--name-only', range);
 	for (const entry of log.split('\x1e').filter((e) => e.trim())) {
 		const [first, ...files] = entry.trim().split('\n');
