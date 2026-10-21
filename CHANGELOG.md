@@ -2,6 +2,24 @@
 
 Release notes for `dist/components.js` and `dist/components.css`, newest first. The pre-commit hook adds a section when a commit includes a new version ([scripts/release-notes.mjs](scripts/release-notes.mjs)); the commit message says where the release was uploaded.
 
+## 2026.43.1 (2026-10-21)
+
+Built 2026-10-21T11:22:39.077Z. Previous release: 2026.42.1.
+
+### Components
+
+- **greeting-card**: CSS changed
+
+### Component commits since 2026.42.1
+
+- Write component styles in SCSS, compiled to the same flat CSS (66b05c7)
+- Add ESLint, Prettier, stylelint and the outsystems-ui package (849b117)
+
+### Tooling and docs since 2026.42.1
+
+- Add release notes to CHANGELOG.md when a release is committed (64ee71f)
+- Rename the project to AIOutsystemsFED (1d9871e)
+
 ## 2026.42.1 (2026-10-15)
 
 Built 2026-10-15T11:18:37.009Z. First release.

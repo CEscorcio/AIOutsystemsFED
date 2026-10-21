@@ -1,7 +1,7 @@
 /*!
- * Version: 2026.42.1
- * OutSystems front-end components
- * Built: 2026-10-15T11:18:37.009Z
+ * Version: 2026.43.1
+ * AIOutsystemsFED components
+ * Built: 2026-10-21T11:22:39.077Z
  * Contains:
  *   components/greeting-card/dist/GreetingCard.js
  */
