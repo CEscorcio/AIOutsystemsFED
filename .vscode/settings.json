@@ -1,10 +1,12 @@
 {
 	"editor.defaultFormatter": "esbenp.prettier-vscode",
 	"editor.formatOnSave": true,
-	"stylelint.validate": ["css"],
+	"stylelint.validate": ["css", "scss"],
 	"css.validate": false,
 	"editor.codeActionsOnSave": {
 		"source.fixAll.eslint": "explicit",
 		"source.fixAll.stylelint": "explicit"
-	}
+	},
+	"chat.useAgentsMdFile": true,
+	"github.copilot.chat.codeGeneration.useInstructionFiles": true
 }

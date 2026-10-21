@@ -1,0 +1,13 @@
+{
+	// Codespaces / Dev Containers: everything that happens in the repo (build, tests,
+	// generators, release records, Copilot). Not the OutSystems side: Service Studio
+	// and its MCP server only run on a Windows machine (docs/guide/AITools.md).
+	"name": "OutSystems 11 component factory",
+	"image": "mcr.microsoft.com/devcontainers/javascript-node:22-bookworm",
+	"postCreateCommand": "npm ci && npm test",
+	"customizations": {
+		"vscode": {
+			"extensions": ["dbaeumer.vscode-eslint", "stylelint.vscode-stylelint", "esbenp.prettier-vscode", "github.copilot", "github.copilot-chat"]
+		}
+	}
+}

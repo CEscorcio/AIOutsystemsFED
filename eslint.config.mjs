@@ -13,6 +13,21 @@ export default tseslint.config(
 		files: ['components/*/src/**/*.ts', 'templates/*/src/**/*.ts'],
 		extends: [tseslint.configs.recommended],
 		languageOptions: { globals: globals.browser },
+		// Security: platform data enters the DOM through textContent only (Components.md, step 3).
+		rules: {
+			'no-restricted-properties': [
+				'error',
+				...['innerHTML', 'outerHTML', 'insertAdjacentHTML', 'createContextualFragment'].map((property) => ({
+					property,
+					message: 'Builds HTML from strings, so OutSystems data could inject markup. Create elements and set textContent instead.',
+				})),
+				{ object: 'document', property: 'write', message: 'Never document.write. Create elements and set textContent.' },
+				{ object: 'document', property: 'writeln', message: 'Never document.writeln. Create elements and set textContent.' },
+			],
+			'no-eval': 'error',
+			'no-implied-eval': 'error',
+			'no-new-func': 'error',
+		},
 	},
 	// Build scripts, test runners and repo scripts: Node ES modules.
 	{

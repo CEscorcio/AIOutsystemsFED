@@ -1,12 +1,14 @@
 # Working in this repo
 
-Custom front-end patterns for **OutSystems 11** (Reactive Web), built in TypeScript and shipped into a module as a Block that bridges to the bundle. [Components.md](guide/Components.md) covers the idea, the rules and steps 1 to 5 (everything done in the repo); [Components_11.md](guide/Components_11.md) covers steps 6 to 8 in OutSystems 11 through Service Studio's MCP server. [README.md](../README.md) has the overview. This repo targets O11 only; don't add ODC content.
+Custom front-end patterns for **OutSystems 11** (Reactive Web), built in TypeScript and shipped into a module as a Block that bridges to the bundle. [Components.md](docs/guide/Components.md) covers the idea, the rules and steps 1 to 5 (everything done in the repo); [Components_11.md](docs/guide/Components_11.md) covers steps 6 to 8 in OutSystems 11 through Service Studio's MCP server. [README.md](README.md) has the overview. This repo targets O11 only; don't add ODC content.
+
+Every AI tool reads this file, directly or through `CLAUDE.md` and `.github/copilot-instructions.md`; [docs/guide/AITools.md](docs/guide/AITools.md) says which reads what. Change the rules here, not in those files.
 
 ## Standing rules
 
-- **[Style.md](guide/Style.md) governs all pattern CSS.** BEM under the pattern block is the golden rule (Rule 0). Every visual value is an OutSystems UI variable whose fallback is its exact base-theme value. Read Style.md before writing or reviewing any CSS.
-- **[AppGuidelines.md](guide/AppGuidelines.md) governs app screens.** Read it before creating or changing a screen; new screens use `Layouts\LayoutTopMenu`, not `LayoutBlank` (Rule 1), and are created in the `MainFlow` UI flow (Rule 2).
-- **New components follow [NewComponent.md](guide/NewComponent.md)**, step by step; walk the user through it when they start one.
+- **[Style.md](docs/guide/Style.md) governs all pattern CSS.** BEM under the pattern block is the golden rule (Rule 0). Every visual value is an OutSystems UI variable whose fallback is its exact base-theme value. Read Style.md before writing or reviewing any CSS.
+- **[AppGuidelines.md](docs/guide/AppGuidelines.md) governs app screens.** Read it before creating or changing a screen; new screens use `Layouts\LayoutTopMenu`, not `LayoutBlank` (Rule 1), and are created in the `MainFlow` UI flow (Rule 2).
+- **New components follow [NewComponent.md](docs/guide/NewComponent.md)**, step by step; walk the user through it when they start one.
 - **Components live in `components/<name>/`**, one npm workspace each; install once at the repo root. **`templates/greeting-card/` is the example**, not the product. New components are copies of it (use the `new-pattern` skill). Don't add features to it unless asked. `npm run build:all` ships every folder in `components/`; `templates/` never ships.
 - **`npm test` must be green** (at the repo root for every component, or `npm test -w components/<name>` for one) before anything goes to OutSystems. When a test fails, fix the code, never the test, unless the rule itself changed in Style.md.
 - **Every new Style.md rule that a script can check gets a check** in `test/checks.js`. Base-theme values come from the installed `outsystems-ui` package; don't hand-copy them.
@@ -21,7 +23,7 @@ Custom front-end patterns for **OutSystems 11** (Reactive Web), built in TypeScr
 - **Generate the OutSystems side; don't write it.** The Script, the theme section, a new Block and its harness come from `npm run o11:generate` (Components_11.md, "Generated lambdas"). Pass the generated files to `applyModelApiCode` unchanged, run each probe, and compare with the values the generator printed.
 - **A release is recorded before it's committed**: `npm run release:record` writes `releases/<version>.json` with a description, the environment label (never a hostname), the module and what was verified. The hook refuses a release commit without it. Never edit a record's files or hashes by hand, and never edit `docs/project/Releases.md`; it's generated.
 - **`component.json` is the contract.** Change it together with `types.ts` and the CSS; `npm test` checks they agree.
-- **A component's platform side has been run once** (2026-10-21), all but the browser check. Follow Components_11.md; what the platform does to uploaded files and the Model API details it needs are in [PlatformNotes.md](guide/PlatformNotes.md). Record anything new you measure there.
+- **A component's platform side has been run once** (2026-10-21), all but the browser check. Follow Components_11.md; what the platform does to uploaded files and the Model API details it needs are in [PlatformNotes.md](docs/guide/PlatformNotes.md). Record anything new you measure there.
 - **One request does one thing**: one Script, or one stylesheet section, or one Block, or one screen, each reviewed in its own Compare-and-Merge.
 - **A publish is confirmed only when** Service Studio reports it done **and** the files the server serves (from `/<App>/moduleservices/moduleinfo`) match `dist/`: the Script, the theme's component section, and the compiled screen.
 - **On O11, dry-run every Model API edit first.** Run the lambda once ending in `throw new Exception("PROBE:...")`: it returns the validation messages without saving. Fix every error, then run it again without the throw, and merge once at the end. Read the screen or module before editing, since the user may have changed it in Service Studio.

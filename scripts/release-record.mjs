@@ -16,7 +16,7 @@
 //   --render                only regenerate docs/project/Releases.md from the records
 //
 // Environment labels are names like "personal", "dev", "test", "prod", never
-// hostnames (docs/AGENTS.md: keep server URLs out of committed files).
+// hostnames (AGENTS.md: keep server URLs out of committed files).
 import { execFileSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';

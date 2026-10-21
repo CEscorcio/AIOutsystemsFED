@@ -15,7 +15,7 @@
 // Add --write to the first two to add the notes to CHANGELOG.md as well.
 //
 // The previous release is the last commit before the new one that changed
-// dist/components.js (releases are committed only when uploaded; docs/AGENTS.md).
+// dist/components.js (releases are committed only when uploaded; AGENTS.md).
 import { execFileSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';

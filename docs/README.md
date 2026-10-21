@@ -13,7 +13,7 @@ Two kinds of documents live here:
 | **Putting it in OutSystems 11** (OutSystems developer) | [guide/Components_11.md](guide/Components_11.md), then [guide/PlatformNotes.md](guide/PlatformNotes.md) for what to expect from the platform; [guide/AppGuidelines.md](guide/AppGuidelines.md) for the screens around it |
 | **Reviewing a change** | [guide/Style.md](guide/Style.md) "What `npm test` checks" and its checklist; the component's `component.json` |
 | **Releasing** | The README's [Versioned Builds](../README.md#versioned-builds); [project/Releases.md](project/Releases.md) for what was released where |
-| **An AI agent** | [AGENTS.md](AGENTS.md) first, always |
+| **An AI agent** (Claude Code, Copilot, any other) | [AGENTS.md](../AGENTS.md) first, always; [guide/AITools.md](guide/AITools.md) for which file each tool reads |
 
 ## Guide
 
@@ -25,6 +25,8 @@ Two kinds of documents live here:
 | [PlatformNotes.md](guide/PlatformNotes.md) | What OutSystems 11 does to uploaded files, and the Model API details that matter |
 | [Style.md](guide/Style.md) | The CSS rules: BEM class names (the golden rule), OutSystems UI variables, selectors, SCSS |
 | [AppGuidelines.md](guide/AppGuidelines.md) | Rules for app screens: layout, UI flow, OutSystems UI classes, naming |
+| [AITools.md](guide/AITools.md) | Which AI tool reads which file (AGENTS.md, Copilot, Claude Code), what runs where, setting up a machine |
+| [adr/](guide/adr/README.md) | Architecture decisions, one per file |
 
 ## Project
 

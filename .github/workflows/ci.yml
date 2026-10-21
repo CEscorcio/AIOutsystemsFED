@@ -1,0 +1,47 @@
+# Every push to main and every pull request: the repo's checks, the dist drift
+# check, the dependency audit and the blueprint's own test.
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - name: Install
+        run: npm ci
+
+      - name: Lint, build, test every component, check the contracts
+        run: npm test
+
+      - name: Committed component builds match the source
+        run: |
+          if ! git diff --exit-code -- components templates; then
+            echo "::error::A component's dist/ doesn't match its source. Run npm test locally and commit the rebuilt dist/."
+            exit 1
+          fi
+
+      - name: No unaccepted high or critical advisories
+        run: npm run check:audit
+
+      - name: A new project from the blueprint reaches its first release
+        run: npm run test:blueprint

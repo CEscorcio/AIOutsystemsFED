@@ -18,5 +18,14 @@
 		"format": {
 			"remove_blank_lines": true
 		}
-	}
+	},
+	"overrides": [
+		{
+			"files": ["*.yml", "*.yaml"],
+			"options": {
+				"useTabs": false,
+				"tabWidth": 2
+			}
+		}
+	]
 }

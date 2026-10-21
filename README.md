@@ -10,11 +10,13 @@ The repository is also a **blueprint**: a new project starts as a copy of it, se
 
 ### Prerequisites
 
-- **Node.js** v20 or higher (LTS recommended)
+- **Node.js** 22 (`.nvmrc`; at least 20)
 - **Git** with Bash (Git Bash on Windows)
 - **npm** (comes with Node.js)
-- **VS Code** (recommended): opening the repo suggests the ESLint, stylelint and Prettier extensions, and formats on save
-- For the OutSystems side only: **Service Studio 11** with its MCP Server enabled, and **Claude Code** connected to it
+- **VS Code** (recommended): opening the repo suggests the ESLint, stylelint, Prettier and GitHub Copilot extensions, and formats on save. Or open it in **Codespaces** (`.devcontainer/`)
+- For the OutSystems side only: **Service Studio 11** with its MCP Server enabled, and an agent connected to it (Claude Code or Copilot in VS Code; both read `.mcp.json`)
+
+The AI tools (Copilot, Claude Code and others) share one set of rules, [AGENTS.md](AGENTS.md); [docs/guide/AITools.md](docs/guide/AITools.md) maps which file each tool reads and what can run where.
 
 ### Clone the repository
 
@@ -159,6 +161,8 @@ npm run build:all -- --no-test
 | `npm run release-notes`                | Print the release notes for the build in `dist/`                                   |
 | `npm run release:record`               | Record the release in `dist/` in `releases/<version>.json` and `docs/project/Releases.md`  |
 | `npm run check:contracts`              | Check every `component.json` against its code (also part of `npm test`)            |
+| `npm run check:audit`                  | Fail on any high or critical npm advisory not accepted in `scripts/check-audit.mjs` |
+| `npm run test:blueprint`               | Make a new project from this repo in a temp folder and take it to its first release |
 | `npm run o11:generate`                 | Write the Model API lambdas for the Script, theme section, a Block or a harness    |
 
 ### Previewing a Component
@@ -209,9 +213,13 @@ AIOutsystemsFED/
 ├── docs/
 │   ├── guide/                  # How the factory works; the same in every project
 │   ├── project/                # This project's records: Releases.md (generated), run logs
-│   └── AGENTS.md               # Standing rules for an AI agent
+├── AGENTS.md                   # Standing rules for every AI agent (CLAUDE.md and Copilot point here)
 ├── CHANGELOG.md                # Release notes, one section per committed version
 ├── .githooks/                  # pre-commit: release notes, release record check
+├── .github/                    # CI, CodeQL, Dependabot; Copilot instructions, prompts and setup steps
+├── .devcontainer/              # Codespaces: everything except the OutSystems side
+├── CLAUDE.md, .mcp.json        # Claude Code: imports AGENTS.md; the Service Studio MCP server (also read by VS Code)
+├── SECURITY.md                 # Reporting problems, and what protects the code
 ├── .claude/skills/new-pattern/ # Scaffold for new components
 └── .vscode/                    # Recommended extensions, format on save
 ```
@@ -241,7 +249,7 @@ Start at [docs/README.md](docs/README.md): it lists every guide and what to read
 For the blueprint (this project's own status and next steps are in [docs/project/README.md](docs/project/README.md)):
 
 1. Run the generators against Service Studio once (dry runs) and record the result in [PlatformNotes.md](docs/guide/PlatformNotes.md), then write a publish skill on top of them
-2. Add CI (`npm test`, a dist drift check) and a pull request template with the Definition of Done
+2. A pull request template with the Definition of Done, Playwright tests on the preview pages, generated per-component READMEs, and GitHub Releases with artifact attestations
 3. Try the library module plus consumer app path in OutSystems 11
 4. Extract the tooling into a versioned package once a second project uses the blueprint
 
