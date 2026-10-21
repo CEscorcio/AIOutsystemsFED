@@ -1,1 +1,4 @@
 node_modules/
+
+# Personal Claude Code settings for this repo (not shared)
+.claude/settings.local.json
