@@ -1,0 +1,12 @@
+# Who reviews what. With branch protection's "Require review from Code Owners",
+# a pull request needs an approval from the owner of each file it changes.
+# Add team members or teams (@org/team) as the project grows.
+
+*                       @CEscorcio
+
+# The factory itself: build rules, release tooling, generators, AI instructions.
+/scripts/               @CEscorcio
+/platform/              @CEscorcio
+/.github/               @CEscorcio
+/AGENTS.md              @CEscorcio
+/factory.config.json    @CEscorcio

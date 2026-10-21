@@ -66,6 +66,8 @@ Details: [Components.md, step 2](Components.md#step-2-write-the-contract-first) 
 
 Keep `namespace` the same as the other components: every class registers on one global, and `npm test` fails when two components use different ones. `ExtendedClass` isn't listed in `component.json`; every Block gets it.
 
+Then run `npm run docs:components`: it writes the component's `README.md` from `component.json`, the page OutSystems developers read to use the Block. `npm test` fails when it's stale, so run it again whenever the contract changes.
+
 **Done when:** `npm run check:contracts` passes, and someone could build the Block in OutSystems from `component.json` alone.
 
 ## Step 4: write the class

@@ -161,6 +161,7 @@ npm run build:all -- --no-test
 | `npm run release-notes`                | Print the release notes for the build in `dist/`                                   |
 | `npm run release:record`               | Record the release in `dist/` in `releases/<version>.json` and `docs/project/Releases.md`  |
 | `npm run check:contracts`              | Check every `component.json` against its code (also part of `npm test`)            |
+| `npm run docs:components`              | Write each component's README.md from its `component.json`                        |
 | `npm run check:audit`                  | Fail on any high or critical npm advisory not accepted in `scripts/check-audit.mjs` |
 | `npm run test:blueprint`               | Make a new project from this repo in a temp folder and take it to its first release |
 | `npm run o11:generate`                 | Write the Model API lambdas for the Script, theme section, a Block or a harness    |

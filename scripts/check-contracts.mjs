@@ -8,6 +8,7 @@
 //     callback per event, with the event's parameters in order
 //   - src/index.ts registers window.<namespace>.<class>
 //   - dist/<Class>.css: the modifiers it styles are exactly the contract's
+//   - README.md is the one generated from component.json (npm run docs:components)
 //   - components (not templates) register on the config's namespace, and no
 //     class is registered twice
 // Templates (templates/*) are checked the same way, since new components are
@@ -16,8 +17,9 @@
 //
 // Usage (from the repo root): node scripts/check-contracts.mjs
 import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
-import { join } from 'node:path';
+import { join, relative } from 'node:path';
 import ts from 'typescript';
+import { readmes } from './lib/component-docs.mjs';
 import { loadConfig } from './lib/config.mjs';
 import { camel, componentsDir, listComponents, loadContract, root, templatesDir, TYPES } from './lib/contract.mjs';
 
@@ -133,6 +135,13 @@ for (const folder of components) {
 	classes.set(c.class, folder);
 }
 for (const folder of templates) checkOne(templatesDir, folder, 'templates/');
+
+// Each component's README.md is generated from its contract and must be current.
+for (const r of readmes()) {
+	const where = relative(root, r.path).split('\\').join('/');
+	if (r.actual === null) problems.push(`${where} is missing: run npm run docs:components`);
+	else if (r.actual !== r.expected) problems.push(`${where} doesn't match component.json: run npm run docs:components (don't edit it by hand)`);
+}
 
 if (problems.length) {
 	console.error(`check-contracts: ${problems.length} problem${problems.length === 1 ? '' : 's'}\n${problems.map((p) => `  - ${p}`).join('\n')}`);
