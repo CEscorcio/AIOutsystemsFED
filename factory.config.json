@@ -1,0 +1,12 @@
+{
+	"project": "AIOutsystemsFED",
+	"namespace": "ClaudeTest",
+	"outsystemsUi": "2.30.0",
+	"o11": {
+		"script": "Components",
+		"theme": "Sandbox",
+		"flow": "MainFlow",
+		"layout": "LayoutTopMenu",
+		"harnessRole": "Registered"
+	}
+}

@@ -10,7 +10,7 @@ export default tseslint.config(
 	js.configs.recommended,
 	// Component source: TypeScript running in the browser.
 	{
-		files: ['components/*/src/**/*.ts'],
+		files: ['components/*/src/**/*.ts', 'templates/*/src/**/*.ts'],
 		extends: [tseslint.configs.recommended],
 		languageOptions: { globals: globals.browser },
 	},
@@ -21,7 +21,7 @@ export default tseslint.config(
 	},
 	// Shared checks: a plain browser script (ES2017: var style, trailing commas allowed) that is also require()d by the test runner.
 	{
-		files: ['components/*/test/checks.js'],
+		files: ['components/*/test/checks.js', 'templates/*/test/checks.js'],
 		languageOptions: {
 			sourceType: 'script',
 			ecmaVersion: 2017,

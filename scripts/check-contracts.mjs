@@ -1,23 +1,39 @@
-// Build rule: every component's contract (component.json) agrees with its code.
+// Build rule: the project's settings are valid, and every component's contract
+// (component.json) agrees with its code.
+//   - factory.config.json is valid, and the outsystems-ui package is pinned to
+//     its "outsystemsUi" version
 //   - component.json is valid (scripts/lib/contract.mjs)
 //   - types.ts: <Class>Parameters has one property per input (camelCase,
 //     matching type) and nothing else; <Class>Events has one optional
 //     callback per event, with the event's parameters in order
 //   - src/index.ts registers window.<namespace>.<class>
 //   - dist/<Class>.css: the modifiers it styles are exactly the contract's
-//   - across components: one namespace, no class registered twice
+//   - components (not templates) register on the config's namespace, and no
+//     class is registered twice
+// Templates (templates/*) are checked the same way, since new components are
+// copied from them, but they don't ship and may use any namespace.
 // Runs after the components are built (npm test, npm run build:all).
 //
 // Usage (from the repo root): node scripts/check-contracts.mjs
 import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 import ts from 'typescript';
-import { camel, componentsDir, listComponents, loadContract, TYPES } from './lib/contract.mjs';
+import { loadConfig } from './lib/config.mjs';
+import { camel, componentsDir, listComponents, loadContract, root, templatesDir, TYPES } from './lib/contract.mjs';
 
 const problems = [];
-const folders = listComponents();
-const missing = readdirSync(componentsDir).filter((f) => statSync(join(componentsDir, f)).isDirectory() && !folders.includes(f) && existsSync(join(componentsDir, f, 'package.json')));
-for (const f of missing) problems.push(`${f}: no component.json (every component describes its Block there; see docs/NewComponent.md)`);
+
+let config = null;
+try {
+	config = loadConfig();
+} catch (e) {
+	problems.push(e.message);
+}
+if (config) {
+	const pinned = (JSON.parse(readFileSync(join(root, 'package.json'), 'utf8')).devDependencies || {})['outsystems-ui'];
+	if (pinned !== config.outsystemsUi)
+		problems.push(`package.json pins outsystems-ui to ${pinned}, but factory.config.json says ${config.outsystemsUi}: run npm install -D --save-exact outsystems-ui@${config.outsystemsUi}`);
+}
 
 function sourceFiles(dir) {
 	return readdirSync(dir).flatMap((f) => {
@@ -26,10 +42,10 @@ function sourceFiles(dir) {
 	});
 }
 
-// Finds an interface by name in the component's src/ and returns its members as
+// Finds an interface by name in a component's src/ and returns its members as
 // { name, optional, type (text), params ([{ name, type }] for a callback) }.
-function readInterface(folder, name) {
-	for (const file of sourceFiles(join(componentsDir, folder, 'src'))) {
+function readInterface(src, name) {
+	for (const file of sourceFiles(src)) {
 		const sf = ts.createSourceFile(file, readFileSync(file, 'utf8'), ts.ScriptTarget.ES2019, true);
 		const found = sf.statements.find((s) => ts.isInterfaceDeclaration(s) && s.name.text === name);
 		if (!found) continue;
@@ -46,19 +62,14 @@ function readInterface(folder, name) {
 	return null;
 }
 
-const namespaces = new Map();
-const classes = new Map();
-for (const folder of folders) {
-	const { contract: c, errors } = loadContract(folder);
-	problems.push(...errors);
-	if (!c || errors.length) continue;
-	const at = (m) => problems.push(`${folder}: ${m}`);
-	namespaces.set(c.namespace, [...(namespaces.get(c.namespace) || []), folder]);
-	if (classes.has(c.class)) at(`class ${c.class} is also used by ${classes.get(c.class)}`);
-	classes.set(c.class, folder);
+function checkOne(dir, folder, label) {
+	const { contract: c, errors } = loadContract(folder, dir);
+	problems.push(...errors.map((e) => `${label}${e}`));
+	if (!c || errors.length) return null;
+	const at = (m) => problems.push(`${label}${folder}: ${m}`);
+	const base = join(dir, folder);
 
-	// types.ts: parameters
-	const params = readInterface(folder, `${c.class}Parameters`);
+	const params = readInterface(join(base, 'src'), `${c.class}Parameters`);
 	if (!params) at(`no interface ${c.class}Parameters in src/`);
 	else {
 		const expected = c.inputs.map((p) => ({ name: camel(p.name), type: TYPES[p.type].ts }));
@@ -70,8 +81,7 @@ for (const folder of folders) {
 		for (const m of params) if (!expected.some((e) => e.name === m.name)) at(`${c.class}Parameters.${m.name} isn't an input in component.json`);
 	}
 
-	// types.ts: events
-	const events = readInterface(folder, `${c.class}Events`);
+	const events = readInterface(join(base, 'src'), `${c.class}Events`);
 	if (!events) at(`no interface ${c.class}Events in src/`);
 	else {
 		for (const e of c.events) {
@@ -88,13 +98,11 @@ for (const folder of folders) {
 		for (const m of events) if (!c.events.some((e) => e.name === m.name)) at(`${c.class}Events.${m.name} isn't an event in component.json`);
 	}
 
-	// index.ts registers the class on the namespace
-	const index = join(componentsDir, folder, 'src', 'index.ts');
+	const index = join(base, 'src', 'index.ts');
 	const indexText = existsSync(index) ? readFileSync(index, 'utf8') : '';
 	if (!new RegExp(`\\.${c.namespace}\\.${c.class}\\s*=`).test(indexText)) at(`src/index.ts doesn't register window.${c.namespace}.${c.class}`);
 
-	// dist/<Class>.css styles exactly the contract's modifiers
-	const cssPath = join(componentsDir, folder, 'dist', `${c.class}.css`);
+	const cssPath = join(base, 'dist', `${c.class}.css`);
 	if (!existsSync(cssPath)) at(`dist/${c.class}.css is missing; build the component first`);
 	else {
 		const css = readFileSync(cssPath, 'utf8').replace(/\/\*[\s\S]*?\*\//g, '');
@@ -103,11 +111,34 @@ for (const folder of folders) {
 		for (const s of styled) if (!listed.includes(s)) at(`the CSS styles ${s}, which isn't in component.json's modifiers`);
 		for (const l of listed) if (!styled.includes(l)) at(`component.json lists ${l}, but the CSS doesn't style it`);
 	}
+	return c;
 }
-if (namespaces.size > 1) problems.push(`components use different namespaces (${[...namespaces].map(([n, f]) => `${n}: ${f.join(', ')}`).join('; ')}); the factory registers every class on one`);
+
+const components = listComponents(componentsDir);
+const templates = listComponents(templatesDir);
+for (const [dir, list, label] of [
+	[componentsDir, components, ''],
+	[templatesDir, templates, 'templates/'],
+]) {
+	const missing = existsSync(dir) ? readdirSync(dir).filter((f) => statSync(join(dir, f)).isDirectory() && !list.includes(f) && existsSync(join(dir, f, 'package.json'))) : [];
+	for (const f of missing) problems.push(`${label}${f}: no component.json (every component describes its Block there; see docs/guide/NewComponent.md)`);
+}
+
+const classes = new Map();
+for (const folder of components) {
+	const c = checkOne(componentsDir, folder, '');
+	if (!c) continue;
+	if (config && c.namespace !== config.namespace) problems.push(`${folder}: namespace is ${c.namespace}; factory.config.json says every component registers on ${config.namespace}`);
+	if (classes.has(c.class)) problems.push(`${folder}: class ${c.class} is also used by ${classes.get(c.class)}`);
+	classes.set(c.class, folder);
+}
+for (const folder of templates) checkOne(templatesDir, folder, 'templates/');
 
 if (problems.length) {
 	console.error(`check-contracts: ${problems.length} problem${problems.length === 1 ? '' : 's'}\n${problems.map((p) => `  - ${p}`).join('\n')}`);
 	process.exit(1);
 }
-console.log(`check-contracts: ${folders.length === 1 ? 'the contract agrees' : `all ${folders.length} contracts agree`} with the code`);
+const n = components.length + templates.length;
+console.log(
+	`check-contracts: factory.config.json is valid; ${n === 1 ? 'the contract agrees' : `all ${n} contracts agree`} with the code (${components.length} component${components.length === 1 ? '' : 's'}, ${templates.length} template${templates.length === 1 ? '' : 's'})`,
+);

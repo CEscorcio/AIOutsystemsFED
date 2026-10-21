@@ -1,5 +1,5 @@
 /*
- * GreetingCard styles, written to the rules in docs/Style.md.
+ * GreetingCard styles, written to the rules in docs/guide/Style.md.
  *
  * - Base theme is OutSystems UI. Every colour, space, radius, border, shadow
  *   and font value is an OutSystems UI variable; the fallback after the comma
@@ -15,7 +15,7 @@
  * Shipped as a stylesheet of its own (dist/GreetingCard.css), not by the JS.
  */
 
-// SCSS, compiled by build.mjs to flat CSS (docs/Style.md, Rule 8). The block
+// SCSS, compiled by build.mjs to flat CSS (docs/guide/Style.md, Rule 8). The block
 // itself has no declarations, so it only groups its elements: every rule
 // below compiles to one BEM class, prefixed at most by a modifier or an
 // OutSystems UI context class.

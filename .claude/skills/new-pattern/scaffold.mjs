@@ -1,9 +1,10 @@
 // Copies the example pattern into a new folder and renames it consistently.
 //
-// Usage: node scaffold.mjs <PatternName> <Namespace> [--from <example-dir>] [--to <target-dir>]
+// Usage: node scaffold.mjs <PatternName> [<Namespace>] [--from <example-dir>] [--to <target-dir>]
 //   PatternName  PascalCase class name, e.g. StatusBadge
-//   Namespace    global namespace the bundle registers on window, e.g. MyCompany
-//   --from       example to copy (default: <repo>/components/greeting-card)
+//   Namespace    global namespace the bundle registers on window (default: the
+//                "namespace" in factory.config.json, which npm test enforces)
+//   --from       example to copy (default: <repo>/templates/greeting-card)
 //   --to         new folder (default: <repo>/components/<pattern-name>)
 //
 // Renames, in file contents and paths:
@@ -65,8 +66,17 @@ const option = (name) => {
 	return i === -1 ? undefined : args[i + 1];
 };
 
-const [pascal, namespace] = positional;
-if (!pascal || !namespace) fail('usage: node scaffold.mjs <PatternName> <Namespace> [--from dir] [--to dir]');
+const repo = resolve(dirname(fileURLToPath(import.meta.url)), '../../..');
+const [pascal, givenNamespace] = positional;
+if (!pascal) fail('usage: node scaffold.mjs <PatternName> [<Namespace>] [--from dir] [--to dir]');
+let namespace = givenNamespace;
+if (!namespace) {
+	try {
+		namespace = JSON.parse(readFileSync(join(repo, 'factory.config.json'), 'utf8')).namespace;
+	} catch {
+		fail('no <Namespace> given and no factory.config.json to read it from');
+	}
+}
 if (!/^[A-Z][A-Za-z0-9]+$/.test(pascal)) fail(`PatternName must be PascalCase letters and digits: ${pascal}`);
 if (!/^[A-Z][A-Za-z0-9]*$/.test(namespace)) fail(`Namespace must start with a capital letter: ${namespace}`);
 if (pascal === 'GreetingCard') fail("pick a name other than the example's");
@@ -77,8 +87,7 @@ const kebab = pascal
 	.toLowerCase();
 if (OSUI_CLASS_NAMES.has(kebab)) fail(`"${kebab}" is an OutSystems UI class; the BEM block must not collide with it (Style.md, Rule 0)`);
 
-const repo = resolve(dirname(fileURLToPath(import.meta.url)), '../../..');
-const from = resolve(option('from') || join(repo, 'components', 'greeting-card'));
+const from = resolve(option('from') || join(repo, 'templates', 'greeting-card'));
 const to = resolve(option('to') || join(repo, 'components', kebab));
 if (!existsSync(join(from, 'package.json'))) fail(`no example at ${from}`);
 if (existsSync(to)) fail(`${to} already exists`);

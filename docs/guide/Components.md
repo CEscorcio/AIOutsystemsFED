@@ -2,7 +2,7 @@
 
 How to build your own front-end pattern: written in TypeScript, kept in Git with a build and tests, and shipped into an OutSystems 11 (Reactive Web) module as a Block, with an AI agent doing the platform work through Service Studio. This page covers the idea, the rules, and steps 1 to 5, everything done in the repo. Steps 6 to 8, in OutSystems, are in [Components_11.md](Components_11.md): Model API edits reviewed in Service Studio, 1-Click Publish, verify. Those platform steps **haven't been run end to end yet** for a component.
 
-The CSS rules every pattern follows are in [Style.md](Style.md). The worked example used on this page is [`greeting-card/`](../components/greeting-card/).
+The CSS rules every pattern follows are in [Style.md](Style.md). The worked example used on this page is [`greeting-card/`](../../templates/greeting-card/).
 
 ## The idea
 
@@ -47,10 +47,10 @@ Nothing in steps 1 to 5 needs an OutSystems environment. [Components_11.md](Comp
 
 ## Step 1: start from the example
 
-Copy [`greeting-card/`](../components/greeting-card/) and rename. With Claude Code, ask for a new pattern (the `new-pattern` skill), or run the script it uses:
+Copy [`greeting-card/`](../../templates/greeting-card/) and rename. With Claude Code, ask for a new pattern (the `new-pattern` skill), or run the script it uses:
 
 ```bash
-node .claude/skills/new-pattern/scaffold.mjs <Pattern> <Namespace>    # e.g. StatusBadge MyCompany
+node .claude/skills/new-pattern/scaffold.mjs <Pattern> [<Namespace>] # e.g. StatusBadge; the namespace defaults to factory.config.json
 ```
 
 The layout:
@@ -66,7 +66,7 @@ test/run.mjs                         runs the checks in jsdom (npm test)
 preview/index.html                   local page; ?test=1 runs the checks in the browser
 ```
 
-Four things to rename consistently: the **namespace** (`ClaudeTest` → yours, e.g. `MyCompany`), the **class name**, the **output file**, and the **BEM block** (`greeting-card` → your pattern in kebab-case, in every CSS class, the stylesheet's file name and the tests; see [Rule 0](#rules-for-every-custom-pattern)). The namespace is global, so make it unique to your team.
+Four things to rename consistently: the **namespace** (set once per project in `factory.config.json`; the scaffold uses it), the **class name**, the **output file**, and the **BEM block** (`greeting-card` → your pattern in kebab-case, in every CSS class, the stylesheet's file name and the tests; see [Rule 0](#rules-for-every-custom-pattern)). The namespace is global, so make it unique to your team.
 
 ```
 npm install
@@ -159,7 +159,7 @@ Plus three habits that saved us debugging time:
 - **Reuse OutSystems UI classes for anything themed.** The card uses `card` and the button uses `btn btn-primary`, so it follows the app theme. Each of those elements also carries its BEM class (`greeting-card__body`, `greeting-card__button`), which is what your own stylesheet targets. That stylesheet takes every colour, radius, spacing and shadow from OutSystems UI variables, with the base theme's value as fallback for the local preview. See [Style.md](Style.md).
 - **Keep the CSS out of the class.** It lives in `style/<pattern>.scss` and ships as a stylesheet of its own (`dist/<Name>.css`), so the class never injects styles and two instances on one screen can't duplicate them. It goes in the app's theme stylesheet, not the Block's: on O11, Block stylesheet edits don't reliably publish through the agent. See [Style.md, Rule 7](Style.md#rule-7-where-a-patterns-css-lives).
 
-See [`GreetingCard.ts`](../components/greeting-card/src/greeting-card/GreetingCard.ts) for the full class (about 80 lines).
+See [`GreetingCard.ts`](../../templates/greeting-card/src/greeting-card/GreetingCard.ts) for the full class (about 80 lines).
 
 ### What the Block does with it
 
@@ -198,7 +198,7 @@ Upload both files from the same build, so their timestamps match, and check them
 
 ## Step 5: prove it locally before going to the platform
 
-`npm test` runs `tsc --noEmit`, builds, and then runs [`test/checks.js`](../components/greeting-card/test/checks.js) against the bundle in jsdom:
+`npm test` runs `tsc --noEmit`, builds, and then runs [`test/checks.js`](../../templates/greeting-card/test/checks.js) against the bundle in jsdom:
 
 ```
 PASS  bundle registers window.ClaudeTest.GreetingCard
@@ -230,7 +230,7 @@ The same file runs in the browser at `preview/index.html?test=1`. Write a check 
 
 ## Making it yours
 
-1. Copy `components/greeting-card/` into `components/<your-component>/` with the `new-pattern` skill or `scaffold.mjs`, then run `npm install` at the repo root.
+1. Copy `templates/greeting-card/` into `components/<your-component>/` with the `new-pattern` skill or `scaffold.mjs`, then run `npm install` at the repo root.
 2. Write `types.ts`: every Input Parameter, every Event and its payload, and the modifiers `ExtendedClass` accepts. Every pattern gets `ExtendedClass` (Text, not mandatory, default `""`), documented as applied by the main container, not the class.
 3. Write the class to the three-member rules and the CSS to [Style.md](Style.md); keep every structural check and add one for each new behaviour; `npm test` until green.
 4. Commit, including `dist/`.
@@ -250,5 +250,5 @@ Not tested here, but the obvious next steps:
 ## References
 
 - [Style.md](Style.md): the CSS rules for every pattern
-- [`greeting-card/`](../components/greeting-card/): the example used on this page
+- [`greeting-card/`](../../templates/greeting-card/): the example used on this page
 - [AI-Powered Frontend Development in OutSystems O11 and ODC](https://antonio-carvalho.medium.com/ai-powered-frontend-development-in-outsystems-o11-and-odc-4d408fdb4ade): António Carvalho, the source of the technique

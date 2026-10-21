@@ -14,12 +14,13 @@
 //   npm run build:all -- --no-test skips the tests (local experiments only)
 //
 // A component is any folder in components/ with a package.json and a build.mjs
-// (e.g. components/greeting-card/). Its output is every .js and .css file in its
+// (e.g. components/status-badge/). Its output is every .js and .css file in its
 // dist/ folder. Dependencies come from the root install (npm workspaces).
 // Components are joined in alphabetical order.
 import { execSync } from 'node:child_process';
 import { existsSync, mkdirSync, readdirSync, readFileSync, statSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
+import { loadConfig } from './lib/config.mjs';
 
 const root = join(import.meta.dirname, '..');
 const componentsDir = join(root, 'components');
@@ -37,7 +38,7 @@ const components = (existsSync(componentsDir) ? readdirSync(componentsDir) : [])
 	.sort();
 
 if (components.length === 0) {
-	console.error('build-all: no components found (folders in components/ with package.json and build.mjs)');
+	console.error('build-all: nothing to release: components/ has no component yet. Create one from the template (docs/guide/NewComponent.md); templates/ never ships.');
 	process.exit(1);
 }
 
@@ -139,8 +140,9 @@ const header = (title, parts) => ['/*!', ` * Version: ${version}`, ` * ${title}`
 const js = scripts.map((p) => `// ---- ${p.label} ----\n;${p.text}`).join('\n\n');
 const css = styles.map((p) => `/* ---- ${p.label} ---- */\n${p.text}`).join('\n\n');
 
-const jsOut = `${header('AIOutsystemsFED components', scripts)}\n"use strict";\n\n${js}\n`;
-const cssOut = `${header('AIOutsystemsFED components: styles', styles)}\n\n${css}\n`;
+const { project } = loadConfig();
+const jsOut = `${header(`${project} components`, scripts)}\n"use strict";\n\n${js}\n`;
+const cssOut = `${header(`${project} components: styles`, styles)}\n\n${css}\n`;
 
 // Smoke test of the two combined files, before anything is written:
 // - components.js runs in a page and registers every component's class

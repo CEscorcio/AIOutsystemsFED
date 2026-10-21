@@ -4,6 +4,8 @@ A UI component library for **OutSystems 11** (Reactive Web), built with TypeScri
 
 Each component is ordinary front-end code, reviewed and tested in Git. In OutSystems it becomes a thin **Block** that receives Input Parameters, raises Events, and drives the component's class from its `OnReady`, `OnParametersChanged` and `OnDestroy` handlers.
 
+The repository is also a **blueprint**: a new project starts as a copy of it, set up with one command (see [Starting a New Project](#starting-a-new-project)).
+
 ## Quick Start
 
 ### Prerequisites
@@ -39,6 +41,30 @@ This lints the whole repo (ESLint, stylelint, Prettier), then builds and tests e
 
 ---
 
+## Starting a New Project
+
+This repository is a blueprint. Everything that differs between projects is in `factory.config.json`:
+
+```jsonc
+{
+  "project": "AIOutsystemsFED",      // README title, header of the combined files
+  "namespace": "ClaudeTest",         // window.<namespace>.<Class>; npm test enforces it
+  "outsystemsUi": "2.30.0",          // the version your O11 environment runs; must match the outsystems-ui pin
+  "o11": { "script": "Components", "theme": "Sandbox", "flow": "MainFlow", "layout": "LayoutTopMenu", "harnessRole": "Registered" }
+}
+```
+
+To start a project:
+
+1. On GitHub, **Use this template** (or copy the repository), and clone the copy
+2. `npm install`
+3. `npm run init -- --project <Name> --namespace <Namespace> --outsystems-ui <version> --theme <Theme>`. Without `--yes` it prints what it would do; with `--yes` it does it, on a clean working tree
+4. `npm install && npm test`, then commit
+
+`init` writes the config and the package name, and empties what belonged to the previous project: `components/`, `releases/`, `dist/components.*`, `CHANGELOG.md` and `docs/project/`. The guide (`docs/guide/`), the tooling and `templates/` stay. Improvements to the guide or the tooling belong in the blueprint, so every project gets them.
+
+---
+
 ## Versioned Builds
 
 This repository builds every component into **one JavaScript file and one stylesheet**, each stamped with a version and a build timestamp.
@@ -60,7 +86,7 @@ Both files start with the same header:
  * AIOutsystemsFED components
  * Built: 2026-10-21T10:15:33.196Z
  * Contains:
- *   components/greeting-card/dist/GreetingCard.js
+ *   components/status-badge/dist/StatusBadge.js
  */
 ```
 
@@ -73,7 +99,7 @@ The version is `<year>.<week>.<N>`:
 
 1. Run `npm run build:all` just before uploading
 2. Put it in the module: `npm run o11:generate -- script` and `npm run o11:generate -- theme --theme <Theme>` write the Model API lambdas for the Script and the theme stylesheet section (see [Generating the OutSystems side](#generating-the-outsystems-side))
-3. Publish, and check the served files against `dist/` ([Components_11.md, step 8](docs/Components_11.md#step-8-verify-what-was-actually-published))
+3. Publish, and check the served files against `dist/` ([Components_11.md, step 8](docs/guide/Components_11.md#step-8-verify-what-was-actually-published))
 4. Record it: `npm run release:record -- --description "<what it's for>" --environment <label> --module <Module> --theme <Theme> --verified "<what you checked>"`
 5. Commit `dist/components.js`, `dist/components.css` and `releases/`, with where they were uploaded
 
@@ -88,9 +114,9 @@ Every release has a data file, `releases/<version>.json`, written by `npm run re
 - the contract changes since the previous release, each marked **breaking** when a screen using the Block could stop compiling or lose a style (an input or event removed, a type changed, a new mandatory input)
 - every deployment: platform, environment label, module, Script, theme, date and how the served files were checked
 
-[docs/Releases.md](docs/Releases.md) is generated from these files. Run `release:record` again for a release that's already recorded to add a deployment, for example when it reaches another environment. Environment labels are names like `dev` or `prod`, never hostnames.
+[docs/project/Releases.md](docs/project/Releases.md) is generated from these files. Run `release:record` again for a release that's already recorded to add a deployment, for example when it reaches another environment. Environment labels are names like `dev` or `prod`, never hostnames.
 
-The pre-commit hook refuses a release commit that doesn't include its record, or whose record was made for other files, and regenerates `docs/Releases.md` into the commit.
+The pre-commit hook refuses a release commit that doesn't include its record, or whose record was made for other files, and regenerates `docs/project/Releases.md` into the commit.
 
 ### Release Notes
 
@@ -126,12 +152,12 @@ npm run build:all -- --no-test
 | Command                                | What it does                                                                       |
 | -------------------------------------- | ---------------------------------------------------------------------------------- |
 | `npm test`                             | Lint everything, then typecheck, build and test every component                    |
-| `npm test -w components/greeting-card` | Build and test one component                                                       |
+| `npm test -w components/status-badge`  | Build and test one component                                                       |
 | `npm run lint`                         | ESLint, stylelint and a Prettier check                                             |
 | `npm run format`                       | Prettier, then stylelint and ESLint auto-fixes                                     |
 | `npm run build:all`                    | Lint, test, and write the versioned `dist/components.js` and `dist/components.css` |
 | `npm run release-notes`                | Print the release notes for the build in `dist/`                                   |
-| `npm run release:record`               | Record the release in `dist/` in `releases/<version>.json` and `docs/Releases.md`  |
+| `npm run release:record`               | Record the release in `dist/` in `releases/<version>.json` and `docs/project/Releases.md`  |
 | `npm run check:contracts`              | Check every `component.json` against its code (also part of `npm test`)            |
 | `npm run o11:generate`                 | Write the Model API lambdas for the Script, theme section, a Block or a harness    |
 
@@ -142,12 +168,12 @@ Open `components/<name>/preview/index.html` in a browser to see the component wi
 ### Creating a New Component
 
 ```bash
-node .claude/skills/new-pattern/scaffold.mjs StatusBadge MyCompany
+node .claude/skills/new-pattern/scaffold.mjs StatusBadge
 npm install
 npm test -w components/status-badge
 ```
 
-This copies `components/greeting-card/` and renames the class, BEM block, stylesheet, namespace and tests. The full walkthrough, from naming a component to proving it live in OutSystems, is [docs/NewComponent.md](docs/NewComponent.md). With Claude Code, ask: "create a StatusBadge component".
+This copies `templates/greeting-card/` into `components/status-badge/` and renames the class, BEM block, stylesheet, namespace and tests. The full walkthrough, from naming a component to proving it live in OutSystems, is [docs/guide/NewComponent.md](docs/guide/NewComponent.md). With Claude Code, ask: "create a StatusBadge component".
 
 ### Generating the OutSystems side
 
@@ -156,69 +182,68 @@ The Block, its harness screen, the Script and the theme stylesheet section are g
 ```bash
 npm run o11:generate -- script                       # Script "Components" from dist/components.js, created or replaced
 npm run o11:generate -- theme --theme Sandbox        # the components section of the theme stylesheet, appended or replaced
-npm run o11:generate -- block greeting-card          # the Block, from component.json
-npm run o11:generate -- harness greeting-card        # a test screen that drives every input and shows every event
+npm run o11:generate -- block status-badge           # the Block, from component.json
+npm run o11:generate -- harness status-badge         # a test screen that drives every input and shows every event
 ```
 
-Each command writes the lambda and a probe, and prints what the probe must report (lengths, checksums, names), so what lands in the module is checked against the repo before it's merged. [Components_11.md](docs/Components_11.md#generated-lambdas) has the order. The Block generator only creates Blocks: changing an existing Block's contract is still done by hand in Service Studio.
+Each command writes the lambda and a probe, and prints what the probe must report (lengths, checksums, names), so what lands in the module is checked against the repo before it's merged. [Components_11.md](docs/guide/Components_11.md#generated-lambdas) has the order. The Block generator only creates Blocks: changing an existing Block's contract is still done by hand in Service Studio.
 
 ### Project Structure
 
 ```
 AIOutsystemsFED/
-├── components/                 # One folder per component (npm workspace)
-│   └── greeting-card/          # The example new components are copied from
+├── factory.config.json         # The project's settings: name, namespace, OutSystems UI version, O11 names
+├── components/                 # One folder per component (npm workspace); everything here ships
+│   └── <name>/
 │       ├── component.json      # The contract as data: inputs, events, modifiers
 │       ├── src/                # TypeScript: contract (types.ts), class, registration
 │       ├── style/              # The component's styles (SCSS)
 │       ├── test/               # Checks run in jsdom and in the browser
 │       ├── preview/            # Local preview page
-│       └── dist/               # Built GreetingCard.js and GreetingCard.css
+│       └── dist/               # Built <Class>.js and <Class>.css
+├── templates/greeting-card/    # The example new components are copied from; tested, never shipped
 ├── platform/o11/               # Generators: component.json + dist/ -> Model API lambdas (out/ not committed)
-├── docs/                       # Documentation; Releases.md is generated
-├── scripts/                    # build-all, check-contracts, release-notes, release-record, install-hooks; lib/
+├── scripts/                    # build-all, check-contracts, check-links, release-notes, release-record, init, install-hooks; lib/
 ├── dist/                       # components.js and components.css (versioned)
 ├── releases/                   # One record per release: contents, hashes, contracts, deployments
+├── docs/
+│   ├── guide/                  # How the factory works; the same in every project
+│   ├── project/                # This project's records: Releases.md (generated), run logs
+│   └── AGENTS.md               # Standing rules for an AI agent
 ├── CHANGELOG.md                # Release notes, one section per committed version
-├── .githooks/                  # pre-commit: adds release notes to CHANGELOG.md
+├── .githooks/                  # pre-commit: release notes, release record check
 ├── .claude/skills/new-pattern/ # Scaffold for new components
 └── .vscode/                    # Recommended extensions, format on save
 ```
 
 ### Documentation
 
-| Document                                  | What it covers                                                                            |
-| ----------------------------------------- | ----------------------------------------------------------------------------------------- |
-| [NewComponent.md](docs/NewComponent.md)   | Step-by-step checklist for building a new component                                       |
-| [Components.md](docs/Components.md)       | The idea, the rules every component follows, and steps 1 to 5 (everything in the repo)    |
-| [Components_11.md](docs/Components_11.md) | Steps 6 to 8 in OutSystems 11: Script, stylesheet, Block, harness screen, publish, verify |
-| [Style.md](docs/Style.md)                 | The CSS rules: BEM class names (the golden rule), OutSystems UI variables, selectors      |
-| [AppGuidelines.md](docs/AppGuidelines.md) | Rules for app screens: layout, UI flow, OutSystems UI classes, naming                     |
-| [Releases.md](docs/Releases.md)           | Every release: contents, contract changes, deployments (generated)                       |
-| [AGENTS.md](docs/AGENTS.md)               | Standing rules for an AI agent working in this repo                                       |
+Start at [docs/README.md](docs/README.md): it lists every guide and what to read first, by role. The guide is [docs/guide/](docs/guide/); this project's records are in [docs/project/](docs/project/), with every release in [Releases.md](docs/project/Releases.md).
 
 ## Considerations
 
-1. **OutSystems UI is the base theme.** Every colour, space, radius, shadow and font value in a component's CSS is an OutSystems UI variable, with its base-theme value as fallback. The `outsystems-ui` package is pinned to the version the O11 environment runs (2.30.0); the tests read its tokens, and the preview loads its stylesheet.
+1. **OutSystems UI is the base theme.** Every colour, space, radius, shadow and font value in a component's CSS is an OutSystems UI variable, with its base-theme value as fallback. The `outsystems-ui` package is pinned to the version the O11 environment runs (`outsystemsUi` in `factory.config.json`; `npm test` checks they match); the tests read its tokens, and the preview loads its stylesheet.
 2. **Components never inject CSS.** Each component's styles live in `style/<name>.scss` and ship as a stylesheet of their own, in the module's theme stylesheet. Don't use the Block's stylesheet: edits to it don't reliably publish through the agent.
 3. **The JS bundle isn't minified on purpose,** so the copy OutSystems serves can be compared with `dist/` line for line. Keep bundles ASCII-only.
-4. **Class names are BEM** under the component's block (`greeting-card__title`, `greeting-card--compact`). stylelint enforces it, together with the other rules in [Style.md](docs/Style.md).
-5. **Styles are SCSS, compiled to plain CSS.** Each component's build compiles `style/*.scss` with Dart Sass and formats it with Prettier, so `dist/<Name>.css` reads like hand-written CSS (converting `greeting-card` produced a byte-identical file). SCSS only groups a block's rules: visual values stay OutSystems UI variables, never Sass variables, and `@extend` is not allowed ([Style.md, Rule 8](docs/Style.md#rule-8-scss-grouping-not-values)).
+4. **Class names are BEM** under the component's block (`status-badge__label`, `status-badge--compact`). stylelint enforces it, together with the other rules in [Style.md](docs/guide/Style.md).
+5. **Styles are SCSS, compiled to plain CSS.** Each component's build compiles `style/*.scss` with Dart Sass and formats it with Prettier, so `dist/<Name>.css` reads like hand-written CSS (converting the example from CSS produced a byte-identical file). SCSS only groups a block's rules: visual values stay OutSystems UI variables, never Sass variables, and `@extend` is not allowed ([Style.md, Rule 8](docs/guide/Style.md#rule-8-scss-grouping-not-values)).
 
 ## Limitations
 
-1. **The OutSystems side has been run once**, for GreetingCard on 2026-10-21: Script, stylesheet, Block and harness through Service Studio, published, and the served files compared with `dist/` ([Components_11.md, First run](docs/Components_11.md#first-run-2026-10-21)). The browser click-through (step 8c) hasn't been done yet, and a library module plus consumer app hasn't been tried.
+1. **The OutSystems side has been run once** (2026-10-21): Script, stylesheet, Block and harness through Service Studio, published, and the served files compared with `dist/` ([PlatformNotes.md](docs/guide/PlatformNotes.md)). The browser click-through (step 8c) hasn't been done yet, the generated lambdas haven't been run against Service Studio, and a library module plus consumer app hasn't been tried.
 2. **The preview page can't run the CSS checks.** A page opened from `file://` can't read a stylesheet's text, so those checks show as skipped there; `npm test` runs them.
 3. **stylelint can't check nested BEM names** (`&__title`) in SCSS. `npm test` catches them in the compiled CSS instead.
 4. **Prettier prints a warning on every run** about the `css` / `scss` `remove_blank_lines` entries in `.prettierrc.json`. They aren't Prettier options and are ignored.
 5. **`npm audit` reports a "high" advisory in `braces`,** a dependency of stylelint. No fixed version exists, and it only applies to malicious file patterns, which this repo doesn't have.
-6. **The example ships too.** `dist/components.js` and `.css` include every folder in `components/`, `greeting-card` included, until it's removed or moved.
+6. **This project has no shipped component yet.** GreetingCard is now the template in `templates/`; `npm run build:all` refuses to make a release until `components/` has one. The Sandbox app keeps release 2026.43.1; a release without GreetingCard records its removal as breaking.
 
 ## Next Steps
 
-1. Do the browser click-through (step 8c) on the Sandbox `GreetingCardTest` screen and record it in [Components_11.md](docs/Components_11.md)
+1. Do the browser click-through (step 8c) on the Sandbox `GreetingCardTest` screen and record it in [the run log](docs/project/FirstRun-2026-10-21.md)
 2. Run the generators against Service Studio once (dry runs) and record the result, then write a publish skill on top of them
-3. Replace or move the `greeting-card` example once real components exist
+3. Choose the project's real namespace (`factory.config.json`), then build the first real component
+4. Add CI (`npm test`, a dist drift check) and a pull request template with the Definition of Done
+5. Extract the tooling into a versioned package once a second project uses the blueprint
 
 ## Notes
 

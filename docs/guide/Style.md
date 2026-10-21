@@ -1,6 +1,6 @@
 # Style rules for custom patterns
 
-The CSS rules every custom pattern follows. The build guides ([Components.md](Components.md), then [Components_11.md](Components_11.md)) say *how* to build and ship a pattern; this page says how its CSS must be written. [`greeting-card/`](../components/greeting-card/) follows every rule here, and its `npm test` enforces the ones a script can check.
+The CSS rules every custom pattern follows. The build guides ([Components.md](Components.md), then [Components_11.md](Components_11.md)) say *how* to build and ship a pattern; this page says how its CSS must be written. [`greeting-card/`](../../templates/greeting-card/) follows every rule here, and its `npm test` enforces the ones a script can check.
 
 **The base theme is OutSystems UI** (`OutSystemsUI.css`). A pattern doesn't bring its own design system: it extends OutSystems UI, takes every visual value from its variables, and keeps working when an app's theme changes them.
 

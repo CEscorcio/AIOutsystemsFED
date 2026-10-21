@@ -1,4 +1,4 @@
-// Records a release in releases/<version>.json and regenerates docs/Releases.md.
+// Records a release in releases/<version>.json and regenerates docs/project/Releases.md.
 // Run it after the build in dist/ has been uploaded and checked, before
 // committing the release; the pre-commit hook refuses a release commit
 // without its record.
@@ -13,7 +13,7 @@
 //
 //   --no-deployment         record the release without a deployment
 //   --from-commit <rev>     record the release committed in <rev> (backfill)
-//   --render                only regenerate docs/Releases.md from the records
+//   --render                only regenerate docs/project/Releases.md from the records
 //
 // Environment labels are names like "personal", "dev", "test", "prod", never
 // hostnames (docs/AGENTS.md: keep server URLs out of committed files).
@@ -38,7 +38,7 @@ function fail(message) {
 
 if (flag('render')) {
 	writePage();
-	console.log('release-record: wrote docs/Releases.md');
+	console.log('release-record: wrote docs/project/Releases.md');
 	process.exit(0);
 }
 
@@ -167,4 +167,4 @@ if (existsSync(path)) {
 	for (const c of breaking) console.log(`  breaking: ${c.component}: ${c.change}`);
 }
 writePage();
-console.log('release-record: wrote docs/Releases.md');
+console.log('release-record: wrote docs/project/Releases.md');

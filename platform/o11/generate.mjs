@@ -1,14 +1,17 @@
 // Generates the Model API lambdas that put a release and its components into an
 // OutSystems 11 Reactive module through the Service Studio MCP
-// (docs/Components_11.md). Nothing here talks to OutSystems: it writes C# files
+// (docs/guide/Components_11.md). Nothing here talks to OutSystems: it writes C# files
 // for the agent to pass to applyModelApiCode, so no AI model retypes the
 // Script, the CSS or the Block.
 //
 // Usage (from the repo root, after npm run build:all):
-//   node platform/o11/generate.mjs script [--name Components]
-//   node platform/o11/generate.mjs theme --theme <Theme>
-//   node platform/o11/generate.mjs block <component> [--name <Block>] [--flow MainFlow] [--public]
-//   node platform/o11/generate.mjs harness <component> [--screen <Class>Test] [--flow MainFlow] [--block <Block>]
+//   node platform/o11/generate.mjs script [--name <Script>]
+//   node platform/o11/generate.mjs theme [--theme <Theme>]
+//   node platform/o11/generate.mjs block <component> [--name <Block>] [--flow <Flow>] [--public]
+//   node platform/o11/generate.mjs harness <component> [--screen <Class>Test] [--flow <Flow>] [--block <Block>]
+//
+// Script, theme, flow, layout and harness role default to factory.config.json ("o11").
+// <component> is a folder in components/, or in templates/ for a dry run.
 //
 // Each command writes to platform/o11/out/ (not committed):
 //   <what>.cs           the lambda to apply (create, or for script/theme create or replace)
@@ -19,7 +22,12 @@
 //   read-back to run after applying <what>.cs, before merging.
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { bridgeAction, camel, loadContract, root, TYPES } from '../../scripts/lib/contract.mjs';
+import { loadConfig } from '../../scripts/lib/config.mjs';
+import { bridgeAction, camel, componentsDir, loadContract, root, templatesDir, TYPES } from '../../scripts/lib/contract.mjs';
+
+// Names default to factory.config.json ("o11"); the options override them.
+const config = loadConfig();
+const SCRIPT = config.o11.script;
 
 const outDir = join(import.meta.dirname, 'out');
 const [command, target] = process.argv.slice(2).filter((a, i, all) => !a.startsWith('--') && !(all[i - 1] || '').startsWith('--'));
@@ -67,9 +75,11 @@ function write(name, apply, probe, expected) {
 	console.log(`The probe must report: PROBE:${expected}`);
 }
 
+// A component, or a template (for a dry run of the generators themselves).
 function contractOf(folder) {
-	if (!folder) fail(`name a component, e.g. greeting-card`);
-	const { contract, errors } = loadContract(folder);
+	if (!folder) fail(`name a component, e.g. status-badge`);
+	const dir = existsSync(join(componentsDir, folder, 'component.json')) ? componentsDir : templatesDir;
+	const { contract, errors } = loadContract(folder, dir);
 	if (!contract) fail(errors.join('\n'));
 	if (errors.length) fail(`fix component.json first:\n  ${errors.join('\n  ')}`);
 	return contract;
@@ -77,7 +87,7 @@ function contractOf(folder) {
 
 // ---- script: dist/components.js as one Script, created or replaced ----
 function script() {
-	const name = option('name', 'Components');
+	const name = option('name', SCRIPT);
 	const js = readDist('components.js');
 	const body = (tail) => `eSpace => {
 	var s = eSpace.Scripts.FirstOrDefault(x => x.Name == ${cs(name)}) ?? eSpace.CreateScript(${cs(name)});
@@ -92,7 +102,7 @@ function script() {
 
 // ---- theme: dist/components.css as one marked section of a theme stylesheet ----
 function theme() {
-	const themeName = option('theme') || fail('--theme <Theme> is required (the app theme, e.g. Sandbox)');
+	const themeName = option('theme', config.o11.theme);
 	const css = readDist('components.css');
 	const GUARD = '.components-start { }';
 	const END = '/* ==== components: end ==== */';
@@ -133,7 +143,7 @@ function theme() {
 function block() {
 	const c = contractOf(target);
 	const blockName = option('name', c.class);
-	const flowName = option('flow', 'MainFlow');
+	const flowName = option('flow', config.o11.flow);
 	const isPublic = flag('public');
 	const ns = `${c.namespace}.${c.class}`;
 	const modifiers = c.modifiers.length ? ` Modifiers: ${c.modifiers.map((m) => `${m.class} (${m.description})`).join('; ')}.` : '';
@@ -143,10 +153,10 @@ function block() {
 	add(`var flow = eSpace.MobileFlows.FirstOrDefault(f => f.Name == ${cs(flowName)});`);
 	add(`if (flow == null) throw new Exception("PROBE:no UI flow named ${flowName}");`);
 	add(`if (flow.Nodes.OfType<IMobileBlock>().Any(b => b.Name == ${cs(blockName)})) throw new Exception("PROBE:a Block named ${blockName} already exists; this generator only creates Blocks");`);
-	add(`var script = eSpace.Scripts.FirstOrDefault(s => s.Name == "Components");`);
-	add(`if (script == null) throw new Exception("PROBE:no Script named Components; apply script.cs first");`);
+	add(`var script = eSpace.Scripts.FirstOrDefault(s => s.Name == ${cs(SCRIPT)});`);
+	add(`if (script == null) throw new Exception("PROBE:no Script named ${SCRIPT}; apply script.cs first");`);
 	add(`var block = flow.CreateBlock(${cs(blockName)});`);
-	add(`block.Description = ${cs(`${c.description} Bridge to window.${ns} (Script Components). Generated from components/${c.folder}/component.json.`)};`);
+	add(`block.Description = ${cs(`${c.description} Bridge to window.${ns} (Script ${SCRIPT}). Generated from ${c.dir === templatesDir ? 'templates' : 'components'}/${c.folder}/component.json.`)};`);
 	add(`block.Public = ${isPublic ? 'true' : 'false'};`);
 	add(`block.RequiredScripts.Add(script);`);
 	c.inputs.forEach((p, i) => {
@@ -214,7 +224,7 @@ function block() {
 
 	const summary = `"PROBE:block=" + block.Name + " inputs=" + string.Join(",", block.InputParameters.Select(p => p.Name)) + " events=" + string.Join(",", block.Events.Select(e => e.Name)) + " actions=" + string.Join(",", block.ScreenActions.Select(a => a.Name).OrderBy(n => n)) + " scripts=" + string.Join(",", block.RequiredScripts.Select(s => s.Name))`;
 	const actions = [...c.events.map((e) => bridgeAction(e.name)), 'OnDestroy', ...(c.inputs.length ? ['OnParametersChanged'] : []), 'OnReady'].sort((a, b) => (a < b ? -1 : a > b ? 1 : 0));
-	const expected = `block=${blockName} inputs=${[...c.inputs.map((p) => p.name), 'ExtendedClass'].join(',')} events=${c.events.map((e) => e.name).join(',')} actions=${actions.join(',')} scripts=Components`;
+	const expected = `block=${blockName} inputs=${[...c.inputs.map((p) => p.name), 'ExtendedClass'].join(',')} events=${c.events.map((e) => e.name).join(',')} actions=${actions.join(',')} scripts=${SCRIPT}`;
 	const code = (tail) => `eSpace => {\n${L.join('\n')}${tail}\n}`;
 	write(`block-${c.folder}`, code(''), code(`\n\tthrow new Exception(${summary});`), expected);
 }
@@ -223,7 +233,7 @@ function block() {
 function harness() {
 	const c = contractOf(target);
 	const screenName = option('screen', `${c.class}Test`);
-	const flowName = option('flow', 'MainFlow');
+	const flowName = option('flow', config.o11.flow);
 	const blockName = option('block', c.class);
 	const L = [];
 	const add = (line) => L.push(`\t${line}`);
@@ -232,14 +242,16 @@ function harness() {
 	add(`if (flow.Nodes.OfType<IMobileScreen>().Any(s => s.Name == ${cs(screenName)})) throw new Exception("PROBE:a screen named ${screenName} already exists");`);
 	add(`var cardBlock = flow.Nodes.OfType<IMobileBlock>().FirstOrDefault(b => b.Name == ${cs(blockName)});`);
 	add(`if (cardBlock == null) throw new Exception("PROBE:no Block named ${blockName} in ${flowName}; apply the block lambda first");`);
-	add(`var layoutBlk = eSpace.MobileFlows.First(f => f.Name == "Layouts").Nodes.OfType<IMobileBlock>().First(b => b.Name == "LayoutTopMenu");`);
+	add(`var layoutBlk = eSpace.MobileFlows.First(f => f.Name == "Layouts").Nodes.OfType<IMobileBlock>().First(b => b.Name == ${cs(config.o11.layout)});`);
 	add(`var x = flow.Nodes.OfType<IMobileScreen>().Select(s => s.HorizontalPosition).DefaultIfEmpty(0).Max() + 1000;`);
 	add(`var scr = flow.CreateScreen(${cs(screenName)});`);
 	add(`scr.Widgets.ToList().ForEach(w => w.Delete());`);
-	add(`scr.Description = ${cs(`Test harness for the ${blockName} Block, generated from components/${c.folder}/component.json. Not an app screen; delete it once the Block is used on real screens.`)};`);
+	add(
+		`scr.Description = ${cs(`Test harness for the ${blockName} Block, generated from ${c.dir === templatesDir ? 'templates' : 'components'}/${c.folder}/component.json. Not an app screen; delete it once the Block is used on real screens.`)};`,
+	);
 	add(`scr.SetTitle(${cs(`"${c.class} test"`)});`);
 	add(`scr.HorizontalPosition = x; scr.VerticalPosition = 700;`);
-	add(`scr.Roles.Add(eSpace.SystemRoles.OfType<OutSystems.Model.Logic.ISystemRole>().First(r => r.Name == "Registered"));`);
+	add(`scr.Roles.Add(eSpace.SystemRoles.OfType<OutSystems.Model.Logic.ISystemRole>().First(r => r.Name == ${cs(config.o11.harnessRole)}));`);
 	add(`var layout = scr.CreateWidget<OutSystems.Model.UI.Mobile.Widgets.IMobileBlockInstanceWidget>();`);
 	add(`layout.SourceBlock = layoutBlk;`);
 	add(`layout.PlaceholdersContent.First(p => p.Placeholder?.Name == "Title").CreateWidget<OutSystems.Model.UI.Mobile.Widgets.ITextWidget>().Text = ${cs(`${c.class} test`)};`);

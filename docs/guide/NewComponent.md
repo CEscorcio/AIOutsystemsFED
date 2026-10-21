@@ -24,7 +24,7 @@ Two names, chosen once and used everywhere:
 | Name | Form | StatusBadge example | Becomes |
 |---|---|---|---|
 | Component | PascalCase | `StatusBadge` | the class, `dist/StatusBadge.js`, the Script and Block names in OutSystems |
-| Namespace | PascalCase, shared by the team | `MyCompany` | `window.MyCompany.StatusBadge`, what the Block's JavaScript calls |
+| Namespace | PascalCase, one per project, set in `factory.config.json` | `MyCompany` | `window.MyCompany.StatusBadge`, what the Block's JavaScript calls. Not chosen per component: the scaffold reads it, and `npm test` fails when a component uses another |
 
 The folder and the BEM block are derived from the component name: `components/status-badge/` and `status-badge`.
 
@@ -36,14 +36,14 @@ The folder and the BEM block are derived from the component name: `components/st
 ## Step 2: create the component from the example
 
 ```bash
-node .claude/skills/new-pattern/scaffold.mjs StatusBadge MyCompany
+node .claude/skills/new-pattern/scaffold.mjs StatusBadge
 npm install                                  # registers the new workspace
 npm test -w components/status-badge          # the copy passes all its checks
 ```
 
-> **With Claude Code:** "Create a StatusBadge component in the MyCompany namespace."
+> **With Claude Code:** "Create a StatusBadge component."
 
-This copies `components/greeting-card/` to `components/status-badge/` and renames the class, BEM block, stylesheet (`style/status-badge.scss`), namespace, bundle and test names.
+This copies `templates/greeting-card/` to `components/status-badge/` and renames the class, BEM block, stylesheet (`style/status-badge.scss`), namespace, bundle and test names.
 
 **Done when:** `npm test -w components/status-badge` is green, and this prints nothing:
 

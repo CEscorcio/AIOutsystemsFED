@@ -1,5 +1,5 @@
 // Release records: releases/<version>.json, one per committed release, and the
-// page generated from them, docs/Releases.md. A record holds what the release
+// page generated from them, docs/project/Releases.md. A record holds what the release
 // contains (files and per-component sections, with hashes, and each
 // component's contract), a description written by a person, the contract
 // changes since the previous release, and every deployment of it.
@@ -8,7 +8,7 @@ import { join } from 'node:path';
 import { root } from './contract.mjs';
 
 export const releasesDir = join(root, 'releases');
-export const releasesPage = join(root, 'docs', 'Releases.md');
+export const releasesPage = join(root, 'docs', 'project', 'Releases.md');
 
 export const compareVersions = (a, b) => {
 	const pa = a.split('.').map(Number);

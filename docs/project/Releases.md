@@ -32,7 +32,7 @@ GreetingCard after the SCSS conversion; the first release run end to end in OutS
 
 | Platform | Environment | Module | Script | Theme | Published | Verified |
 |---|---|---|---|---|---|---|
-| O11 | personal | Sandbox | Components | Sandbox | 2026-10-21 | Script identical to dist/components.js (platform adds a BOM); theme section identical to dist/components.css (served with CRLF); compiled Block checked (docs/Components_11.md, First run). Browser check not done. |
+| O11 | personal | Sandbox | Components | Sandbox | 2026-10-21 | Script identical to dist/components.js (platform adds a BOM); theme section identical to dist/components.css (served with CRLF); compiled Block checked (docs/guide/Components_11.md, First run). Browser check not done. |
 
 ## 2026.42.1
 

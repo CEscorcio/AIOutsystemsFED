@@ -21,6 +21,8 @@ import { join } from 'node:path';
 
 export const root = join(import.meta.dirname, '..', '..');
 export const componentsDir = join(root, 'components');
+// Examples the scaffold copies from: checked like components, never shipped.
+export const templatesDir = join(root, 'templates');
 
 // OutSystems basic types a contract may use, with their TypeScript and Model API forms.
 export const TYPES = {
@@ -30,20 +32,25 @@ export const TYPES = {
 	Boolean: { ts: 'boolean', modelApi: 'eSpace.BooleanType' },
 };
 
-export const kebab = (pascal) => pascal.replace(/([a-z0-9])([A-Z])/g, '$1-$2').toLowerCase();
+// The same rule as the scaffold: StatusBadge -> status-badge, XMLViewer -> xml-viewer.
+export const kebab = (pascal) =>
+	pascal
+		.replace(/([a-z0-9])([A-Z])/g, '$1-$2')
+		.replace(/([A-Z])([A-Z][a-z])/g, '$1-$2')
+		.toLowerCase();
 export const camel = (pascal) => pascal.charAt(0).toLowerCase() + pascal.slice(1);
 // OnGreetClicked -> TriggerGreetClicked: the Client Action a JS node can call ($actions lists Client Actions, not Block Events).
 export const bridgeAction = (eventName) => `Trigger${eventName.replace(/^On/, '')}`;
 
 const PASCAL = /^[A-Z][A-Za-z0-9]*$/;
 
-export function listComponents() {
-	return (existsSync(componentsDir) ? readdirSync(componentsDir) : []).filter((name) => existsSync(join(componentsDir, name, 'component.json'))).sort();
+export function listComponents(dir = componentsDir) {
+	return (existsSync(dir) ? readdirSync(dir) : []).filter((name) => existsSync(join(dir, name, 'component.json'))).sort();
 }
 
 // Returns { contract, errors }. errors is empty when the contract is valid.
-export function loadContract(folder) {
-	const path = join(componentsDir, folder, 'component.json');
+export function loadContract(folder, dir = componentsDir) {
+	const path = join(dir, folder, 'component.json');
 	const errors = [];
 	let c;
 	try {
@@ -83,5 +90,5 @@ export function loadContract(folder) {
 		if ((m.class || '').includes('--is-')) err(`modifiers[${i}]: --is-* is a state the component sets, not a modifier`);
 		if (!m.description) err(`modifiers[${i}].description is missing`);
 	}
-	return { contract: { inputs: [], events: [], modifiers: [], ...c, folder }, errors };
+	return { contract: { inputs: [], events: [], modifiers: [], ...c, folder, dir }, errors };
 }

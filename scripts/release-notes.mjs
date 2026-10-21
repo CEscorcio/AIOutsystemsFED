@@ -135,7 +135,7 @@ if (hook && newCss && parseHeader(newCss)?.version !== next.version) {
 }
 
 // A release commit carries its record (releases/<version>.json, from npm run
-// release:record), recorded for exactly these files; docs/Releases.md is
+// release:record), recorded for exactly these files; docs/project/Releases.md is
 // regenerated from the records and staged with it.
 if (hook) {
 	const recordText = show(`:releases/${next.version}.json`);
@@ -146,7 +146,7 @@ if (hook) {
 		fail(`releases/${next.version}.json was recorded for other files than the staged dist/; run npm run release:record again on this build`);
 	}
 	writePage();
-	git('add', 'docs/Releases.md');
+	git('add', 'docs/project/Releases.md');
 }
 
 // Components: added, removed, changed.

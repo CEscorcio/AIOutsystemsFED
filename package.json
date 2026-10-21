@@ -4,18 +4,20 @@
 	"description": "Custom front-end components for OutSystems. Each folder in components/ is an npm workspace with its own build and tests.",
 	"type": "module",
 	"workspaces": [
-		"components/*"
+		"components/*",
+		"templates/*"
 	],
 	"scripts": {
-		"lint": "eslint . && stylelint \"components/*/style/**/*.{css,scss}\" && prettier --check .",
-		"format": "prettier --write . && stylelint \"components/*/style/**/*.{css,scss}\" --fix && eslint . --fix",
+		"lint": "eslint . && node scripts/check-links.mjs && stylelint \"{components,templates}/*/style/**/*.{css,scss}\" && prettier --check .",
+		"format": "prettier --write . && stylelint \"{components,templates}/*/style/**/*.{css,scss}\" --fix && eslint . --fix",
 		"test": "npm run lint && npm test --workspaces && node scripts/check-contracts.mjs",
 		"build:all": "node scripts/build-all.mjs",
 		"prepare": "node scripts/install-hooks.mjs",
 		"release-notes": "node scripts/release-notes.mjs",
 		"check:contracts": "node scripts/check-contracts.mjs",
 		"release:record": "node scripts/release-record.mjs",
-		"o11:generate": "node platform/o11/generate.mjs"
+		"o11:generate": "node platform/o11/generate.mjs",
+		"init": "node scripts/init.mjs"
 	},
 	"devDependencies": {
 		"@eslint/js": "^10.0.1",

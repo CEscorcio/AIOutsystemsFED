@@ -4,27 +4,27 @@
 	"rules": {
 		"selector-class-pattern": [
 			"^[a-z0-9]+(-[a-z0-9]+)*(__[a-z0-9]+(-[a-z0-9]+)*)?(--[a-z0-9]+(-[a-z0-9]+)*)?$",
-			{ "message": "Class names are BEM: block, block__element, block--modifier (docs/Style.md, Rule 0)" }
+			{ "message": "Class names are BEM: block, block__element, block--modifier (docs/guide/Style.md, Rule 0)" }
 		],
-		"selector-max-id": [0, { "message": "No ids in selectors (docs/Style.md, Rule 3)" }],
-		"selector-max-type": [0, { "message": "No element selectors (docs/Style.md, Rule 3)" }],
+		"selector-max-id": [0, { "message": "No ids in selectors (docs/guide/Style.md, Rule 3)" }],
+		"selector-max-type": [0, { "message": "No element selectors (docs/guide/Style.md, Rule 3)" }],
 		"selector-max-compound-selectors": [
 			2,
 			{
-				"message": "One BEM class, prefixed at most by a modifier or an OutSystems UI context class (docs/Style.md, Rule 3)"
+				"message": "One BEM class, prefixed at most by a modifier or an OutSystems UI context class (docs/guide/Style.md, Rule 3)"
 			}
 		],
-		"declaration-no-important": [true, { "message": "No !important (docs/Style.md, Rule 3)" }],
-		"media-feature-name-disallowed-list": [["width", "min-width", "max-width"], { "message": "Switch widths on .phone / .tablet, not media queries (docs/Style.md, Rule 4)" }],
+		"declaration-no-important": [true, { "message": "No !important (docs/guide/Style.md, Rule 3)" }],
+		"media-feature-name-disallowed-list": [["width", "min-width", "max-width"], { "message": "Switch widths on .phone / .tablet, not media queries (docs/guide/Style.md, Rule 4)" }],
 		"property-disallowed-list": [
 			["left", "right", "margin-left", "margin-right", "padding-left", "padding-right", "border-left", "border-right"],
-			{ "message": "Use logical properties (inset-inline-start, padding-inline-start, ...) (docs/Style.md, Rule 5)" }
+			{ "message": "Use logical properties (inset-inline-start, padding-inline-start, ...) (docs/guide/Style.md, Rule 5)" }
 		],
 		"declaration-property-value-disallowed-list": [
 			{ "text-align": ["left", "right"], "outline": ["none", "0"] },
-			{ "message": "Use start/end, and never remove focus outlines (docs/Style.md, Rules 5 and 6)" }
+			{ "message": "Use start/end, and never remove focus outlines (docs/guide/Style.md, Rules 5 and 6)" }
 		],
-		"selector-pseudo-class-disallowed-list": [["focus", "focus-visible", "focus-within"], { "message": "Focus belongs to OutSystems UI (docs/Style.md, Rule 6)" }],
+		"selector-pseudo-class-disallowed-list": [["focus", "focus-visible", "focus-within"], { "message": "Focus belongs to OutSystems UI (docs/guide/Style.md, Rule 6)" }],
 		"order/order": ["custom-properties", "declarations"],
 		"color-hex-length": null,
 		"color-function-notation": null,
@@ -37,7 +37,7 @@
 			"files": ["**/*.scss"],
 			"extends": ["stylelint-config-standard-scss"],
 			"rules": {
-				"at-rule-disallowed-list": [["extend", "import"], { "message": "No @extend, and @use instead of @import (docs/Style.md, Rule 8)" }]
+				"at-rule-disallowed-list": [["extend", "import"], { "message": "No @extend, and @use instead of @import (docs/guide/Style.md, Rule 8)" }]
 			}
 		}
 	]
