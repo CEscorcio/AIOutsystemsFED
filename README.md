@@ -235,15 +235,15 @@ Start at [docs/README.md](docs/README.md): it lists every guide and what to read
 3. **stylelint can't check nested BEM names** (`&__title`) in SCSS. `npm test` catches them in the compiled CSS instead.
 4. **Prettier prints a warning on every run** about the `css` / `scss` `remove_blank_lines` entries in `.prettierrc.json`. They aren't Prettier options and are ignored.
 5. **`npm audit` reports a "high" advisory in `braces`,** a dependency of stylelint. No fixed version exists, and it only applies to malicious file patterns, which this repo doesn't have.
-6. **This project has no shipped component yet.** GreetingCard is now the template in `templates/`; `npm run build:all` refuses to make a release until `components/` has one. The Sandbox app keeps release 2026.43.1; a release without GreetingCard records its removal as breaking.
 
 ## Next Steps
 
-1. Do the browser click-through (step 8c) on the Sandbox `GreetingCardTest` screen and record it in [the run log](docs/project/FirstRun-2026-10-21.md)
-2. Run the generators against Service Studio once (dry runs) and record the result, then write a publish skill on top of them
-3. Choose the project's real namespace (`factory.config.json`), then build the first real component
-4. Add CI (`npm test`, a dist drift check) and a pull request template with the Definition of Done
-5. Extract the tooling into a versioned package once a second project uses the blueprint
+For the blueprint (this project's own status and next steps are in [docs/project/README.md](docs/project/README.md)):
+
+1. Run the generators against Service Studio once (dry runs) and record the result in [PlatformNotes.md](docs/guide/PlatformNotes.md), then write a publish skill on top of them
+2. Add CI (`npm test`, a dist drift check) and a pull request template with the Definition of Done
+3. Try the library module plus consumer app path in OutSystems 11
+4. Extract the tooling into a versioned package once a second project uses the blueprint
 
 ## Notes
 

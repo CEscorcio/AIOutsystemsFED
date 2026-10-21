@@ -13,7 +13,8 @@
 //   - package.json: the package name, and the outsystems-ui pin
 //   - README.md: the project name
 //   - empties the release history: releases/, dist/components.*, CHANGELOG.md,
-//     docs/project/ (except its README), then regenerates docs/project/Releases.md
+//     docs/project/ (its README is rewritten for the new project), then regenerates
+//     docs/project/Releases.md
 //   - removes components/* (the previous project's components), unless --keep-components
 // The guide (docs/guide/), the tooling and templates/ stay as they are.
 import { execFileSync } from 'node:child_process';
@@ -109,6 +110,12 @@ plan('CHANGELOG.md: no releases yet', () =>
 	writeFileSync(
 		join(root, 'CHANGELOG.md'),
 		'# Changelog\n\nRelease notes for `dist/components.js` and `dist/components.css`, newest first. The pre-commit hook adds a section when a commit includes a new version ([scripts/release-notes.mjs](scripts/release-notes.mjs)); the commit message says where the release was uploaded.\n',
+	),
+);
+plan('docs/project/README.md: a new project page', () =>
+	writeFileSync(
+		join(root, 'docs', 'project', 'README.md'),
+		"# Project records\n\nThis project's own documents, as opposed to the factory's guide in [../guide/](../guide/):\n\n- [Releases.md](Releases.md): every release, generated from `releases/` by `npm run release:record`; don't edit it\n- run logs: what happened when something was done for the first time in this project, one file each (`<What>-<date>.md`)\n- decisions that only apply to this project\n\nWhat a log teaches that would hold in any project goes into the guide instead, usually [PlatformNotes.md](../guide/PlatformNotes.md).\n\n## Status\n\n- **Components:** none yet. Create the first one from the template (docs/guide/NewComponent.md).\n\n## Next steps\n\n1. Build the first component\n",
 	),
 );
 plan('docs/project/Releases.md: regenerated, empty', () => writePage());
