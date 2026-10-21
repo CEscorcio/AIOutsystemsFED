@@ -1,0 +1,32 @@
+{
+	"class": "GreetingCard",
+	"block": "greeting-card",
+	"namespace": "ClaudeTest",
+	"description": "A card that greets a name and counts how many times its button was clicked.",
+	"inputs": [
+		{
+			"name": "Name",
+			"type": "Text",
+			"mandatory": true,
+			"default": "\"\"",
+			"description": "The name to greet. An empty name shows \"there\".",
+			"example": "\"OutSystems\""
+		},
+		{
+			"name": "ButtonLabel",
+			"type": "Text",
+			"mandatory": false,
+			"default": "\"Greet\"",
+			"description": "The button's text. Empty falls back to \"Greet\".",
+			"example": "\"Say hello\""
+		}
+	],
+	"events": [
+		{
+			"name": "OnGreetClicked",
+			"description": "Raised on every button click.",
+			"params": [{ "name": "Count", "type": "Integer", "description": "How many times the button was clicked." }]
+		}
+	],
+	"modifiers": [{ "class": "greeting-card--compact", "description": "Tighter padding and a smaller title." }]
+}

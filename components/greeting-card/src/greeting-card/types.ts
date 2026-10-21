@@ -1,5 +1,6 @@
-// The contract with the OutSystems Block. When the Block and the class
-// disagree, this file is the arbiter.
+// The contract with the OutSystems Block, in TypeScript. component.json
+// describes the same Block as data (the generators in platform/o11/ build
+// the Block from it); npm test fails when the two disagree.
 //
 // Block Input Parameters -> GreetingCardParameters
 //   Name           Text
@@ -9,7 +10,7 @@
 //                  container has Style Classes =
 //                  "greeting-card" + If(ExtendedClass <> NullTextIdentifier(), " " + ExtendedClass, "")
 //                  so it is deliberately absent from GreetingCardParameters.
-//                  Modifiers it accepts (BEM, see style/greeting-card.css):
+//                  Modifiers it accepts (BEM, see style/greeting-card.scss):
 //                    greeting-card--compact   tighter padding, smaller title
 //
 // Block Events -> GreetingCardEvents (each wired through a bridge Client Action,

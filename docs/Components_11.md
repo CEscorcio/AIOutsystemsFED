@@ -60,6 +60,23 @@ With O11 you aren't spending a quota, but **one element per request** is still t
 
 If your Service Studio is set to accept merges automatically, step 4 happens without a dialog. Look at the module afterwards anyway.
 
+### Generated lambdas
+
+The requests below describe each element in words. Since the first run, the repo generates them instead: `npm run o11:generate` reads `component.json` and `dist/`, and writes each lambda plus a probe to `platform/o11/out/`. In order:
+
+| Step | Command | Then |
+|---|---|---|
+| Script | `npm run o11:generate -- script` | Run `script.probe.cs` (a dry run) and compare with the printed values; apply `script.cs`; merge |
+| Stylesheet | `npm run o11:generate -- theme --theme <Theme>` | Apply `theme.cs` (it appends the section, or replaces it between the markers); run `theme.probe.cs` on the saved copy; merge |
+| Block | `npm run o11:generate -- block <component>` | Dry run with `block-<component>.probe.cs`; apply `block-<component>.cs`; read the Block back; merge |
+| Harness | `npm run o11:generate -- harness <component>` | Dry run, apply, merge |
+
+The agent passes each file's content to `applyModelApiCode` as it is. The probes report lengths, checksums or names, and the generator printed what they must be, so a copy that's off by one character is caught before the merge.
+
+> **Not yet run against Service Studio.** The generators reproduce the lambdas of the first run: the Block's JavaScript nodes are character for character what was published. But Service Studio closed before their own dry runs, so treat the first use as a test and record it here.
+
+What they don't do: change an existing Block (the generator stops if the Block exists; edit a contract change by hand), add a module dependency, or publish.
+
 ### Request A: the Script
 
 The agent reads `dist/GreetingCard.js` and assigns it to the Script's `JavaScript` property. The content goes in as a C# string literal, not through a model's rewrite. The main risk is in escaping, so the request asks for a check:

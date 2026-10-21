@@ -55,7 +55,7 @@ The copy still behaves like the greeting card. The next steps make it yours.
 
 ## Step 3: write the contract
 
-Edit `components/status-badge/src/status-badge/types.ts` first, before any other code. It lists, in its header comment and its interfaces:
+Edit `components/status-badge/component.json` and `components/status-badge/src/status-badge/types.ts` first, before any other code. `component.json` describes the Block as data: the generators build the Block and its harness from it, and the release records keep a copy of it. `types.ts` says the same in TypeScript. `npm test` fails when they disagree, or when the CSS styles a modifier `component.json` doesn't list. Between them they list:
 
 - every **Input Parameter** the Block will have, with its OutSystems type and default
 - `ExtendedClass` (Text, not mandatory, default `""`), applied by the Block's main container and **not** passed to the class
@@ -64,7 +64,9 @@ Edit `components/status-badge/src/status-badge/types.ts` first, before any other
 
 Details: [Components.md, step 2](Components.md#step-2-write-the-contract-first) and [the rules for every pattern](Components.md#rules-for-every-custom-pattern).
 
-**Done when:** someone could build the Block in OutSystems from this file alone.
+Keep `namespace` the same as the other components: every class registers on one global, and `npm test` fails when two components use different ones. `ExtendedClass` isn't listed in `component.json`; every Block gets it.
+
+**Done when:** `npm run check:contracts` passes, and someone could build the Block in OutSystems from `component.json` alone.
 
 ## Step 4: write the class
 
@@ -135,7 +137,7 @@ Follow [Components_11.md](Components_11.md). There are four parts: the **Script*
 | | |
 |---|---|
 | Guide | [Components_11.md, step 6](Components_11.md#step-6-the-platform-side-reviewed-in-service-studio) |
-| How | Model API edits, one element each, each reviewed in Service Studio's Compare-and-Merge |
+| How | Generated Model API lambdas (`npm run o11:generate`), one element each, each reviewed in Service Studio's Compare-and-Merge |
 | Before you start | [Prerequisites](Components_11.md#prerequisites) and the [four checks on steps 1 to 5](Components_11.md#before-step-6-four-o11-checks-on-steps-1-to-5) |
 
 > **With Claude Code:** "Add the StatusBadge Script, Block and a test screen to the \<app\> app." It follows Components_11.md, one element at a time, and won't publish until you ask.

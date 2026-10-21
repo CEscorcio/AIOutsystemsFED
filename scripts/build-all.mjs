@@ -89,6 +89,16 @@ for (const name of components) {
 	styles.push(...readOutputs(name, '.css'));
 }
 
+// Every component.json agrees with its code (scripts/check-contracts.mjs), after the builds.
+if (runTests) {
+	console.log('\n== contracts: node scripts/check-contracts.mjs');
+	try {
+		execSync('node scripts/check-contracts.mjs', { cwd: root, stdio: 'inherit' });
+	} catch {
+		fail('a contract disagrees with its code');
+	}
+}
+
 const now = new Date();
 const builtAt = now.toISOString();
 

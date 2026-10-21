@@ -1,0 +1,69 @@
+{
+	"version": "2026.43.1",
+	"built": "2026-10-21T11:22:39.077Z",
+	"description": "GreetingCard after the SCSS conversion; the first release run end to end in OutSystems 11 (Sandbox app).",
+	"sourceCommit": "64ee71f6af821f0a0d5fec14c84cddd31a696972",
+	"previousVersion": "2026.42.1",
+	"files": {
+		"dist/components.js": {
+			"bytes": 2627,
+			"sha256": "00b5ea7fb279c0c12a8852d6ca34d835b6de22af44e4f881b3433ee31f50abd3"
+		},
+		"dist/components.css": {
+			"bytes": 3595,
+			"sha256": "ac6e1155d361027d71cb3bc73c824c428536100ec06e08a61e496e8a0ee1cab7"
+		}
+	},
+	"components": [
+		{
+			"folder": "greeting-card",
+			"class": "GreetingCard",
+			"namespace": "ClaudeTest",
+			"contract": {
+				"inputs": [
+					{
+						"name": "Name",
+						"type": "Text",
+						"mandatory": true
+					},
+					{
+						"name": "ButtonLabel",
+						"type": "Text",
+						"mandatory": false
+					}
+				],
+				"events": [
+					{
+						"name": "OnGreetClicked",
+						"params": [
+							{
+								"name": "Count",
+								"type": "Integer"
+							}
+						]
+					}
+				],
+				"modifiers": [
+					"greeting-card--compact"
+				]
+			},
+			"contractSource": "today's component.json (the compiled JS is identical)",
+			"sha256": {
+				"js": "ee6b8d3e60a5d15861a0dcd4654bb36acd98650259ca34db1119a7c3bff76398",
+				"css": "3b54b753efc2423510d4686922ff94ceb8c2a540307d6c47b36d42441d3f2477"
+			}
+		}
+	],
+	"contractChanges": [],
+	"deployments": [
+		{
+			"platform": "O11",
+			"environment": "personal",
+			"module": "Sandbox",
+			"script": "Components",
+			"theme": "Sandbox",
+			"published": "2026-10-21",
+			"verified": "Script identical to dist/components.js (platform adds a BOM); theme section identical to dist/components.css (served with CRLF); compiled Block checked (docs/Components_11.md, First run). Browser check not done."
+		}
+	]
+}

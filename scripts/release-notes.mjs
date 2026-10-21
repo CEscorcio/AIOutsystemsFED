@@ -17,8 +17,10 @@
 // The previous release is the last commit before the new one that changed
 // dist/components.js (releases are committed only when uploaded; docs/AGENTS.md).
 import { execFileSync } from 'node:child_process';
+import { createHash } from 'node:crypto';
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
+import { writePage } from './lib/releases.mjs';
 
 const root = join(import.meta.dirname, '..');
 const changelogPath = join(root, 'CHANGELOG.md');
@@ -130,6 +132,21 @@ if (hook && newCss && parseHeader(newCss)?.version !== next.version) {
 	fail(
 		`the staged dist/components.css isn't from the same build as dist/components.js (${parseHeader(newCss)?.version || 'no version'} vs ${next.version}); stage both files from one npm run build:all`,
 	);
+}
+
+// A release commit carries its record (releases/<version>.json, from npm run
+// release:record), recorded for exactly these files; docs/Releases.md is
+// regenerated from the records and staged with it.
+if (hook) {
+	const recordText = show(`:releases/${next.version}.json`);
+	if (!recordText) fail(`stage releases/${next.version}.json with the release: run npm run release:record -- --description "..." --environment <label> --module <Module>, then git add releases/`);
+	const record = JSON.parse(recordText);
+	const sha = (text) => createHash('sha256').update(text).digest('hex');
+	if (record.files['dist/components.js'].sha256 !== sha(newJs) || record.files['dist/components.css'].sha256 !== sha(newCss || '')) {
+		fail(`releases/${next.version}.json was recorded for other files than the staged dist/; run npm run release:record again on this build`);
+	}
+	writePage();
+	git('add', 'docs/Releases.md');
 }
 
 // Components: added, removed, changed.

@@ -9,10 +9,13 @@
 	"scripts": {
 		"lint": "eslint . && stylelint \"components/*/style/**/*.{css,scss}\" && prettier --check .",
 		"format": "prettier --write . && stylelint \"components/*/style/**/*.{css,scss}\" --fix && eslint . --fix",
-		"test": "npm run lint && npm test --workspaces",
+		"test": "npm run lint && npm test --workspaces && node scripts/check-contracts.mjs",
 		"build:all": "node scripts/build-all.mjs",
 		"prepare": "node scripts/install-hooks.mjs",
-		"release-notes": "node scripts/release-notes.mjs"
+		"release-notes": "node scripts/release-notes.mjs",
+		"check:contracts": "node scripts/check-contracts.mjs",
+		"release:record": "node scripts/release-record.mjs",
+		"o11:generate": "node platform/o11/generate.mjs"
 	},
 	"devDependencies": {
 		"@eslint/js": "^10.0.1",
