@@ -172,7 +172,7 @@ AIOutsystemsFED/
 
 ## Limitations
 
-1. **The OutSystems side hasn't been run end to end yet** for a component (Script, stylesheet, Block and publish through Service Studio). [Components_11.md](docs/Components_11.md) marks those steps as not verified; record what happens the first time.
+1. **The OutSystems side has been run once**, for GreetingCard on 2026-10-21: Script, stylesheet, Block and harness through Service Studio, published, and the served files compared with `dist/` ([Components_11.md, First run](docs/Components_11.md#first-run-2026-10-21)). The browser click-through (step 8c) hasn't been done yet, and a library module plus consumer app hasn't been tried.
 2. **The preview page can't run the CSS checks.** A page opened from `file://` can't read a stylesheet's text, so those checks show as skipped there; `npm test` runs them.
 3. **stylelint can't check nested BEM names** (`&__title`) in SCSS. `npm test` catches them in the compiled CSS instead.
 4. **Prettier prints a warning on every run** about the `css` / `scss` `remove_blank_lines` entries in `.prettierrc.json`. They aren't Prettier options and are ignored.
@@ -181,8 +181,9 @@ AIOutsystemsFED/
 
 ## Next Steps
 
-1. Run the first component end to end in OutSystems 11 and record the results in [Components_11.md](docs/Components_11.md)
-2. Replace or move the `greeting-card` example once real components exist
+1. Do the browser click-through (step 8c) on the Sandbox `GreetingCardTest` screen and record it in [Components_11.md](docs/Components_11.md)
+2. Write a publish skill from the first run's steps
+3. Replace or move the `greeting-card` example once real components exist
 
 ## Notes
 

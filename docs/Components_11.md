@@ -2,9 +2,9 @@
 
 The OutSystems side of [Components.md](Components.md). It starts where that page's step 5 ends: you have a pattern with its contract, class, CSS and a green `npm test`. This page puts it into an O11 Reactive module as a Block, publishes it, and proves that what's live is what you wrote. The agent works through **Service Studio's own MCP server**, editing the module you have open with the OutSystems Model API, and you review every change in Service Studio's Compare-and-Merge window before it lands.
 
-> **Status: not yet run end to end.** Steps 1 to 5 are built and tested. Steps 6 to 8 are written from the Service Studio MCP's documented and verified behaviour, but this exact Block has not been built and published yet. Replace this note with your measurements once you've run it.
+> **Status: run end to end once, on 2026-10-21, except the browser check (8c).** GreetingCard shipped as release 2026.43.1 (`dist/components.js` and `dist/components.css`) into the O11 Sandbox app (Reactive, personal environment) through the Service Studio MCP: Script, theme stylesheet section, Block and a harness screen, one merge each, then one publish. Steps 8a and 8b passed; what was measured is in [First run: 2026-10-21](#first-run-2026-10-21). Step 8c (clicking through in a browser) hasn't been done yet.
 >
-> The Service Studio MCP workflow itself (editing a module, merging, publishing, checking what deployed) **has** been used on O11, to build two screens; what that showed is in [Working with the Service Studio MCP](#working-with-the-service-studio-mcp).
+> The Service Studio MCP workflow itself was also used earlier on O11 to build two screens; what that showed is in [Working with the Service Studio MCP](#working-with-the-service-studio-mcp).
 
 **Reactive Web only.** The bridge relies on Block lifecycle events (`OnReady`, `OnParametersChanged`, `OnDestroy`) and JavaScript nodes with `$parameters` / `$actions`. Those exist in Reactive Web and Mobile modules. Traditional Web Blocks don't have that lifecycle, so this recipe doesn't apply to them.
 
@@ -142,7 +142,7 @@ Two things the Service Studio MCP has shown about theme stylesheet edits:
 - **The first 2 characters after Theme Editor's block are dropped**, which can turn a leading `/*` into a stray `*/` that kills the next rule. The guard rule `.components-start { }` absorbs that, so start the section with it.
 - **The agent may report an `InvalidIconLibrary` error** after editing the theme stylesheet. It comes from the agent's own validator; Service Studio's validation of the merged module was clean and the edits published. Any other error still blocks the merge.
 
-**Not yet done with a component stylesheet**; record what happens here the first time.
+**Done once with `dist/components.css`** (2026-10-21): the section published intact; see [First run](#first-run-2026-10-21) for the line endings and the guard rule.
 
 ### Request C: a screen that uses it
 
@@ -209,6 +209,55 @@ Open the harness screen and click through:
 3. Typing in the input updates the greeting live (proves `onParametersChanged`).
 4. DevTools → Elements: the main container carries `greeting-card` plus any `ExtendedClass`, and every class inside it is `greeting-card__*`, `greeting-card--*` or OutSystems UI.
 5. DevTools → Console is clean.
+
+## First run: 2026-10-21
+
+GreetingCard, release 2026.43.1, into the Sandbox app (OutSystems UI 2.30.0). The release files went in rather than the single-component ones: the Script is named `Components` and holds `dist/components.js`; the theme section holds `dist/components.css`.
+
+**What was built**, each in its own dry run, apply and merge:
+
+| Element | What it is | Checked before merging |
+|---|---|---|
+| Script `Components` | `dist/components.js`, set from a C# string literal generated from the file | Length (2627), line count (73) and a checksum of the stored text matched the file |
+| Theme `Sandbox` stylesheet | Theme Editor's block untouched, then `.components-start { }`, the start marker, `dist/components.css`, the end marker | Read back after saving: the added text (3717 characters) matched by checksum |
+| Block `GreetingCard` (MainFlow, not Public) | Inputs, event, `Instance`, `MountPoint`, Required Script `Components`, `TriggerGreetClicked`, the three handlers, exactly as in Request B | Read back: JS, arguments and flows as specified |
+| Screen `GreetingCardTest` (MainFlow, `LayoutTopMenu`, Registered) | Request C on a screen of its own, since `Design` already had content | Dry run clean once the handler's `Count` argument was set |
+
+The publish (`omlPublish`) returned `Uploading, Compiling, Deploying, Done` with no errors.
+
+**8a, the Script.** Served as `scripts/<App>.Components.js`:
+
+| | Local `dist/components.js` | Published |
+|---|---|---|
+| Size | 2627 bytes | 2630 bytes |
+| BOM | no | yes (`EF BB BF`, the 3-byte difference) |
+| Line endings | LF | LF |
+| Final newline | yes | yes |
+| Code after removing the BOM | | **identical** |
+
+**The theme stylesheet.** Served as `css/<App>.<Theme>.css`:
+
+- The components section, between the markers, is **identical** to `dist/components.css` once line endings are normalised (3595 characters).
+- The platform serves the theme with **CRLF** line endings. Theme Editor's own CRLF lines come out as `\r\r\n`; harmless in CSS.
+- **No characters were dropped** after Theme Editor's block this time: the guard rule `.components-start { }` arrived whole. Keep it anyway; the drop was seen before.
+
+**8b, the compiled Block** (`scripts/<App>.MainFlow.GreetingCard.mvc.js`):
+
+- The three JS nodes are compiled verbatim, guards included (`if ($parameters.Instance)`, not rewritten).
+- `ExtendedClass` appears only in `MountPoint`'s style expression (`"greeting-card" + (… extendedClassIn …)`), never in a JS node.
+- The event goes through `$actions.TriggerGreetClicked`.
+- The Block loads `scripts/<App>.Components.js`.
+- The harness screen's compiled file has the handler's message (`"OnGreetClicked fired: Count = " + …`) and the `Say hello` label.
+
+**8c, the browser check:** not done yet. Open `/<App>/GreetingCardTest` (log in first; the screen is for Registered users) and go through the five checks in [8c](#8c-it-works-in-a-real-browser).
+
+**What the Model API needed** that Requests B and C don't say:
+
+- A Reactive container's Style Classes is `SetStyle(...)` on `ServiceStudio.Plugin.NRWidgets.IContainer`, not `SetStyleClasses`.
+- A Block's lifecycle handlers are Block screen actions wired with `block.OnReady.Destination = action` (and the same for `OnParametersChanged`, `OnDestroy`).
+- A Block event handler on an instance needs its argument set explicitly: `handler.Arguments.First(a => a.Parameter.Name == "Count").SetValue("Count")`. Without it, the module has a "Required Property Value" error.
+- A theme's `StyleSheet` reads back unchanged until the module is saved, so a dry run can't verify a theme edit. Save, read it back in a separate call, then merge.
+- The agent's validator reported `InvalidIconLibrary` on the theme after the stylesheet edit. The publish went through without it, as the Service Studio MCP skill documents.
 
 ## Working with the Service Studio MCP
 
