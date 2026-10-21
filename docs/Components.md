@@ -194,7 +194,7 @@ Each component's build also writes `dist/<Name>.css` from its `style/` folder: e
 - `dist/components.js`: every component's bundle, with `"use strict"` declared once at the top. Ship it as one Script (for example `Components`) instead of one Script per component.
 - `dist/components.css`: every component's stylesheet. Ship it in the app's theme stylesheet ([Style.md, Rule 7](Style.md#rule-7-where-a-patterns-css-lives)).
 
-Upload both files from the same build, so their timestamps match, and check them after publishing the same way as a single bundle: the published Script must match `dist/components.js`. Every build gets a new timestamp, so rebuild just before uploading and commit the files you uploaded.
+Upload both files from the same build, so their timestamps match, and check them after publishing the same way as a single bundle: the published Script must match `dist/components.js`. Every build gets a new timestamp, so rebuild just before uploading and commit the files you uploaded. The commit also gets the release's notes in `CHANGELOG.md`, added by the pre-commit hook (see the README, Release Notes).
 
 ## Step 5: prove it locally before going to the platform
 

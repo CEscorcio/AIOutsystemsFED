@@ -1,0 +1,5 @@
+#!/bin/sh
+# When this commit includes a new dist/components.js version, adds its release
+# notes to CHANGELOG.md and stages it (scripts/release-notes.mjs). Installed by
+# npm install, through the prepare script (scripts/install-hooks.mjs).
+exec node scripts/release-notes.mjs --hook

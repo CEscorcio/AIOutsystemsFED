@@ -77,6 +77,23 @@ The version is `<year>.<week>.<N>`:
 
 Commit them **only when they've been uploaded**: test builds don't use up version numbers, but a committed build does.
 
+### Release Notes
+
+Committing a new version adds its release notes to [CHANGELOG.md](CHANGELOG.md) in the same commit. A git pre-commit hook (`.githooks/pre-commit`, installed by `npm install`) runs `scripts/release-notes.mjs` whenever the staged `dist/components.js` has a version the last release didn't, and lists:
+
+- each component that was added, removed or changed (JS, CSS), compared with the previous release's files
+- the commits since the previous release, split into component commits and tooling and docs
+
+The hook stops the commit if `dist/components.js` and `dist/components.css` aren't from the same build. Ordinary commits are left alone.
+
+To see the notes for the build in `dist/` before committing it:
+
+```bash
+npm run release-notes
+```
+
+In a clone made before the hook existed, run `npm install` once to install it.
+
 ### Skipping the Tests
 
 For local experiments only, never for something going to OutSystems:
@@ -98,6 +115,7 @@ npm run build:all -- --no-test
 | `npm run lint`                         | ESLint, stylelint and a Prettier check                                             |
 | `npm run format`                       | Prettier, then stylelint and ESLint auto-fixes                                     |
 | `npm run build:all`                    | Lint, test, and write the versioned `dist/components.js` and `dist/components.css` |
+| `npm run release-notes`                | Print the release notes for the build in `dist/`                                   |
 
 ### Previewing a Component
 
@@ -125,8 +143,10 @@ AIOutsystemsFED/
 │       ├── preview/            # Local preview page
 │       └── dist/               # Built GreetingCard.js and GreetingCard.css
 ├── docs/                       # Documentation
-├── scripts/                    # build-all.mjs
+├── scripts/                    # build-all.mjs, release-notes.mjs, install-hooks.mjs
 ├── dist/                       # components.js and components.css (versioned)
+├── CHANGELOG.md                # Release notes, one section per committed version
+├── .githooks/                  # pre-commit: adds release notes to CHANGELOG.md
 ├── .claude/skills/new-pattern/ # Scaffold for new components
 └── .vscode/                    # Recommended extensions, format on save
 ```
@@ -163,7 +183,6 @@ AIOutsystemsFED/
 
 1. Run the first component end to end in OutSystems 11 and record the results in [Components_11.md](docs/Components_11.md)
 2. Replace or move the `greeting-card` example once real components exist
-4. Evaluate automated release notes on commit
 
 ## Notes
 

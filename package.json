@@ -10,7 +10,9 @@
 		"lint": "eslint . && stylelint \"components/*/style/**/*.{css,scss}\" && prettier --check .",
 		"format": "prettier --write . && stylelint \"components/*/style/**/*.{css,scss}\" --fix && eslint . --fix",
 		"test": "npm run lint && npm test --workspaces",
-		"build:all": "node scripts/build-all.mjs"
+		"build:all": "node scripts/build-all.mjs",
+		"prepare": "node scripts/install-hooks.mjs",
+		"release-notes": "node scripts/release-notes.mjs"
 	},
 	"devDependencies": {
 		"@eslint/js": "^10.0.1",
