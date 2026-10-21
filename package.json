@@ -1,13 +1,27 @@
 {
-  "name": "outsystems-front-end-ia",
-  "private": true,
-  "description": "Custom front-end components for OutSystems. Each folder in components/ is an npm workspace with its own build and tests.",
-  "type": "module",
-  "workspaces": [
-    "components/*"
-  ],
-  "scripts": {
-    "test": "npm test --workspaces",
-    "build:all": "node scripts/build-all.mjs"
-  }
+	"name": "outsystems-front-end-ia",
+	"private": true,
+	"description": "Custom front-end components for OutSystems. Each folder in components/ is an npm workspace with its own build and tests.",
+	"type": "module",
+	"workspaces": [
+		"components/*"
+	],
+	"scripts": {
+		"lint": "eslint . && stylelint \"components/*/style/**/*.css\" && prettier --check .",
+		"format": "prettier --write . && stylelint \"components/*/style/**/*.css\" --fix && eslint . --fix",
+		"test": "npm run lint && npm test --workspaces",
+		"build:all": "node scripts/build-all.mjs"
+	},
+	"devDependencies": {
+		"@eslint/js": "^10.0.1",
+		"eslint": "^10.13.0",
+		"eslint-config-prettier": "^10.1.8",
+		"globals": "^17.13.0",
+		"outsystems-ui": "2.30.0",
+		"prettier": "^3.9.10",
+		"stylelint": "^17.16.0",
+		"stylelint-config-standard": "^40.0.0",
+		"stylelint-order": "^8.1.2",
+		"typescript-eslint": "^8.72.0"
+	}
 }

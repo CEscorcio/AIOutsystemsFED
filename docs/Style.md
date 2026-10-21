@@ -160,7 +160,7 @@ Use `.is-rtl .greeting-card__… { … }` only for what logical properties can't
 
 `npm run build:all` adds a smoke test of the combined files before writing them: `components.js` loads and registers every component's class, and `components.css` has rules for every component and none outside their blocks. If any of that fails, nothing is written.
 
-What stays for review: semantic token choice, contrast, hover-only interactions, and whether a modifier belongs in the pattern at all. When you add a variable to the stylesheet, add it with its base value to `OSUI_TOKENS` in [`test/checks.js`](../components/greeting-card/test/checks.js).
+What stays for review: semantic token choice, contrast, hover-only interactions, and whether a modifier belongs in the pattern at all. The tests read every OutSystems UI variable and its value from the installed `outsystems-ui` package (`dist/O11.OutSystemsUI.css`, pinned in the root `package.json`), so there's no list to maintain. Many of these rules are also checked by stylelint (`.stylelintrc.json`) as you type, in an editor with the stylelint extension.
 
 ## Checklist for a new pattern
 

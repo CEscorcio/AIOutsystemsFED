@@ -17,16 +17,16 @@
 //   OnGreetClicked(Count: Integer)  <- Client Action TriggerGreetClicked(Count)
 
 export interface GreetingCardParameters {
-  name: string;
-  buttonLabel: string;
+	name: string;
+	buttonLabel: string;
 }
 
 export interface GreetingCardEvents {
-  OnGreetClicked?: (count: number) => void;
+	OnGreetClicked?: (count: number) => void;
 }
 
 export interface GreetingCardConfig extends GreetingCardParameters {
-  /** Runtime id of the Block's empty mount Container. */
-  runtimeId: string;
-  events?: GreetingCardEvents;
+	/** Runtime id of the Block's empty mount Container. */
+	runtimeId: string;
+	events?: GreetingCardEvents;
 }

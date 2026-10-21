@@ -1,4 +1,4 @@
-import { GreetingCard } from "./greeting-card/GreetingCard";
+import { GreetingCard } from './greeting-card/GreetingCard';
 
 // Registers window.ClaudeTest.GreetingCard for the Block's JS nodes.
 type Namespace = { GreetingCard?: typeof GreetingCard };

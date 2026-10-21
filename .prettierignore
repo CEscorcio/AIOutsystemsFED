@@ -1,0 +1,7 @@
+# Build output: checked by diffing against what's published, never reformatted
+dist/
+components/*/dist/
+node_modules/
+package-lock.json
+# Docs keep their hand-made tables and line breaks
+*.md

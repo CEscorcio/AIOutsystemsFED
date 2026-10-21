@@ -95,7 +95,7 @@ Edit `components/status-badge/style/status-badge.css`, following [Style.md](Styl
 - no focus styles; a `prefers-reduced-motion` override for any transition
 - no `!important`
 
-When you use a variable the tests don't know yet, add it with its base value to `OSUI_TOKENS` in `test/checks.js`. The values are in [Style.md's variable table](Style.md#the-variables-we-use-and-their-base-values).
+The tests read every OutSystems UI variable and its value from the installed `outsystems-ui` package (`dist/O11.OutSystemsUI.css`, pinned in the root `package.json`), so there's no list to maintain. The values are in [Style.md's variable table](Style.md#the-variables-we-use-and-their-base-values).
 
 **Done when:** you've gone through [Style.md's checklist](Style.md#checklist-for-a-new-pattern).
 

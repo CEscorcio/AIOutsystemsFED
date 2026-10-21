@@ -1,16 +1,16 @@
 {
-  "name": "greeting-card",
-  "version": "1.0.0",
-  "private": true,
-  "description": "TypeScript component driven from an OutSystems Block (Block-as-bridge POC)",
-  "scripts": {
-    "build": "node build.mjs",
-    "typecheck": "tsc --noEmit",
-    "test": "npm run typecheck && npm run build && node test/run.mjs"
-  },
-  "devDependencies": {
-    "esbuild": "0.25.0",
-    "jsdom": "26.0.0",
-    "typescript": "5.8.3"
-  }
+	"name": "greeting-card",
+	"version": "1.0.0",
+	"private": true,
+	"description": "TypeScript component driven from an OutSystems Block (Block-as-bridge POC)",
+	"scripts": {
+		"build": "node build.mjs",
+		"typecheck": "tsc --noEmit",
+		"test": "npm run typecheck && npm run build && node test/run.mjs"
+	},
+	"devDependencies": {
+		"esbuild": "0.25.0",
+		"jsdom": "26.0.0",
+		"typescript": "5.8.3"
+	}
 }

@@ -54,10 +54,24 @@ Needs Node.js LTS. Every command runs from the repo root: the components are npm
 
 ```bash
 npm install     # once, for every component
-npm test        # every component: typecheck, build, then the checks in jsdom
+npm test        # lint everything, then every component: typecheck, build, the checks in jsdom
 ```
 
-To work on one component, run its tests alone with `npm test -w components/greeting-card`, or run `npm test` inside its folder. Then open `components/greeting-card/preview/index.html` in a browser to see the component, or add `?test=1` to run the same checks there. No OutSystems environment is needed for any of this.
+To work on one component, run its tests alone with `npm test -w components/greeting-card`, or run `npm test` inside its folder. Then open `components/greeting-card/preview/index.html` in a browser to see the component with the real OutSystems UI stylesheet, or add `?test=1` to run the same checks there. No OutSystems environment is needed for any of this.
+
+### Lint and format
+
+The same tools as our other front-end projects, set up at the repo root:
+
+| Command | What it does |
+|---|---|
+| `npm run lint` | ESLint (TypeScript and scripts), stylelint (component CSS, with the Style.md rules) and a Prettier check. Part of `npm test` and `npm run build:all` |
+| `npm run format` | Prettier, then stylelint and ESLint auto-fixes |
+
+- **Prettier** uses `.prettierrc.json`: tabs, single quotes, 200-character lines. Its `css` / `scss` `remove_blank_lines` entries aren't Prettier options; Prettier ignores them and prints a warning.
+- **stylelint** (`.stylelintrc.json`) extends `stylelint-config-standard` with the Style.md rules: BEM class names, no ids or element selectors, no `!important`, no width media queries, logical properties only, no focus styles.
+- **OutSystems UI** comes from the `outsystems-ui` package, pinned to the version the O11 environment runs (2.30.0). The tests read its `:root` tokens to check every fallback, and the preview page loads its stylesheet.
+- **VS Code** recommends the ESLint, stylelint and Prettier extensions when you open the repo (`.vscode/`), and formats and fixes on save.
 
 To build **every** component for a release:
 
@@ -92,8 +106,10 @@ To start your own component, copy `components/greeting-card/` into `components/<
 
 ```
 README.md               this page
-CLAUDE.md               standing rules for the AI agent working in this repo
-package.json            npm workspaces (components/*) and the test / build:all commands
+package.json            npm workspaces (components/*), the dev tools, and the test / lint / format / build:all commands
+.prettierrc.json, .prettierignore, .stylelintrc.json, eslint.config.mjs
+                        formatter and linter settings
+.vscode/                recommended extensions and format-on-save
 package-lock.json       the one lockfile for every component
 docs/
   Components.md         the idea, the rules and steps 1 to 5
@@ -101,6 +117,7 @@ docs/
   Style.md              CSS rules for every component
   AppGuidelines.md      rules for app screens (layout, placeholders, classes)
   NewComponent.md       step-by-step checklist for building a new component
+  AGENTS.md             standing rules for an AI agent working in this repo
 components/             one folder per component, each an npm workspace
   greeting-card/        the example component new ones are copied from
     src/                contract (types.ts), class, global registration
