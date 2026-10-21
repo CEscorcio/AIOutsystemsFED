@@ -129,8 +129,8 @@ const header = (title, parts) => ['/*!', ` * Version: ${version}`, ` * ${title}`
 const js = scripts.map((p) => `// ---- ${p.label} ----\n;${p.text}`).join('\n\n');
 const css = styles.map((p) => `/* ---- ${p.label} ---- */\n${p.text}`).join('\n\n');
 
-const jsOut = `${header('OutSystems front-end components', scripts)}\n"use strict";\n\n${js}\n`;
-const cssOut = `${header('OutSystems front-end components: styles', styles)}\n\n${css}\n`;
+const jsOut = `${header('AIOutsystemsFED components', scripts)}\n"use strict";\n\n${js}\n`;
+const cssOut = `${header('AIOutsystemsFED components: styles', styles)}\n\n${css}\n`;
 
 // Smoke test of the two combined files, before anything is written:
 // - components.js runs in a page and registers every component's class

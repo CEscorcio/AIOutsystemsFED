@@ -1,5 +1,5 @@
 {
-	"name": "outsystems-front-end-ia",
+	"name": "ai-outsystems-fed",
 	"private": true,
 	"description": "Custom front-end components for OutSystems. Each folder in components/ is an npm workspace with its own build and tests.",
 	"type": "module",
