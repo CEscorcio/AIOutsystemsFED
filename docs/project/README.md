@@ -11,9 +11,13 @@ What a log teaches that would hold in any project goes into the guide instead, u
 ## Status
 
 - **Components:** CopyField, RelativeTime, Sparkline, ConfirmButton, ReadMore (2026-10-22), and GreetingCard, shipped as `components/greeting-card`: a copy of the template (`templates/greeting-card`), refactored to the current rules (translatable text, the `AIOutsystemsFED` namespace). Change both together; the template is what new components are copied from.
-- **Run logs:** [FirstRun-2026-10-21.md](FirstRun-2026-10-21.md), GreetingCard into the Sandbox app.
+- **Released:** 2026.43.2, all six components, in the Sandbox app (personal environment), with a `<Name>Test` screen each ([Releases.md](Releases.md)).
+- **Run logs:**
+  - [FirstRun-2026-10-21.md](FirstRun-2026-10-21.md): GreetingCard into the Sandbox app, by hand.
+  - [GeneratorRun-2026-10-22.md](GeneratorRun-2026-10-22.md): all six from the generators.
 
 ## Next steps
 
-1. Do the browser click-through (step 8c) on the Sandbox `GreetingCardTest` screen and add it to [the run log](FirstRun-2026-10-21.md)
-2. Build the first real component (the namespace is set: `window.AIOutsystemsFED.<Component>`, since 2026-10-22)
+1. Do the browser click-through (step 8c) on the six Sandbox test screens and add it to [the generator run log](GeneratorRun-2026-10-22.md)
+2. Give Boolean inputs a control (a switch) in the harness generator
+3. Use the Blocks on a real screen

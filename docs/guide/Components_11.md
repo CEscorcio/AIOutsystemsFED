@@ -73,7 +73,9 @@ The requests below describe each element in words. Since the first run, the repo
 
 The agent passes each file's content to `applyModelApiCode` as it is. The probes report lengths, checksums or names, and the generator printed what they must be, so a copy that's off by one character is caught before the merge.
 
-> **Not yet run against Service Studio.** The generators reproduce the lambdas of the first run: the Block's JavaScript nodes are character for character what was published. But Service Studio closed before their own dry runs, so treat the first use as a test and record it here.
+> **Run against Service Studio on 2026-10-22** (release 2026.43.2): the Script, the theme section (its replace path), six Blocks and six harness screens, each dry-run, applied and merged on its own, then published and compared with `dist/`. [PlatformNotes.md](PlatformNotes.md) has what that run measured.
+
+**Read the dry run's validation messages, not only the probe line.** The probe reports names and checksums. A mistake that leaves those right shows up only as a new message, such as the "Unused Element" warning that exposed a renamed parameter in that run. Compare the messages with the ones the module had before; anything new is about your change.
 
 What they don't do: change an existing Block (the generator stops if the Block exists; edit a contract change by hand), add a module dependency, or publish.
 
@@ -270,7 +272,7 @@ These are documented limits of the Service Studio MCP, not ones we hit on this p
 3. Request A (Script from file), request B (Block with bridge action and the main container's Style Classes), request C (harness). Review each Compare-and-Merge.
 4. Publish the library, refresh the dependency, publish the consumer; confirm the version in Service Center.
 5. Diff the Script, find the JS nodes, click through in the browser.
-6. Record what you measured here, and remove the "not yet run" status.
+6. Record anything new you measured in [PlatformNotes.md](PlatformNotes.md), and the release with `npm run release:record`.
 7. Only then use the Block on real screens.
 
 ## References

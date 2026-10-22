@@ -241,7 +241,7 @@ For a quick answer to "how do I…", see [docs/guide/HowTo.md](docs/guide/HowTo.
 
 ## Limitations
 
-1. **The OutSystems side has been run once** (2026-10-21): Script, stylesheet, Block and harness through Service Studio, published, and the served files compared with `dist/` ([PlatformNotes.md](docs/guide/PlatformNotes.md)). The browser click-through (step 8c) hasn't been done yet, the generated lambdas haven't been run against Service Studio, and a library module plus consumer app hasn't been tried.
+1. **The OutSystems side has been run twice:** by hand on 2026-10-21, and from the generators on 2026-10-22 (six components). Both times the Script, stylesheet, Blocks and harness screens went in through Service Studio and were published, and the served files were compared with `dist/` ([PlatformNotes.md](docs/guide/PlatformNotes.md)). The browser click-through (step 8c) hasn't been done yet, and neither has a library module plus consumer app. The harness generator gives Boolean inputs no control on the test screen.
 2. **The preview page can't run the CSS checks.** A page opened from `file://` can't read a stylesheet's text, so those checks show as skipped there; `npm test` runs them.
 3. **stylelint can't check nested BEM names** (`&__title`) in SCSS. `npm test` catches them in the compiled CSS instead.
 4. **Prettier prints a warning on every run** about the `css` / `scss` `remove_blank_lines` entries in `.prettierrc.json`. They aren't Prettier options and are ignored.
@@ -251,7 +251,7 @@ For a quick answer to "how do I…", see [docs/guide/HowTo.md](docs/guide/HowTo.
 
 For the blueprint (this project's own status and next steps are in [docs/project/README.md](docs/project/README.md)):
 
-1. Run the generators against Service Studio once (dry runs) and record the result in [PlatformNotes.md](docs/guide/PlatformNotes.md), then write a publish skill on top of them
+1. Write a publish skill on top of the generators (they ran against Service Studio on 2026-10-22), with the served-file check as a script, and give Boolean inputs a control in the harness
 2. A pull request template with the Definition of Done, Playwright tests on the preview pages, generated per-component READMEs, and GitHub Releases with artifact attestations
 3. Try the library module plus consumer app path in OutSystems 11
 4. Extract the tooling into a versioned package once a second project uses the blueprint
