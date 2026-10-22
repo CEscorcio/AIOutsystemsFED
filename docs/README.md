@@ -7,6 +7,8 @@ Two kinds of documents live here:
 
 ## Start here
 
+New here, or looking for how to do one thing? **[guide/HowTo.md](guide/HowTo.md)** has short recipes for every common task, from setting up a machine to releasing.
+
 | You are | Read, in order |
 |---|---|
 | **Building a component** (front-end developer) | [guide/NewComponent.md](guide/NewComponent.md) step by step; [guide/Style.md](guide/Style.md) before writing CSS; [guide/Components.md](guide/Components.md) for the reasons behind the rules |
@@ -19,6 +21,7 @@ Two kinds of documents live here:
 
 | Document | What it covers |
 |---|---|
+| [HowTo.md](guide/HowTo.md) | Short recipes for every common task, a failing-check table and a command cheat sheet |
 | [NewComponent.md](guide/NewComponent.md) | Step-by-step checklist for building a new component |
 | [Components.md](guide/Components.md) | The idea, the rules every component follows, and steps 1 to 5 (everything in the repo) |
 | [Components_11.md](guide/Components_11.md) | Steps 6 to 8 in OutSystems 11: Script, stylesheet, Block, harness screen, publish, verify |

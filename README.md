@@ -227,7 +227,7 @@ AIOutsystemsFED/
 
 ### Documentation
 
-Start at [docs/README.md](docs/README.md): it lists every guide and what to read first, by role. The guide is [docs/guide/](docs/guide/); this project's records are in [docs/project/](docs/project/), with every release in [Releases.md](docs/project/Releases.md).
+For a quick answer to "how do I…", see [docs/guide/HowTo.md](docs/guide/HowTo.md). Start at [docs/README.md](docs/README.md): it lists every guide and what to read first, by role. The guide is [docs/guide/](docs/guide/); this project's records are in [docs/project/](docs/project/), with every release in [Releases.md](docs/project/Releases.md).
 
 ## Considerations
 
