@@ -12,8 +12,12 @@ The Block is named `GreetingCard`. Generate it with `npm run o11:generate -- blo
 
 | Name | Type | Mandatory | Default | Description |
 |---|---|---|---|---|
-| `Name` | Text | Yes | `""` | The name to greet. An empty name shows "there". |
+| `Name` | Text | Yes | `""` | The name to greet. An empty name uses FallbackName. |
 | `ButtonLabel` | Text | No | `"Greet"` | The button's text. Empty falls back to "Greet". |
+| `Greeting` | Text | No | `"Hello, {name}!"` | The title, with {name} where the name goes. Translate it like any other label. |
+| `FallbackName` | Text | No | `"there"` | Used for {name} when Name is empty. |
+| `CountLabel` | Text | No | `"Greeted {count} times"` | The counter's text, with {count} where the number goes (used for every count but 1). |
+| `CountLabelOne` | Text | No | `"Greeted 1 time"` | The counter's text for a count of exactly 1; it may use {count} too. |
 | `ExtendedClass` | Text | No | `""` | Extra classes for the Block's main container, such as a modifier below. Applied by the Block; never reaches the class. |
 
 ### Events
@@ -34,8 +38,8 @@ Set through `ExtendedClass`, for example `ExtendedClass = "greeting-card--compac
 
 The release's Script registers `window.AIOutsystemsFED.GreetingCard`. The Block drives it from three lifecycle handlers:
 
-- **OnReady**: `new AIOutsystemsFED.GreetingCard({ runtimeId, name, buttonLabel, events })`, mounted in the Block's `MountPoint` container
-- **OnParametersChanged**: `instance.onParametersChanged({ name, buttonLabel })`
+- **OnReady**: `new AIOutsystemsFED.GreetingCard({ runtimeId, name, buttonLabel, greeting, fallbackName, countLabel, countLabelOne, events })`, mounted in the Block's `MountPoint` container
+- **OnParametersChanged**: `instance.onParametersChanged({ name, buttonLabel, greeting, fallbackName, countLabel, countLabelOne })`
 - **OnDestroy**: `instance.destroy()`
 
 ## Files

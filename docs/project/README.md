@@ -10,7 +10,7 @@ What a log teaches that would hold in any project goes into the guide instead, u
 
 ## Status
 
-- **Components:** none shipped yet. GreetingCard became the template in `templates/` (2026-10-21), so `npm run build:all` refuses to make a release until `components/` has one. The Sandbox app keeps release 2026.43.1; a release without GreetingCard records its removal as breaking.
+- **Components:** CopyField, RelativeTime, Sparkline, ConfirmButton, ReadMore (2026-10-22), and GreetingCard, shipped as `components/greeting-card`: a copy of the template (`templates/greeting-card`), refactored to the current rules (translatable text, the `AIOutsystemsFED` namespace). Change both together; the template is what new components are copied from.
 - **Run logs:** [FirstRun-2026-10-21.md](FirstRun-2026-10-21.md), GreetingCard into the Sandbox app.
 
 ## Next steps

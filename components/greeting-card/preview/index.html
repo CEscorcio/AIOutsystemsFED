@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<title>GreetingCard preview</title>
+		<!-- The base theme, as the app loads it: OutSystems UI from the installed package -->
+		<link rel="stylesheet" href="../../../node_modules/outsystems-ui/dist/O11.OutSystemsUI.css" />
+		<style>
+			body {
+				font-family: system-ui, sans-serif;
+				max-width: 640px;
+				margin: 32px auto;
+				padding: 0 16px;
+			}
+			#log {
+				font-family: ui-monospace, monospace;
+				font-size: 13px;
+				white-space: pre-wrap;
+			}
+			.pass {
+				color: #0a7a2f;
+			}
+			.fail {
+				color: #b00020;
+				font-weight: 600;
+			}
+			.skip {
+				color: #6a7178;
+			}
+		</style>
+		<!-- The component's own stylesheet, as the app loads it -->
+		<link rel="stylesheet" href="../dist/GreetingCard.css" />
+	</head>
+	<body>
+		<h1>GreetingCard</h1>
+		<p>Open with <code>?test=1</code> to run the scripted checks.</p>
+		<!-- Mirrors the Block's main container: pattern class + ExtendedClass -->
+		<div id="mount" class="greeting-card"></div>
+		<p id="events"></p>
+		<div id="log"></div>
+
+		<script src="../dist/GreetingCard.js"></script>
+		<!-- The checks every component passes, then this component's own -->
+		<script src="../../../packages/toolchain/structural-checks.js"></script>
+		<script src="../test/checks.js"></script>
+		<script>
+			// The build registers the class on the namespace in factory.config.json; find it
+			// without naming the namespace: the global that has __release and the class.
+			var GreetingCard = Object.keys(window)
+				.map(function (k) {
+					try {
+						return window[k] && window[k].__release && window[k].GreetingCard;
+					} catch (e) {
+						return null;
+					}
+				})
+				.filter(Boolean)[0];
+
+			new GreetingCard({
+				runtimeId: 'mount',
+				name: 'OutSystems',
+				buttonLabel: 'Greet',
+				events: {
+					OnGreetClicked: function (n) {
+						document.getElementById('events').textContent = 'OnGreetClicked(' + n + ')';
+					},
+				},
+			});
+
+			if (new URLSearchParams(location.search).get('test') === '1') {
+				var results = runComponentChecks(window, GreetingCard, componentTest);
+				var log = document.getElementById('log');
+				var failed = 0;
+				results.forEach(function (r) {
+					if (!r.ok) failed++;
+					var line = document.createElement('div');
+					line.className = r.skipped ? 'skip' : r.ok ? 'pass' : 'fail';
+					line.textContent = (r.skipped ? 'SKIP  ' : r.ok ? 'PASS  ' : 'FAIL  ') + r.name + (r.skipped ? ' (CSS checks run in npm test)' : '');
+					log.appendChild(line);
+				});
+				var summary = document.createElement('div');
+				summary.textContent = '\n' + (results.length - failed) + '/' + results.length + ' passed';
+				log.appendChild(summary);
+			}
+		</script>
+	</body>
+</html>

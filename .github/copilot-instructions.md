@@ -9,6 +9,7 @@ The essentials, in case you read only this:
 - **Never edit generated files**: `dist/`, `components/*/dist/`, `releases/`, `docs/project/Releases.md`, `CHANGELOG.md` entries, `platform/o11/out/`. Change the source and rebuild.
 - **Never invent OutSystems UI values.** Every colour, space, radius, shadow and font value in CSS is an OutSystems UI variable with its exact base-theme fallback ([Style.md](../docs/guide/Style.md), Rule 2). The tests check it.
 - **Platform data enters the DOM through `textContent` only**, never `innerHTML`. ESLint enforces it.
+- **Every visible string comes from an input** (with an English default), so screens can translate it.
 - **No server hostnames, URLs or keys** in committed files. Environments are labels like `dev` or `prod`.
 - The OutSystems side (Scripts, Blocks, publishing) runs through Service Studio's MCP server on a developer's Windows machine. In the cloud you can't reach it: prepare the change and the generated lambdas (`npm run o11:generate`), and say what's left for someone with Service Studio.
 

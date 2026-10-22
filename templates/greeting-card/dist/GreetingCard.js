@@ -1,13 +1,23 @@
 "use strict";
 (() => {
   // src/greeting-card/GreetingCard.ts
+  var DEFAULTS = {
+    name: "",
+    buttonLabel: "Greet",
+    greeting: "Hello, {name}!",
+    fallbackName: "there",
+    countLabel: "Greeted {count} times",
+    countLabelOne: "Greeted 1 time"
+  };
+  var fill = (template, values) => Object.keys(values).reduce((text, key) => text.split(`{${key}}`).join(values[key]), template);
   var GreetingCard = class {
     constructor(config) {
+      this.params = { ...DEFAULTS };
       this.count = 0;
       this.destroyed = false;
       this.handleClick = () => {
         this.count += 1;
-        this.renderCount();
+        this.render();
         if (this.events.OnGreetClicked) this.events.OnGreetClicked(this.count);
       };
       const mount = document.getElementById(config.runtimeId);
@@ -31,13 +41,15 @@
       this.button.addEventListener("click", this.handleClick);
       this.root.append(text, this.button);
       this.mount.replaceChildren(this.root);
-      this.applyParameters(config);
-      this.renderCount();
+      this.onParametersChanged(config);
     }
-    /** Called from the Block's OnParametersChanged handler. */
+    /** Called from the Block's OnParametersChanged handler. Partial updates keep the rest, and the count. */
     onParametersChanged(params) {
       if (this.destroyed) return;
-      this.applyParameters(params);
+      for (const key of Object.keys(DEFAULTS)) {
+        if (params[key] !== void 0) this.params[key] = params[key] || DEFAULTS[key];
+      }
+      this.render();
     }
     /** Called from the Block's OnDestroy handler. */
     destroy() {
@@ -47,12 +59,11 @@
       this.root.remove();
     }
     // Platform data enters the DOM through textContent only, never innerHTML.
-    applyParameters(params) {
-      if (params.name !== void 0) this.title.textContent = `Hello, ${params.name || "there"}!`;
-      if (params.buttonLabel !== void 0) this.button.textContent = params.buttonLabel || "Greet";
-    }
-    renderCount() {
-      this.countLabel.textContent = this.count === 1 ? "Greeted 1 time" : `Greeted ${this.count} times`;
+    render() {
+      const p = this.params;
+      this.title.textContent = fill(p.greeting, { name: p.name || p.fallbackName });
+      this.button.textContent = p.buttonLabel;
+      this.countLabel.textContent = fill(this.count === 1 ? p.countLabelOne : p.countLabel, { count: String(this.count) });
     }
   };
 

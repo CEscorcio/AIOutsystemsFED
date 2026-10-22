@@ -1,5 +1,5 @@
 {
-	"name": "greeting-card",
+	"name": "greeting-card-template",
 	"version": "1.0.0",
 	"private": true,
 	"description": "Example component: a TypeScript class driven from an OutSystems Block. The template new components are copied from.",

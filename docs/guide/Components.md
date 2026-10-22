@@ -106,7 +106,7 @@ The comment block at the top is the most useful thing in the file: when you late
 
 ### Rules for every custom pattern
 
-Three conventions apply to every pattern, so they behave like the patterns in OutSystems UI. Rule 0 is the golden rule: no pattern ships without it.
+Four conventions apply to every pattern, so they behave like the patterns in OutSystems UI. Rule 0 is the golden rule: no pattern ships without it.
 
 **Rule 0 (golden rule): every CSS class the pattern owns follows BEM, with the pattern class as the block.**
 
@@ -140,6 +140,8 @@ It's how a screen adapts one instance (spacing, a theme variant, a utility class
 - Because it's a platform expression, it updates live when `ExtendedClass` changes. The JavaScript doesn't need to know about it.
 
 **`ExtendedClass` is applied in one place only: that container.** Don't also apply it from the TypeScript class. Doing both puts every class on two nested elements, and a spacing class like `margin-top-m` would add its margin twice. That's why `extendedClass` isn't in `GreetingCardParameters`, isn't passed by the JS nodes, and the class never touches the mount element's own classes. `npm test` checks this last point.
+
+**Rule 3: every visible string arrives through an input.** OutSystems apps are routinely multilingual, and text written in the TypeScript class can't be translated. Give each label, message and template its own Text input, with the English text as its default, and use placeholders for values (`Greeting = "Hello, {name}!"`, `CountLabel = "Greeted {count} times"`). The class only falls back to those documented defaults when an input is empty. Where the browser can do the translating, prefer it and take a `Locale` input instead (RelativeTime uses `Intl.RelativeTimeFormat`). Screen-reader text counts as visible.
 
 ## Step 3: write the class to the bridge's rules
 

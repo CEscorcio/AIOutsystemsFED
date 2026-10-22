@@ -8,7 +8,7 @@
 			"type": "Text",
 			"mandatory": true,
 			"default": "\"\"",
-			"description": "The name to greet. An empty name shows \"there\".",
+			"description": "The name to greet. An empty name uses FallbackName.",
 			"example": "\"OutSystems\""
 		},
 		{
@@ -18,25 +18,46 @@
 			"default": "\"Greet\"",
 			"description": "The button's text. Empty falls back to \"Greet\".",
 			"example": "\"Say hello\""
+		},
+		{
+			"name": "Greeting",
+			"type": "Text",
+			"mandatory": false,
+			"default": "\"Hello, {name}!\"",
+			"description": "The title, with {name} where the name goes. Translate it like any other label.",
+			"example": "\"Hello, {name}!\""
+		},
+		{
+			"name": "FallbackName",
+			"type": "Text",
+			"mandatory": false,
+			"default": "\"there\"",
+			"description": "Used for {name} when Name is empty.",
+			"example": "\"there\""
+		},
+		{
+			"name": "CountLabel",
+			"type": "Text",
+			"mandatory": false,
+			"default": "\"Greeted {count} times\"",
+			"description": "The counter's text, with {count} where the number goes (used for every count but 1).",
+			"example": "\"Greeted {count} times\""
+		},
+		{
+			"name": "CountLabelOne",
+			"type": "Text",
+			"mandatory": false,
+			"default": "\"Greeted 1 time\"",
+			"description": "The counter's text for a count of exactly 1; it may use {count} too.",
+			"example": "\"Greeted 1 time\""
 		}
 	],
 	"events": [
 		{
 			"name": "OnGreetClicked",
 			"description": "Raised on every button click.",
-			"params": [
-				{
-					"name": "Count",
-					"type": "Integer",
-					"description": "How many times the button was clicked."
-				}
-			]
+			"params": [{ "name": "Count", "type": "Integer", "description": "How many times the button was clicked." }]
 		}
 	],
-	"modifiers": [
-		{
-			"class": "greeting-card--compact",
-			"description": "Tighter padding and a smaller title."
-		}
-	]
+	"modifiers": [{ "class": "greeting-card--compact", "description": "Tighter padding and a smaller title." }]
 }

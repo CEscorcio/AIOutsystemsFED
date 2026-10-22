@@ -48,12 +48,25 @@ var componentTest = {
 		card.onParametersChanged({ name: '', buttonLabel: '' });
 		t.check('empty name and label fall back', title.textContent === 'Hello, there!' && button.textContent === 'Greet');
 
+		// Every visible string comes from an input, so a screen can pass a translation.
+		card.onParametersChanged({ name: 'Ana', greeting: 'Olá, {name}!', countLabel: '{count} cumprimentos', countLabelOne: '1 cumprimento', buttonLabel: 'Cumprimentar' });
+		t.check('Greeting translates the title, with {name} filled in', title.textContent === 'Olá, Ana!');
+		t.check('CountLabel translates the counter, with {count} filled in', count.textContent === '2 cumprimentos');
+		button.click();
+		button.click();
+		card.onParametersChanged({ countLabel: '{count} cumprimentos' });
+		t.check('a translated counter keeps counting', count.textContent === '4 cumprimentos' && clicks[3] === 4);
+		card.onParametersChanged({ name: '', fallbackName: 'amigo' });
+		t.check('FallbackName is used for an empty Name', title.textContent === 'Olá, amigo!');
+		card.onParametersChanged({ greeting: '', countLabel: '' });
+		t.check('empty texts fall back to the documented defaults', title.textContent === 'Hello, amigo!' && count.textContent === 'Greeted 4 times');
+
 		card.onParametersChanged({ name: '<img src=x onerror=alert(1)>' });
 		t.check('markup in data renders as text, not HTML', host.querySelector('img') === null && title.textContent.indexOf('<img') !== -1);
 
 		card.destroy();
 		button.click();
-		t.check('destroy removes the click listener', clicks.length === 2);
+		t.check('destroy removes the click listener', clicks.length === 4);
 		host.remove();
 	},
 };

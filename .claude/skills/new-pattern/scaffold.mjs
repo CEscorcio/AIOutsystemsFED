@@ -124,6 +124,14 @@ function walk(dir) {
 }
 walk(to);
 
+// The package is named after the folder: workspace names must be unique, and the
+// template's own name (greeting-card-template) isn't a component's.
+const pkgPath = join(to, 'package.json');
+const pkg = JSON.parse(readFileSync(pkgPath, 'utf8'));
+pkg.name = kebab;
+pkg.description = `The ${pascal} component: a TypeScript class driven from an OutSystems Block (see component.json).`;
+writeFileSync(pkgPath, `${JSON.stringify(pkg, null, '\t')}\n`);
+
 console.log(`Created ${to}`);
 console.log(`  class      ${pascal}`);
 console.log(`  BEM block  ${kebab}`);
