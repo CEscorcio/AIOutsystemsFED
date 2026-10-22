@@ -6,6 +6,7 @@
 		"script": "Components",
 		"theme": "Sandbox",
 		"flow": "MainFlow",
+		"blockFlow": "Patterns",
 		"layout": "LayoutTopMenu",
 		"harnessRole": "Registered"
 	},

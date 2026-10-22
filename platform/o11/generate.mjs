@@ -8,9 +8,10 @@
 //   node platform/o11/generate.mjs script [--name <Script>]
 //   node platform/o11/generate.mjs theme [--theme <Theme>]
 //   node platform/o11/generate.mjs block <component> [--name <Block>] [--flow <Flow>] [--public]
-//   node platform/o11/generate.mjs harness <component> [--screen <Class>Test] [--flow <Flow>] [--block <Block>]
+//   node platform/o11/generate.mjs harness <component> [--screen <Class>Test] [--flow <Flow>] [--block <Block>] [--block-flow <Flow>]
 //
-// Script, theme, flow, layout and harness role default to factory.config.json ("o11").
+// Script, theme, flows, layout and harness role default to factory.config.json ("o11"):
+// Blocks go in o11.blockFlow, harness screens in o11.flow.
 // <component> is a folder in components/, or in templates/ for a dry run.
 //
 // Each command writes to platform/o11/out/ (not committed):
@@ -143,16 +144,18 @@ function theme() {
 function block() {
 	const c = contractOf(target);
 	const blockName = option('name', c.class);
-	const flowName = option('flow', config.o11.flow);
+	const flowName = option('flow', config.o11.blockFlow);
 	const isPublic = flag('public');
 	const ns = `${config.namespace}.${c.class}`;
 	const modifiers = c.modifiers.length ? ` Modifiers: ${c.modifiers.map((m) => `${m.class} (${m.description})`).join('; ')}.` : '';
 	const L = [];
 	const add = (line) => L.push(`\t${line}`);
 
-	add(`var flow = eSpace.MobileFlows.FirstOrDefault(f => f.Name == ${cs(flowName)});`);
-	add(`if (flow == null) throw new Exception("PROBE:no UI flow named ${flowName}");`);
-	add(`if (flow.Nodes.OfType<IMobileBlock>().Any(b => b.Name == ${cs(blockName)})) throw new Exception("PROBE:a Block named ${blockName} already exists; this generator only creates Blocks");`);
+	// The flow is created when missing (CreateMobileFlow, measured 2026-10-22). Block names are unique in the module.
+	add(`var flow = eSpace.MobileFlows.FirstOrDefault(f => f.Name == ${cs(flowName)}) ?? eSpace.CreateMobileFlow(${cs(flowName)});`);
+	add(
+		`if (eSpace.MobileFlows.SelectMany(f => f.Nodes).OfType<IMobileBlock>().Any(b => b.Name == ${cs(blockName)})) throw new Exception("PROBE:a Block named ${blockName} already exists; this generator only creates Blocks");`,
+	);
 	add(`var script = eSpace.Scripts.FirstOrDefault(s => s.Name == ${cs(SCRIPT)});`);
 	add(`if (script == null) throw new Exception("PROBE:no Script named ${SCRIPT}; apply script.cs first");`);
 	add(`var block = flow.CreateBlock(${cs(blockName)});`);
@@ -241,13 +244,14 @@ function harness() {
 	const screenName = option('screen', `${c.class}Test`);
 	const flowName = option('flow', config.o11.flow);
 	const blockName = option('block', c.class);
+	const blockFlow = option('block-flow', config.o11.blockFlow);
 	const L = [];
 	const add = (line) => L.push(`\t${line}`);
 	add(`var flow = eSpace.MobileFlows.FirstOrDefault(f => f.Name == ${cs(flowName)});`);
 	add(`if (flow == null) throw new Exception("PROBE:no UI flow named ${flowName}");`);
 	add(`if (flow.Nodes.OfType<IMobileScreen>().Any(s => s.Name == ${cs(screenName)})) throw new Exception("PROBE:a screen named ${screenName} already exists");`);
-	add(`var cardBlock = flow.Nodes.OfType<IMobileBlock>().FirstOrDefault(b => b.Name == ${cs(blockName)});`);
-	add(`if (cardBlock == null) throw new Exception("PROBE:no Block named ${blockName} in ${flowName}; apply the block lambda first");`);
+	add(`var cardBlock = eSpace.MobileFlows.Where(f => f.Name == ${cs(blockFlow)}).SelectMany(f => f.Nodes).OfType<IMobileBlock>().FirstOrDefault(b => b.Name == ${cs(blockName)});`);
+	add(`if (cardBlock == null) throw new Exception("PROBE:no Block named ${blockName} in ${blockFlow}; apply the block lambda first");`);
 	add(`var layoutBlk = eSpace.MobileFlows.First(f => f.Name == "Layouts").Nodes.OfType<IMobileBlock>().First(b => b.Name == ${cs(config.o11.layout)});`);
 	add(`var x = flow.Nodes.OfType<IMobileScreen>().Select(s => s.HorizontalPosition).DefaultIfEmpty(0).Max() + 1000;`);
 	add(`var scr = flow.CreateScreen(${cs(screenName)});`);

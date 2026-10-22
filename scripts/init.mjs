@@ -3,7 +3,7 @@
 //
 // Usage (from the repo root, in a copy made with GitHub's "Use this template"):
 //   npm run init -- --project <Name> --namespace <Namespace> [--outsystems-ui <version>]
-//                   [--theme <Theme>] [--flow <Flow>] [--script <Script>] [--keep-components] [--yes]
+//                   [--theme <Theme>] [--flow <Flow>] [--block-flow <Flow>] [--script <Script>] [--keep-components] [--yes]
 //
 // Without --yes it only prints what it would do. With --yes it does it; the git
 // working tree must be clean, so everything it changed shows in one diff.
@@ -51,6 +51,7 @@ const config = {
 		...before.o11,
 		...(option('theme') ? { theme: option('theme') } : {}),
 		...(option('flow') ? { flow: option('flow') } : {}),
+		...(option('block-flow') ? { blockFlow: option('block-flow') } : {}),
 		...(option('script') ? { script: option('script') } : {}),
 	},
 };
@@ -66,7 +67,7 @@ const actions = [];
 const plan = (text, run) => actions.push({ text, run });
 
 plan(
-	`factory.config.json: project "${config.project}", namespace ${config.namespace}, OutSystems UI ${config.outsystemsUi}, theme ${config.o11.theme}, flow ${config.o11.flow}, script ${config.o11.script}`,
+	`factory.config.json: project "${config.project}", namespace ${config.namespace}, OutSystems UI ${config.outsystemsUi}, theme ${config.o11.theme}, flow ${config.o11.flow}, blocks in ${config.o11.blockFlow}, script ${config.o11.script}`,
 	() => writeFileSync(configPath, `${JSON.stringify(config, null, '\t')}\n`),
 );
 

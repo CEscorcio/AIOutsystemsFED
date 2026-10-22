@@ -93,14 +93,14 @@ if (theme !== undefined) {
 for (const folder of positional.length ? positional : listComponents()) {
 	const { contract: c, errors } = loadContract(folder);
 	if (!c) fail(errors.join('\n'));
-	const block = await served(`scripts/${appName}.${config.o11.flow}.${c.class}.mvc.js`);
+	const block = await served(`scripts/${appName}.${config.o11.blockFlow}.${c.class}.mvc.js`);
 	if (block !== undefined) {
 		check(block.includes(`new ${config.namespace}.${c.class}(`), `${c.class}: creates ${config.namespace}.${c.class}`);
 		check(block.includes('.onParametersChanged(') && block.includes('.destroy()'), `${c.class}: updates and destroys it`);
 		for (const e of c.events) check(block.includes(bridgeAction(e.name)), `${c.class}: wires ${bridgeAction(e.name)}`);
 	}
 	const screen = await served(`scripts/${appName}.${config.o11.flow}.${c.class}Test.mvc.js`);
-	if (screen !== undefined) check(screen.includes(`${config.o11.flow}.${c.class}`), `${c.class}Test: uses the ${c.class} Block`);
+	if (screen !== undefined) check(screen.includes(`${config.o11.blockFlow}.${c.class}`), `${c.class}Test: uses the ${c.class} Block`);
 }
 
 console.log(failed ? `verify: ${failed} check(s) failed` : `verify: ${appName} serves dist/ ${version}`);

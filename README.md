@@ -52,7 +52,7 @@ This repository is a blueprint. Everything that differs between projects is in `
   "project": "AIOutsystemsFED",      // README title, header of the combined files
   "namespace": "AIOutsystemsFED",    // the build registers every class as window.<namespace>.<Class>
   "outsystemsUi": "2.30.0",          // the version your O11 environment runs; must match the outsystems-ui pin
-  "o11": { "script": "Components", "theme": "Sandbox", "flow": "MainFlow", "layout": "LayoutTopMenu", "harnessRole": "Registered" },
+  "o11": { "script": "Components", "theme": "Sandbox", "flow": "MainFlow", "blockFlow": "Patterns", "layout": "LayoutTopMenu", "harnessRole": "Registered" },
   "budgets": { "releaseJsKB": 100, "releaseCssKB": 50 }  // build:all fails over them
 }
 ```

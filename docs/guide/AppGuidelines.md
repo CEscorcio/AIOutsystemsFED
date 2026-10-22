@@ -41,11 +41,12 @@ Every new app screen is created in the **`MainFlow`** UI flow. Don't add screens
 
 **Why:**
 
-- **Each flow has one job.** The app template splits the module into three flows, and only one of them is for the app's own screens:
+- **Each flow has one job.** The app template splits the module into three flows, and this factory adds a fourth for its component Blocks. Only one of them is for the app's own screens:
 
   | Flow | Holds | New screens? |
   |---|---|---|
-  | `MainFlow` | The app's screens | **Yes** |
+  | `MainFlow` | The app's screens, including each component's `<Class>Test` screen | **Yes** |
+  | `Patterns` | The component Blocks (the bridges to `window.<namespace>`), and nothing else (`o11.blockFlow` in `factory.config.json`) | No |
   | `Common` | The template's system screens (`Login`, `InvalidPermissions`) and shared blocks (`Menu`, `ApplicationTitle`, `UserInfo`, `MenuIcon`) | No |
   | `Layouts` | The layout blocks (`LayoutTopMenu`, `LayoutBlank`, `LayoutSideMenu`, …) | No |
 
@@ -59,7 +60,7 @@ Every new app screen is created in the **`MainFlow`** UI flow. Don't add screens
 
 **How to check:** in Service Studio, the screen appears under **Interface → UI Flows → MainFlow**. With the agent, `getScreenNames` lists each screen with its `UIFlow`, which should be `MainFlow` for every screen except `Login` and `InvalidPermissions`.
 
-**Measured on:** the O11 Sandbox app. The template created `Layouts`, `Common` and `MainFlow`, with `MainFlow` empty, and the `Wireframe` screen was created in `MainFlow`.
+**Measured on:** the O11 Sandbox app. The template created `Layouts`, `Common` and `MainFlow`, with `MainFlow` empty, and the `Wireframe` screen was created in `MainFlow`. On 2026-10-22 the six component Blocks were moved from `MainFlow` into a new `Patterns` flow (`CreateMobileFlow`, then `Services.ModelServices.MoveObject`). Their test screens kept using them, and validation was unchanged.
 
 ## Rule 3: style screens with OutSystems UI classes only
 
