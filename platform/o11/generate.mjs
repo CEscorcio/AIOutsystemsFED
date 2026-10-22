@@ -177,13 +177,19 @@ function block() {
 	add(`mount.SetStyle(${cs(`"${c.block}" + If(ExtendedClass <> NullTextIdentifier(), " " + ExtendedClass, "")`)});`);
 
 	// One bridge Client Action per event: $actions in a JS node lists Client Actions, not Block Events.
+	// A parameter named like a Block input would be renamed (Value -> Value2) and the trigger's
+	// argument would then read the Block input; such parameters get an Event prefix instead.
+	const blockInputs = new Set([...c.inputs.map((p) => p.name), 'ExtendedClass', 'Instance']);
 	c.events.forEach((e, i) => {
 		const a = `tr${i}`;
 		add(`var ${a} = block.CreateScreenAction(${cs(bridgeAction(e.name))});`);
-		(e.params || []).forEach((p, j) => add(`var ${a}p${j} = ${a}.CreateInputParameter(${cs(p.name)}); ${a}p${j}.DataType = ${TYPES[p.type].modelApi};`));
+		(e.params || []).forEach((p, j) => {
+			const name = blockInputs.has(p.name) ? `Event${p.name}` : p.name;
+			add(`var ${a}p${j} = ${a}.CreateInputParameter(${cs(name)}); ${a}p${j}.DataType = ${TYPES[p.type].modelApi};`);
+		});
 		add(`var ${a}Start = ${a}.CreateNode<OutSystems.Model.Logic.Nodes.IStartNode>();`);
 		add(`var ${a}Node = ${a}.CreateNode<OutSystems.Model.Logic.Nodes.ITriggerNode>().ConnectedBelow(${a}Start); ${a}Node.Event = ev${i};`);
-		(e.params || []).forEach((p, j) => add(`${a}Node.SetArgumentValue(ev${i}p${j}, ${cs(p.name)});`));
+		(e.params || []).forEach((p, j) => add(`${a}Node.SetArgumentValue(ev${i}p${j}, ${a}p${j}.Name);`));
 		add(`${a}.CreateNode<OutSystems.Model.Logic.Nodes.IEndNode>().ConnectedBelow(${a}Node);`);
 	});
 
