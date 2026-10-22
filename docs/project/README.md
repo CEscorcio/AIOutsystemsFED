@@ -16,4 +16,4 @@ What a log teaches that would hold in any project goes into the guide instead, u
 ## Next steps
 
 1. Do the browser click-through (step 8c) on the Sandbox `GreetingCardTest` screen and add it to [the run log](FirstRun-2026-10-21.md)
-2. Choose the project's real namespace (`factory.config.json`), then build the first real component
+2. Build the first real component (the namespace is set: `window.AIOutsystemsFED.<Component>`, since 2026-10-22)
