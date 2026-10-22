@@ -1,0 +1,20 @@
+/*
+ * RelativeTime styles, written to the rules in docs/guide/Style.md.
+ *
+ * - Every colour and font value is an OutSystems UI variable with its
+ *   base-theme value (OutSystems UI 2.30.0) as fallback.
+ * - BEM block relative-time:
+ *     elements  relative-time__value (a <time> element)
+ *     modifiers relative-time--muted   (passed by a screen through ExtendedClass)
+ * - It inherits the surrounding text's size and colour unless muted, so it
+ *   reads as part of a sentence ("Updated 3 minutes ago").
+ */
+.relative-time__value {
+	white-space: nowrap;
+	cursor: help;
+}
+
+.relative-time--muted .relative-time__value {
+	font-size: var(--font-size-s, 14px);
+	color: var(--color-neutral-7, #6a7178);
+}

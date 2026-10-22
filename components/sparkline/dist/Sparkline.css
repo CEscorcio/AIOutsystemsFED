@@ -1,0 +1,44 @@
+/*
+ * Sparkline styles, written to the rules in docs/guide/Style.md.
+ *
+ * - Every colour and size is an OutSystems UI variable with its base-theme
+ *   value (OutSystems UI 2.30.0) as fallback, so the app's theme recolours it.
+ * - BEM block sparkline:
+ *     elements  sparkline__chart (the <svg>), __line, __dot
+ *     modifiers sparkline--positive, sparkline--negative (through ExtendedClass)
+ * - The SVG fills its container's width; its height follows the text size.
+ */
+.sparkline__chart {
+	display: block;
+	width: 100%;
+	height: var(--space-m, 24px);
+	overflow: visible;
+}
+
+.sparkline__line {
+	fill: none;
+	stroke: var(--color-primary, #1068eb);
+	stroke-width: var(--border-size-m, 2px);
+	stroke-linecap: round;
+	stroke-linejoin: round;
+}
+
+.sparkline__dot {
+	fill: var(--color-primary, #1068eb);
+}
+
+.sparkline--positive .sparkline__line {
+	stroke: var(--color-success, #29823b);
+}
+
+.sparkline--positive .sparkline__dot {
+	fill: var(--color-success, #29823b);
+}
+
+.sparkline--negative .sparkline__line {
+	stroke: var(--color-error, #dc2020);
+}
+
+.sparkline--negative .sparkline__dot {
+	fill: var(--color-error, #dc2020);
+}

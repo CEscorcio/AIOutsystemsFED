@@ -1,0 +1,47 @@
+{
+	"class": "ConfirmButton",
+	"block": "confirm-button",
+	"description": "A button for destructive actions that asks for a second click: the first click arms it, the second confirms, and it disarms after a few seconds, on blur or on Escape.",
+	"inputs": [
+		{
+			"name": "Label",
+			"type": "Text",
+			"mandatory": true,
+			"default": "\"\"",
+			"description": "The button's text before it's armed.",
+			"example": "\"Delete order\""
+		},
+		{
+			"name": "ConfirmLabel",
+			"type": "Text",
+			"mandatory": false,
+			"default": "\"Click again to confirm\"",
+			"description": "The button's text while it's armed, also announced to screen readers.",
+			"example": "\"Click again to delete\""
+		},
+		{
+			"name": "TimeoutSeconds",
+			"type": "Integer",
+			"mandatory": false,
+			"default": "4",
+			"description": "How long it stays armed before going back to Label. 0 or less uses 4.",
+			"example": "4"
+		},
+		{
+			"name": "IsDisabled",
+			"type": "Boolean",
+			"mandatory": false,
+			"default": "False",
+			"description": "Disables the button, and disarms it.",
+			"example": "False"
+		}
+	],
+	"events": [
+		{
+			"name": "OnConfirmed",
+			"description": "Raised on the second click, while armed. Do the destructive action here.",
+			"params": []
+		}
+	],
+	"modifiers": [{ "class": "confirm-button--full-width", "description": "The button fills its container's width, as on phones." }]
+}

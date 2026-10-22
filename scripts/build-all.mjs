@@ -174,7 +174,7 @@ for (const [file, text, budget] of [
 ]) {
 	if (budget && kb(text) > budget) fail(`${file} is ${kb(text).toFixed(1)} KB, over its ${budget} KB budget (factory.config.json "budgets"); shrink it, or raise the budget deliberately`);
 }
-const plural = (count, word) => `${count} ${word}${count === 1 ? '' : 's'}`;
+const plural = (count, word) => `${count} ${word}${count === 1 ? '' : /(s|x|ch|sh)$/.test(word) ? 'es' : 's'}`;
 console.log(`\nSmoke test: components.js loads and registers ${plural(components.length, 'class')} and __release ${version}; components.css styles ${plural(components.length, 'component')}`);
 
 mkdirSync(join(root, 'dist'), { recursive: true });

@@ -1,0 +1,44 @@
+/*
+ * ReadMore styles, written to the rules in docs/guide/Style.md.
+ *
+ * - Every colour, space and font value is an OutSystems UI variable with its
+ *   base-theme value (OutSystems UI 2.30.0) as fallback.
+ * - BEM block read-more:
+ *     elements  read-more__text, __toggle (a link-styled button)
+ *     state     read-more__text--is-clamped   (set by the component)
+ *     modifiers read-more--muted               (through ExtendedClass)
+ * - The number of lines is set by the component on the element
+ *   (-webkit-line-clamp), because it comes from an Input Parameter.
+ * - Focus is left to OutSystems UI.
+ */
+.read-more__text {
+	margin: 0;
+	white-space: pre-line;
+	overflow-wrap: anywhere;
+}
+
+.read-more__text--is-clamped {
+	display: -webkit-box;
+	overflow: hidden;
+	-webkit-box-orient: vertical;
+}
+
+.read-more__toggle {
+	margin-block-start: var(--space-xs, 4px);
+	padding: var(--space-none, 0);
+	font-size: var(--font-size-s, 14px);
+	font-weight: var(--font-semi-bold, 600);
+	color: var(--color-primary, #1068eb);
+	cursor: pointer;
+	background: none;
+	border: none;
+}
+
+.read-more__toggle:hover {
+	text-decoration: underline;
+}
+
+.read-more--muted .read-more__text {
+	font-size: var(--font-size-s, 14px);
+	color: var(--color-neutral-7, #6a7178);
+}

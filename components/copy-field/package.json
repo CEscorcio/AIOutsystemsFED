@@ -1,0 +1,10 @@
+{
+	"name": "copy-field",
+	"version": "1.0.0",
+	"private": true,
+	"description": "Example component: a TypeScript class driven from an OutSystems Block. The template new components are copied from.",
+	"scripts": {
+		"build": "node ../../packages/toolchain/build.mjs",
+		"test": "node ../../packages/toolchain/test.mjs"
+	}
+}

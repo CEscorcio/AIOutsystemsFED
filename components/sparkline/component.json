@@ -1,0 +1,36 @@
+{
+	"class": "Sparkline",
+	"block": "sparkline",
+	"description": "Draws a small inline trend line from a list of numbers, for KPI cards and table rows, in the theme's colours.",
+	"inputs": [
+		{
+			"name": "Values",
+			"type": "Text",
+			"mandatory": true,
+			"default": "\"\"",
+			"description": "The numbers, in order, separated by commas, semicolons or spaces (for example 3,5,2,8). Use a dot for decimals. Fewer than two numbers draw nothing.",
+			"example": "\"3,5,4,8,6,9,12\""
+		},
+		{
+			"name": "Label",
+			"type": "Text",
+			"mandatory": false,
+			"default": "\"\"",
+			"description": "What the line shows, read by screen readers (for example Sales, last 7 days). The first and last values are added to it.",
+			"example": "\"Orders, last 7 days\""
+		},
+		{
+			"name": "ShowLast",
+			"type": "Boolean",
+			"mandatory": false,
+			"default": "True",
+			"description": "Mark the last point with a dot.",
+			"example": "True"
+		}
+	],
+	"events": [],
+	"modifiers": [
+		{ "class": "sparkline--positive", "description": "The line in the success colour, for a trend that's good news." },
+		{ "class": "sparkline--negative", "description": "The line in the error colour, for a trend that's bad news." }
+	]
+}

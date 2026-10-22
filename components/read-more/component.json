@@ -1,0 +1,47 @@
+{
+	"class": "ReadMore",
+	"block": "read-more",
+	"description": "Shows long text clamped to a number of lines, with a Show more / Show less toggle that only appears when the text doesn't fit.",
+	"inputs": [
+		{
+			"name": "Text",
+			"type": "Text",
+			"mandatory": true,
+			"default": "\"\"",
+			"description": "The text. Line breaks are kept.",
+			"example": "\"OutSystems apps often show long descriptions, notes or comments in lists and cards. This one is clamped to three lines, with a toggle to read the rest without leaving the screen or opening a popup.\""
+		},
+		{
+			"name": "Lines",
+			"type": "Integer",
+			"mandatory": false,
+			"default": "3",
+			"description": "How many lines to show while collapsed. 0 or less uses 3.",
+			"example": "3"
+		},
+		{
+			"name": "MoreLabel",
+			"type": "Text",
+			"mandatory": false,
+			"default": "\"Show more\"",
+			"description": "The toggle's text while collapsed.",
+			"example": "\"Show more\""
+		},
+		{
+			"name": "LessLabel",
+			"type": "Text",
+			"mandatory": false,
+			"default": "\"Show less\"",
+			"description": "The toggle's text while expanded.",
+			"example": "\"Show less\""
+		}
+	],
+	"events": [
+		{
+			"name": "OnToggled",
+			"description": "Raised when the user expands or collapses the text.",
+			"params": [{ "name": "IsExpanded", "type": "Boolean", "description": "True when the text is now shown in full." }]
+		}
+	],
+	"modifiers": [{ "class": "read-more--muted", "description": "Secondary text colour and a smaller size, for descriptions under a title." }]
+}

@@ -83,9 +83,11 @@ function checkOne(dir, folder, label) {
 		for (const m of params) if (!expected.some((e) => e.name === m.name)) at(`${c.class}Parameters.${m.name} isn't an input in component.json`);
 	}
 
+	// A component without events may leave the interface out (an empty interface fails ESLint).
 	const events = readInterface(join(base, 'src'), `${c.class}Events`);
-	if (!events) at(`no interface ${c.class}Events in src/`);
-	else {
+	if (!events) {
+		if (c.events.length) at(`no interface ${c.class}Events in src/`);
+	} else {
 		for (const e of c.events) {
 			const m = events.find((x) => x.name === e.name);
 			if (!m) {

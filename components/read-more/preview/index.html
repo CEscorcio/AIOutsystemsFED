@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<title>ReadMore preview</title>
+		<!-- The base theme, as the app loads it: OutSystems UI from the installed package -->
+		<link rel="stylesheet" href="../../../node_modules/outsystems-ui/dist/O11.OutSystemsUI.css" />
+		<style>
+			body {
+				font-family: system-ui, sans-serif;
+				max-width: 640px;
+				margin: 32px auto;
+				padding: 0 16px;
+			}
+			#log {
+				font-family: ui-monospace, monospace;
+				font-size: 13px;
+				white-space: pre-wrap;
+			}
+			.pass {
+				color: #0a7a2f;
+			}
+			.fail {
+				color: #b00020;
+				font-weight: 600;
+			}
+			.skip {
+				color: #6a7178;
+			}
+		</style>
+		<!-- The component's own stylesheet, as the app loads it -->
+		<link rel="stylesheet" href="../dist/ReadMore.css" />
+	</head>
+	<body>
+		<h1>ReadMore</h1>
+		<p>Shows long text clamped to a number of lines, with a Show more / Show less toggle that only appears when the text doesn't fit.</p>
+		<p>Open with <code>?test=1</code> to run the checks. Add a modifier to the mount's classes to see it: <code>read-more--muted</code>.</p>
+		<!-- Mirrors the Block's main container: block class + ExtendedClass -->
+		<div id="mount" class="read-more"></div>
+		<p id="events"></p>
+		<div id="log"></div>
+
+		<script src="../dist/ReadMore.js"></script>
+		<!-- The checks every component passes, then this component's own -->
+		<script src="../../../packages/toolchain/structural-checks.js"></script>
+		<script src="../test/checks.js"></script>
+		<script>
+			// The build registers the class on the namespace in factory.config.json; find it
+			// without naming the namespace: the global that has __release and the class.
+			var ReadMore = Object.keys(window)
+				.map(function (k) {
+					try {
+						return window[k] && window[k].__release && window[k].ReadMore;
+					} catch (e) {
+						return null;
+					}
+				})
+				.filter(Boolean)[0];
+			function logEvent(text) {
+				document.getElementById('events').textContent = text;
+			}
+
+			new ReadMore({
+				text:
+					'OutSystems apps often show long descriptions, notes or comments in lists and cards. This one is clamped to three lines, with a toggle to read the rest without leaving the screen or opening a popup.',
+				lines: 3,
+				moreLabel: 'Show more',
+				lessLabel: 'Show less',
+				runtimeId: 'mount',
+				events: {
+					OnToggled: function (isExpanded) {
+						logEvent('OnToggled(' + [isExpanded].join(', ') + ')');
+					},
+				},
+			});
+
+			if (new URLSearchParams(location.search).get('test') === '1') {
+				var results = runComponentChecks(window, ReadMore, componentTest);
+				var log = document.getElementById('log');
+				var failed = 0;
+				results.forEach(function (r) {
+					if (!r.ok) failed++;
+					var line = document.createElement('div');
+					line.className = r.skipped ? 'skip' : r.ok ? 'pass' : 'fail';
+					line.textContent = (r.skipped ? 'SKIP  ' : r.ok ? 'PASS  ' : 'FAIL  ') + r.name + (r.skipped ? ' (CSS checks run in npm test)' : '');
+					log.appendChild(line);
+				});
+				var summary = document.createElement('div');
+				summary.textContent = '\n' + (results.length - failed) + '/' + results.length + ' passed';
+				log.appendChild(summary);
+			}
+		</script>
+	</body>
+</html>
