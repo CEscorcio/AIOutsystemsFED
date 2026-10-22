@@ -6,8 +6,47 @@ Every committed release of `dist/components.js` and `dist/components.css`, newes
 
 | Version | Built | Components | Deployed to | Breaking changes |
 |---|---|---|---|---|
+| [2026.43.2](#2026432) | 2026-10-22 | confirm-button, copy-field, greeting-card, read-more, relative-time, sparkline | personal / Sandbox | none |
 | [2026.43.1](#2026431) | 2026-10-21 | greeting-card | personal / Sandbox | none |
 | [2026.42.1](#2026421) | 2026-10-15 | greeting-card | not recorded | none |
+
+## 2026.43.2
+
+Six components in one bundle: GreetingCard brought to the current rules (translatable text), plus CopyField, RelativeTime, Sparkline, ConfirmButton and ReadMore. First release whose Blocks and test screens all came from the generators.
+
+- **Built:** 2026-10-22T15:11:18.397Z
+- **Source commit:** `8de216c024ff`
+- **dist/components.js:** 20249 bytes, sha256 `706d63ea31e4`
+- **dist/components.css:** 9813 bytes, sha256 `38d2c63c394f`
+
+| Component | Class | Inputs | Events | Modifiers |
+|---|---|---|---|---|
+| confirm-button | `AIOutsystemsFED.ConfirmButton` | Label: Text*, ConfirmLabel: Text, TimeoutSeconds: Integer, IsDisabled: Boolean | OnConfirmed() | confirm-button--full-width |
+| copy-field | `AIOutsystemsFED.CopyField` | Value: Text*, Label: Text, CopyLabel: Text, CopiedLabel: Text | OnCopied(Value: Text) | copy-field--compact |
+| greeting-card | `AIOutsystemsFED.GreetingCard` | Name: Text*, ButtonLabel: Text, Greeting: Text, FallbackName: Text, CountLabel: Text, CountLabelOne: Text | OnGreetClicked(Count: Integer) | greeting-card--compact |
+| read-more | `AIOutsystemsFED.ReadMore` | Text: Text*, Lines: Integer, MoreLabel: Text, LessLabel: Text | OnToggled(IsExpanded: Boolean) | read-more--muted |
+| relative-time | `AIOutsystemsFED.RelativeTime` | Timestamp: Text*, Locale: Text, EmptyLabel: Text, Live: Boolean | none | relative-time--muted |
+| sparkline | `AIOutsystemsFED.Sparkline` | Values: Text*, Label: Text, ShowLast: Boolean | none | sparkline--positive, sparkline--negative |
+
+\* mandatory. Every Block also takes `ExtendedClass` (Text, optional).
+
+**Contract changes since the previous release:**
+
+- confirm-button: component added
+- copy-field: component added
+- greeting-card: input Greeting added
+- greeting-card: input FallbackName added
+- greeting-card: input CountLabel added
+- greeting-card: input CountLabelOne added
+- read-more: component added
+- relative-time: component added
+- sparkline: component added
+
+**Deployments:**
+
+| Platform | Environment | Module | Script | Theme | Published | Verified |
+|---|---|---|---|---|---|---|
+| O11 | personal | Sandbox | Components | Sandbox | 2026-10-22 | Served Script identical to dist/components.js after the platform's BOM; theme section identical to dist/components.css after line-ending normalisation, one section, Version 2026.43.2; the six compiled Blocks create their AIOutsystemsFED class, update, destroy and wire their Trigger actions; the six test screens use their Block. Browser check not run. |
 
 ## 2026.43.1
 

@@ -1,14 +1,110 @@
 /*!
- * Version: 2026.43.1
+ * Version: 2026.43.2
  * AIOutsystemsFED components: styles
- * Built: 2026-10-21T11:22:39.077Z
+ * Built: 2026-10-22T15:11:18.397Z
  * Contains:
+ *   components/confirm-button/dist/ConfirmButton.css
+ *   components/copy-field/dist/CopyField.css
  *   components/greeting-card/dist/GreetingCard.css
+ *   components/read-more/dist/ReadMore.css
+ *   components/relative-time/dist/RelativeTime.css
+ *   components/sparkline/dist/Sparkline.css
  */
+
+/* ---- components/confirm-button/dist/ConfirmButton.css ---- */
+/*
+ * ConfirmButton styles, written to the rules in docs/guide/Style.md.
+ *
+ * - The look is OutSystems UI's own buttons: btn, and btn-error while armed,
+ *   so the app's theme styles both. This stylesheet only adds the armed
+ *   emphasis and the full-width modifier.
+ * - BEM block confirm-button:
+ *     elements  confirm-button__button, __status (a visually hidden live region)
+ *     state     confirm-button__button--is-armed   (set by the component)
+ *     modifiers confirm-button--full-width         (through ExtendedClass)
+ * - Focus is left to OutSystems UI.
+ */
+.confirm-button__button {
+	transition: box-shadow 0.15s ease;
+}
+
+.confirm-button__button--is-armed {
+	box-shadow: 0 0 0 var(--border-size-m, 2px) var(--color-error-light, #fceaea);
+}
+
+.confirm-button--full-width .confirm-button__button {
+	width: 100%;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.confirm-button__button {
+		transition: none;
+	}
+}
+
+/* ---- components/copy-field/dist/CopyField.css ---- */
+/*
+ * CopyField styles, written to the rules in docs/guide/Style.md.
+ *
+ * - Every colour, space, radius, border and font value is an OutSystems UI
+ *   variable with its base-theme value (OutSystems UI 2.30.0) as fallback.
+ * - BEM block copy-field:
+ *     elements  copy-field__body, __label, __row, __value, __button, __status
+ *     modifiers copy-field--compact   (passed by a screen through ExtendedClass)
+ * - The button is OutSystems UI's btn btn-small; the live region uses its
+ *   wcag-hide-text. Focus is left to OutSystems UI.
+ */
+.copy-field__body {
+	display: flex;
+	flex-direction: column;
+	gap: var(--space-xs, 4px);
+	min-width: 0;
+}
+
+.copy-field__label {
+	font-size: var(--font-size-s, 14px);
+	font-weight: var(--font-semi-bold, 600);
+	color: var(--color-neutral-7, #6a7178);
+}
+
+.copy-field__row {
+	display: flex;
+	align-items: center;
+	gap: var(--space-s, 8px);
+	min-width: 0;
+}
+
+.copy-field__value {
+	flex: 1 1 auto;
+	min-width: 0;
+	padding: var(--space-xs, 4px) var(--space-s, 8px);
+	overflow: hidden;
+	font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+	font-size: var(--font-size-s, 14px);
+	color: var(--color-neutral-9, #272b30);
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	background-color: var(--color-neutral-2, #f1f3f5);
+	border: var(--border-size-s, 1px) solid var(--color-neutral-4, #dee2e6);
+	border-radius: var(--border-radius-soft, 4px);
+}
+
+.copy-field__button {
+	flex-shrink: 0;
+}
+
+.copy-field--compact .copy-field__value {
+	padding: var(--space-none, 0) var(--space-xs, 4px);
+	font-size: var(--font-size-xs, 12px);
+}
+
+.copy-field--compact .copy-field__label {
+	font-size: var(--font-size-xs, 12px);
+}
 
 /* ---- components/greeting-card/dist/GreetingCard.css ---- */
 /*
- * GreetingCard styles, written to the rules in docs/Style.md.
+ * GreetingCard styles, written to the rules in docs/guide/Style.md.
  *
  * - Base theme is OutSystems UI. Every colour, space, radius, border, shadow
  *   and font value is an OutSystems UI variable; the fallback after the comma
@@ -121,4 +217,118 @@
 	.greeting-card__button:hover {
 		transform: none;
 	}
+}
+
+/* ---- components/read-more/dist/ReadMore.css ---- */
+/*
+ * ReadMore styles, written to the rules in docs/guide/Style.md.
+ *
+ * - Every colour, space and font value is an OutSystems UI variable with its
+ *   base-theme value (OutSystems UI 2.30.0) as fallback.
+ * - BEM block read-more:
+ *     elements  read-more__text, __toggle (a link-styled button)
+ *     state     read-more__text--is-clamped   (set by the component)
+ *     modifiers read-more--muted               (through ExtendedClass)
+ * - The number of lines is set by the component on the element
+ *   (-webkit-line-clamp), because it comes from an Input Parameter.
+ * - Focus is left to OutSystems UI.
+ */
+.read-more__text {
+	margin: 0;
+	white-space: pre-line;
+	overflow-wrap: anywhere;
+}
+
+.read-more__text--is-clamped {
+	display: -webkit-box;
+	overflow: hidden;
+	-webkit-box-orient: vertical;
+}
+
+.read-more__toggle {
+	margin-block-start: var(--space-xs, 4px);
+	padding: var(--space-none, 0);
+	font-size: var(--font-size-s, 14px);
+	font-weight: var(--font-semi-bold, 600);
+	color: var(--color-primary, #1068eb);
+	cursor: pointer;
+	background: none;
+	border: none;
+}
+
+.read-more__toggle:hover {
+	text-decoration: underline;
+}
+
+.read-more--muted .read-more__text {
+	font-size: var(--font-size-s, 14px);
+	color: var(--color-neutral-7, #6a7178);
+}
+
+/* ---- components/relative-time/dist/RelativeTime.css ---- */
+/*
+ * RelativeTime styles, written to the rules in docs/guide/Style.md.
+ *
+ * - Every colour and font value is an OutSystems UI variable with its
+ *   base-theme value (OutSystems UI 2.30.0) as fallback.
+ * - BEM block relative-time:
+ *     elements  relative-time__value (a <time> element)
+ *     modifiers relative-time--muted   (passed by a screen through ExtendedClass)
+ * - It inherits the surrounding text's size and colour unless muted, so it
+ *   reads as part of a sentence ("Updated 3 minutes ago").
+ */
+.relative-time__value {
+	white-space: nowrap;
+	cursor: help;
+}
+
+.relative-time--muted .relative-time__value {
+	font-size: var(--font-size-s, 14px);
+	color: var(--color-neutral-7, #6a7178);
+}
+
+/* ---- components/sparkline/dist/Sparkline.css ---- */
+/*
+ * Sparkline styles, written to the rules in docs/guide/Style.md.
+ *
+ * - Every colour and size is an OutSystems UI variable with its base-theme
+ *   value (OutSystems UI 2.30.0) as fallback, so the app's theme recolours it.
+ * - BEM block sparkline:
+ *     elements  sparkline__chart (the <svg>), __line, __dot
+ *     modifiers sparkline--positive, sparkline--negative (through ExtendedClass)
+ * - The SVG fills its container's width; its height follows the text size.
+ */
+.sparkline__chart {
+	display: block;
+	width: 100%;
+	height: var(--space-m, 24px);
+	overflow: visible;
+}
+
+.sparkline__line {
+	fill: none;
+	stroke: var(--color-primary, #1068eb);
+	stroke-width: var(--border-size-m, 2px);
+	stroke-linecap: round;
+	stroke-linejoin: round;
+}
+
+.sparkline__dot {
+	fill: var(--color-primary, #1068eb);
+}
+
+.sparkline--positive .sparkline__line {
+	stroke: var(--color-success, #29823b);
+}
+
+.sparkline--positive .sparkline__dot {
+	fill: var(--color-success, #29823b);
+}
+
+.sparkline--negative .sparkline__line {
+	stroke: var(--color-error, #dc2020);
+}
+
+.sparkline--negative .sparkline__dot {
+	fill: var(--color-error, #dc2020);
 }
