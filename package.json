@@ -24,7 +24,8 @@
 		"init": "node scripts/init.mjs",
 		"check:audit": "node scripts/check-audit.mjs",
 		"test:blueprint": "node scripts/test-blueprint.mjs",
-		"docs:components": "node scripts/component-docs.mjs"
+		"docs:components": "node scripts/component-docs.mjs",
+		"o11:verify": "node platform/o11/verify.mjs"
 	},
 	"devDependencies": {
 		"@eslint/js": "^10.0.1",

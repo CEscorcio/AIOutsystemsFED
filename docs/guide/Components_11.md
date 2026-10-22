@@ -2,7 +2,12 @@
 
 The OutSystems side of [Components.md](Components.md). It starts where that page's step 5 ends: you have a pattern with its contract, class, CSS and a green `npm test`. This page puts it into an O11 Reactive module as a Block, publishes it, and proves that what's live is what you wrote. The agent works through **Service Studio's own MCP server**, editing the module you have open with the OutSystems Model API, and you review every change in Service Studio's Compare-and-Merge window before it lands.
 
-> **Status: run end to end once (2026-10-21), all but the browser check (8c).** A component went through steps 6 to 8 into an O11 Reactive app: Script, theme stylesheet section, Block and a harness screen, one merge each, then one publish, and steps 8a and 8b passed. What the platform did to the uploaded files, and the Model API details it needed, are in [PlatformNotes.md](PlatformNotes.md). The generated lambdas below haven't been run against Service Studio yet.
+> **Status: run end to end twice, all but the browser check (8c).**
+>
+> - **2026-10-21, by hand:** one component went into an O11 Reactive app: Script, theme stylesheet section, Block and a harness screen, one merge each, then one publish. Steps 8a and 8b passed.
+> - **2026-10-22, from the [generated lambdas](#generated-lambdas):** six components, checked with `npm run o11:verify`.
+>
+> What the platform did to the uploaded files, and the Model API details it needed, are in [PlatformNotes.md](PlatformNotes.md).
 >
 > The Service Studio MCP workflow itself was also used earlier on O11 to build two screens; what that showed is in [Working with the Service Studio MCP](#working-with-the-service-studio-mcp).
 
@@ -39,7 +44,7 @@ Start in a throwaway Reactive app. Move to the library once the steps work.
 | Service Studio 11 with the **MCP Server** enabled | The agent's channel | Approve the agent's session when Service Studio asks. To let the agent merge and publish without a dialog, allow **automatic merge and publish** in the MCP Server dialog; otherwise you'll do those two steps yourself |
 | The module open in Service Studio | The agent only sees open modules | Open the consuming app too, if the harness lives there |
 | Claude Code | Drives the Model API edits | Connected to Service Studio's MCP server (`/mcp`) |
-| `curl` and `diff` | Verifying the published files | Git Bash has both |
+| Node and network access to the server | `npm run o11:verify` downloads the published files | The app's URL is passed on the command line, never committed |
 | Steps 1 to 5 of [Components.md](Components.md) done | The bundle to ship | `npm test` green, `dist/` committed |
 
 ## Before step 6: four O11 checks on steps 1 to 5
@@ -194,30 +199,23 @@ A "published" result isn't proof on its own. Confirm in **Service Center → Fac
 
 ## Step 8: verify what was actually published
 
-### 8a. The Script is your bundle
-
-O11 Reactive modules list their versioned files at `https://<server>/<App>/moduleservices/moduleinfo`. Find your Script in that manifest by name rather than guessing the path; a library's Script is served through the consuming app:
+Steps 8a and 8b are one command. It only reads: it downloads the app's `moduleinfo` manifest and the files it lists, and compares them with `dist/`. A library's Script is served through the consuming app, so pass the app:
 
 ```bash
-APP=https://<server>/<App>
-curl -s "$APP/moduleservices/moduleinfo" | grep -o '[^"]*GreetingCard[^"]*\.js[^"]*'
-curl -s -o published.js "https://<server>/<App>/<that path>"
-
-# strip a BOM if there is one, then compare
-sed '1s/^\xEF\xBB\xBF//' published.js | diff dist/GreetingCard.js - && echo IDENTICAL
+npm run o11:verify -- --app https://<server>/<App>              # every component
+npm run o11:verify -- --app https://<server>/<App> read-more    # one component
+npm run o11:verify -- --app https://<server>/<App> --keep tmp/served   # keep the files to look at
 ```
 
-Expect a byte-order mark in front and nothing else: line endings stay LF and the final newline is kept ([PlatformNotes.md](PlatformNotes.md#what-the-platform-serves)). Anything more is a finding; record it there. Because the Script was set from the file rather than retyped by a model, any difference you find comes from the platform or from escaping, not from AI rewriting.
+`O11_APP_URL` works instead of `--app`. Don't commit the URL. It exits non-zero when any check fails. Run on 2026-10-22: 25 checks passed against six components.
+
+### 8a. The Script and the theme are your build
+
+The Script must be identical to `dist/components.js` after removing a byte-order mark: line endings stay LF and the final newline is kept. The theme must hold one components section, identical to `dist/components.css` once line endings are normalised ([PlatformNotes.md](PlatformNotes.md#what-the-platform-serves)). Anything more is a finding; record it there. Because the content was set from the file rather than retyped by a model, any difference comes from the platform or from escaping, not from AI rewriting.
 
 ### 8b. The JS nodes are wired as you asked
 
-Download the app's script chunks from the same manifest and search for the class. The Block's compiled code is in a file named like `scripts/<Module>.<Flow>.GreetingCard.mvc.js`:
-
-```bash
-grep -l "<Namespace>.GreetingCard" *.js
-```
-
-Check four things: the guards survived (possibly rewritten as `x && …`), the parameter names match `types.ts`, no `extendedClass` reaches the JS nodes, and the event goes through `TriggerGreetClicked`. Also look for `MountPoint`'s style expression, recalculated from `ExtendedClass`.
+Each Block compiles to `scripts/<App>.<Flow>.<Block>.mvc.js`. The check looks for `new <Namespace>.<Class>(`, the `onParametersChanged` and `destroy` calls, and each `Trigger<Event>` action. It also checks that each `<Class>Test` screen uses its Block. With `--keep`, also look by eye: the guards survived (possibly rewritten as `x && …`), the parameter names match `types.ts`, and no `extendedClass` reaches the JS nodes.
 
 ### 8c. It works in a real browser
 

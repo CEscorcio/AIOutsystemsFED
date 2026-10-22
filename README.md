@@ -166,6 +166,7 @@ npm run build:all -- --no-test
 | `npm run check:audit`                  | Fail on any high or critical npm advisory not accepted in `scripts/check-audit.mjs` |
 | `npm run test:blueprint`               | Make a new project from this repo in a temp folder and take it to its first release |
 | `npm run o11:generate`                 | Write the Model API lambdas for the Script, theme section, a Block or a harness    |
+| `npm run o11:verify`                   | After a publish, check what the app serves against `dist/` (`--app <url>`)         |
 
 ### Previewing a Component
 
@@ -193,6 +194,8 @@ npm run o11:generate -- harness status-badge         # a test screen that drives
 ```
 
 Each command writes the lambda and a probe, and prints what the probe must report (lengths, checksums, names), so what lands in the module is checked against the repo before it's merged. [Components_11.md](docs/guide/Components_11.md#generated-lambdas) has the order. The Block generator only creates Blocks: changing an existing Block's contract is still done by hand in Service Studio.
+
+After publishing, `npm run o11:verify -- --app https://<server>/<App>` downloads what the app serves and checks it against `dist/`: the Script, the theme section, and each component's Block and test screen. It only reads, and the URL stays on the command line.
 
 ### Project Structure
 
@@ -241,7 +244,7 @@ For a quick answer to "how do I…", see [docs/guide/HowTo.md](docs/guide/HowTo.
 
 ## Limitations
 
-1. **The OutSystems side has been run twice:** by hand on 2026-10-21, and from the generators on 2026-10-22 (six components). Both times the Script, stylesheet, Blocks and harness screens went in through Service Studio and were published, and the served files were compared with `dist/` ([PlatformNotes.md](docs/guide/PlatformNotes.md)). The browser click-through (step 8c) hasn't been done yet, and neither has a library module plus consumer app. The harness generator gives Boolean inputs no control on the test screen.
+1. **The OutSystems side has been run twice:** by hand on 2026-10-21, and from the generators on 2026-10-22 (six components). Both times the Script, stylesheet, Blocks and harness screens went in through Service Studio and were published, and the served files were compared with `dist/` ([PlatformNotes.md](docs/guide/PlatformNotes.md)). The browser click-through (step 8c) hasn't been done yet, and neither has a library module plus consumer app.
 2. **The preview page can't run the CSS checks.** A page opened from `file://` can't read a stylesheet's text, so those checks show as skipped there; `npm test` runs them.
 3. **stylelint can't check nested BEM names** (`&__title`) in SCSS. `npm test` catches them in the compiled CSS instead.
 4. **Prettier prints a warning on every run** about the `css` / `scss` `remove_blank_lines` entries in `.prettierrc.json`. They aren't Prettier options and are ignored.
@@ -251,7 +254,7 @@ For a quick answer to "how do I…", see [docs/guide/HowTo.md](docs/guide/HowTo.
 
 For the blueprint (this project's own status and next steps are in [docs/project/README.md](docs/project/README.md)):
 
-1. Write a publish skill on top of the generators (they ran against Service Studio on 2026-10-22), with the served-file check as a script, and give Boolean inputs a control in the harness
+1. Write a publish skill on top of `o11:generate` and `o11:verify` (both run against Service Studio and a published app on 2026-10-22)
 2. A pull request template with the Definition of Done, Playwright tests on the preview pages, generated per-component READMEs, and GitHub Releases with artifact attestations
 3. Try the library module plus consumer app path in OutSystems 11
 4. Extract the tooling into a versioned package once a second project uses the blueprint

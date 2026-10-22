@@ -160,7 +160,7 @@ The main container's Style Classes are always:
 Publish, then check three things. A "published successfully" message alone isn't proof.
 
 1. **The live version is the new one.** Service Center shows the new module version.
-2. **The published files are yours.** Download the Script and compare it with `dist/StatusBadge.js`, and check the theme's CSS holds your stylesheet section with the right timestamp ([Components_11.md, 8a](Components_11.md#8a-the-script-is-your-bundle)).
+2. **The published files are yours.** `npm run o11:verify -- --app https://<server>/<App> status-badge` checks that the Script is `dist/components.js`, the theme holds `dist/components.css`, and the StatusBadge Block and its test screen are compiled as generated ([Components_11.md, step 8](Components_11.md#step-8-verify-what-was-actually-published)).
 3. **It works in a browser.** Open the harness screen: it renders, each Input Parameter change shows, each Event reaches OutSystems, the main container has `status-badge` plus any `ExtendedClass`, and the console is clean.
 
 > **With Claude Code:** "Publish \<app\> and verify the StatusBadge Script and stylesheet."

@@ -27,7 +27,7 @@ When a rule changes, change `AGENTS.md` or the guide it points to, and the match
 | `npm test`, `build:all`, release records | yes | yes | yes | yes |
 | Generate the Model API lambdas (`o11:generate`) | yes | yes | yes | yes |
 | Apply them, merge, publish, read a module | **yes** | no | no | no |
-| Verify what a server serves (`moduleinfo`, curl) | yes | yes | yes, with network access | yes, with the server as a secret |
+| Verify what a server serves (`o11:verify`) | yes | yes | yes, with network access | yes, with the server as a secret |
 
 Service Studio's MCP server only exists on a machine with Service Studio open, and it only edits the modules open there. An agent that can't reach it prepares the change, generates the lambdas and says what's left; someone with Service Studio applies them, following [Components_11.md](Components_11.md).
 

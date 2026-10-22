@@ -134,7 +134,11 @@ A release is one Script (`dist/components.js`) and one stylesheet section (`dist
    npm run o11:generate -- harness status-badge    # a test screen for it
    ```
 3. **Apply them in Service Studio** (Windows, MCP Server on, the module open), with Claude Code or Copilot agent mode. Each lambda is dry-run first, then applied and merged, and you review each merge. Follow [Components_11.md](Components_11.md#generated-lambdas).
-4. **Publish** (1-Click Publish, or ask the agent; it only publishes when asked), then **check what's live** against `dist/`: the Script, the theme section and the compiled Block ([Components_11.md, step 8](Components_11.md#step-8-verify-what-was-actually-published)). Expect a BOM added to the Script and CRLF line endings in the theme ([PlatformNotes.md](PlatformNotes.md)).
+4. **Publish** (1-Click Publish, or ask the agent; it only publishes when asked), then **check what's live** against `dist/`: the Script, the theme section and the compiled Blocks ([Components_11.md, step 8](Components_11.md#step-8-verify-what-was-actually-published)):
+   ```bash
+   npm run o11:verify -- --app https://<server>/<App>    # don't commit the URL
+   ```
+   It allows for the BOM the platform adds to the Script and the CRLF line endings in the theme ([PlatformNotes.md](PlatformNotes.md)).
 5. **Record it** in `releases/<version>.json`:
    ```bash
    npm run release:record -- --description "StatusBadge, first version" \
@@ -235,6 +239,7 @@ When the OutSystems 11 environment upgrades OutSystems UI:
 | `npm run build:all` | Build the versioned release in `dist/` (runs every check first) |
 | `npm run release-notes` | What the build in `dist/` contains |
 | `npm run o11:generate -- <script \| theme \| block <c> \| harness <c>>` | Write the Model API lambdas for Service Studio |
+| `npm run o11:verify -- --app https://<server>/<App>` | Check what a published app serves against `dist/` |
 | `npm run release:record -- …` | Record a release or a deployment |
 | `npm run check:contracts` | Check every contract against its code |
 | `npm run check:audit` | Check dependency advisories |
