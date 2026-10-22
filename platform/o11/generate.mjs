@@ -265,11 +265,12 @@ function harness() {
 	add(`var harness = main.CreateWidget<ServiceStudio.Plugin.NRWidgets.IContainer>(${cs(`${c.class}Harness`)});`);
 	c.inputs.forEach((p, i) => {
 		add(`var v${i} = scr.CreateLocalVariable(${cs(`${p.name}Value`)}); v${i}.DataType = ${TYPES[p.type].modelApi}; v${i}.SetDefaultValue(${cs(p.example || p.default)});`);
-		if (p.type === 'Boolean') return; // no input widget: change it in the variable's default
 		add(`var f${i} = harness.CreateWidget<ServiceStudio.Plugin.NRWidgets.IContainer>(${cs(`${p.name}Field`)}); f${i}.SetStyle(${cs('"margin-bottom-base"')});`);
 		add(`var l${i} = f${i}.CreateWidget<ServiceStudio.Plugin.NRWidgets.ILabel>(${cs(`${p.name}Label`)});`);
-		add(`var i${i} = f${i}.CreateWidget<ServiceStudio.Plugin.NRWidgets.IInput>(${cs(`${p.name}Input`)}); i${i}.SetVariable(${cs(`${p.name}Value`)});`);
-		if (p.type !== 'Text') add(`i${i}.InputType = ServiceStudio.Plugin.NRWidgets.Enumerations.InputType.Number;`);
+		// A Boolean gets a Checkbox (ICheckbox, bound like an Input: measured 2026-10-22).
+		const widget = p.type === 'Boolean' ? 'ICheckbox' : 'IInput';
+		add(`var i${i} = f${i}.CreateWidget<ServiceStudio.Plugin.NRWidgets.${widget}>(${cs(`${p.name}Input`)}); i${i}.SetVariable(${cs(`${p.name}Value`)});`);
+		if (p.type !== 'Text' && p.type !== 'Boolean') add(`i${i}.InputType = ServiceStudio.Plugin.NRWidgets.Enumerations.InputType.Number;`);
 		add(`((OutSystems.Model.UI.Mobile.Widgets.ITextWidget)l${i}.Widgets.First()).Text = ${cs(p.name)}; l${i}.TargetWidget = i${i};`);
 	});
 	add(`var inst = harness.CreateWidget<OutSystems.Model.UI.Mobile.Widgets.IMobileBlockInstanceWidget>();`);

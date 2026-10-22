@@ -4,7 +4,7 @@ What OutSystems 11 and the Service Studio MCP do with what this factory uploads,
 
 Measured on 2026-10-21: an O11 personal environment, a Reactive app, OutSystems UI 2.30.0, Service Studio's MCP server. Add a line with the date and setup whenever a measurement here changes.
 
-Measured again on 2026-10-22, same setup, release 2026.43.2: the first run where every Script, theme section, Block and test screen came from `npm run o11:generate`. The theme's replace path swapped the old section in place. Six Blocks and six screens each passed their probe and merged on the first try, apart from the parameter rename below. The publish passed with `InvalidIconLibrary` still reported, and the served files matched `dist/` as in the table. Test screens get no control for a Boolean input, so such inputs keep their default there; this is not yet fixed in the harness generator.
+Measured again on 2026-10-22, same setup, release 2026.43.2: the first run where every Script, theme section, Block and test screen came from `npm run o11:generate`. The theme's replace path swapped the old section in place. Six Blocks and six screens each passed their probe and merged on the first try, apart from the parameter rename below. The publish passed with `InvalidIconLibrary` still reported, and the served files matched `dist/` as in the table. Those test screens had no control for a Boolean input. The harness generator now adds a Checkbox (`ServiceStudio.Plugin.NRWidgets.ICheckbox`, bound with `SetVariable` like an Input). A dry run on 2026-10-22 was clean, but the screens already in Sandbox predate this change.
 
 ## What the platform serves
 

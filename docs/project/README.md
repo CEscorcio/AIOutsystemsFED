@@ -19,5 +19,5 @@ What a log teaches that would hold in any project goes into the guide instead, u
 ## Next steps
 
 1. Do the browser click-through (step 8c) on the six Sandbox test screens and add it to [the generator run log](GeneratorRun-2026-10-22.md)
-2. Give Boolean inputs a control (a switch) in the harness generator
+2. The Sandbox test screens for RelativeTime, Sparkline and ConfirmButton predate the Checkbox for Boolean inputs; recreate them from the generator if Live, ShowLast or IsDisabled need testing there
 3. Use the Blocks on a real screen
