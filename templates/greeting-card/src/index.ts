@@ -1,7 +1,4 @@
-import { GreetingCard } from './greeting-card/GreetingCard';
-
-// Registers window.ClaudeTest.GreetingCard for the Block's JS nodes.
-type Namespace = { GreetingCard?: typeof GreetingCard };
-const w = window as unknown as { ClaudeTest?: Namespace };
-w.ClaudeTest = w.ClaudeTest || {};
-w.ClaudeTest.GreetingCard = GreetingCard;
+// The component's entry point: export the class named in component.json. The build
+// registers it as window.<namespace>.GreetingCard, with the namespace from
+// factory.config.json; this file never names the namespace.
+export { GreetingCard } from './greeting-card/GreetingCard';

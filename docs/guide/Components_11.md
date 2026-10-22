@@ -96,7 +96,7 @@ Copy the names from `types.ts`. The bridge Client Action and the guards are ther
 
 ```text
 In module <Module>, create a Block "GreetingCard" (Public = <Yes for a library, No
-for an app>). It is a thin bridge to window.ClaudeTest.GreetingCard defined in the
+for an app>). It is a thin bridge to window.<Namespace>.GreetingCard defined in the
 "GreetingCard" Script. Only create this Block. Merge, don't publish.
 
 1. Input Parameters: Name (Text, mandatory, default ""), ButtonLabel (Text, not
@@ -114,7 +114,7 @@ for an app>). It is a thin bridge to window.ClaudeTest.GreetingCard defined in t
 
 OnReady — inputs RuntimeId = MountPoint.Id, Name, ButtonLabel; output Instance,
 assigned to the local variable Instance:
-$parameters.Instance = new ClaudeTest.GreetingCard({
+$parameters.Instance = new <Namespace>.GreetingCard({
   runtimeId: $parameters.RuntimeId,
   name: $parameters.Name,
   buttonLabel: $parameters.ButtonLabel,
@@ -212,7 +212,7 @@ Expect a byte-order mark in front and nothing else: line endings stay LF and the
 Download the app's script chunks from the same manifest and search for the class. The Block's compiled code is in a file named like `scripts/<Module>.<Flow>.GreetingCard.mvc.js`:
 
 ```bash
-grep -l "ClaudeTest.GreetingCard" *.js
+grep -l "<Namespace>.GreetingCard" *.js
 ```
 
 Check four things: the guards survived (possibly rewritten as `x && …`), the parameter names match `types.ts`, no `extendedClass` reaches the JS nodes, and the event goes through `TriggerGreetClicked`. Also look for `MountPoint`'s style expression, recalculated from `ExtendedClass`.

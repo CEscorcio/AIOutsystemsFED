@@ -55,14 +55,24 @@ try {
 
 	node('.claude/skills/new-pattern/scaffold.mjs', 'StatusBadge');
 	const contract = JSON.parse(read('components/status-badge/component.json'));
-	check('the scaffold used the project namespace', contract.namespace === 'Acme' && read('components/status-badge/src/index.ts').includes('w.Acme.StatusBadge'));
+	check(
+		'the scaffold made a component that never names the namespace',
+		contract.class === 'StatusBadge' &&
+			!('namespace' in contract) &&
+			!/window|Acme/.test(read('components/status-badge/src/index.ts').replace(/\/\/.*$|\/\*[\s\S]*?\*\//gm, '')) &&
+			!existsSync(join(tmp, 'components/status-badge/build.mjs')),
+	);
 	git('add', '-A');
 	git('commit', '-q', '-m', 'Add StatusBadge');
 
 	node('scripts/build-all.mjs');
 	const js = read('dist/components.js');
 	const version = (js.match(/^ \* Version: (\S+)$/m) || [])[1];
-	check('build:all ran every check and wrote the release', !!version && js.includes(' * AcmePortal components') && js.includes('components/status-badge/dist/StatusBadge.js'));
+	check('build:all ran every check and wrote the release', !!version && js.includes(' * AcmePortal components') && js.includes(' *   components/status-badge/src/index.ts'));
+	const { JSDOM } = await import('jsdom');
+	const page = new JSDOM('<!doctype html><body></body>', { runScripts: 'outside-only' }).window;
+	page.eval(js);
+	check('the release registers window.Acme.StatusBadge and its version', page.Acme && typeof page.Acme.StatusBadge === 'function' && page.Acme.__release === version);
 
 	node('platform/o11/generate.mjs', 'block', 'status-badge');
 	node('platform/o11/generate.mjs', 'theme');

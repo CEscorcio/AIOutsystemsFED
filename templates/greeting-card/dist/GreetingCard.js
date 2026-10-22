@@ -56,8 +56,9 @@
     }
   };
 
-  // src/index.ts
+  // factory-entry.js
   var w = window;
-  w.ClaudeTest = w.ClaudeTest || {};
-  w.ClaudeTest.GreetingCard = GreetingCard;
+  var ns = w["AIOutsystemsFED"] = w["AIOutsystemsFED"] || {};
+  ns.GreetingCard = GreetingCard;
+  if (!ns.__release) ns.__release = "dev";
 })();

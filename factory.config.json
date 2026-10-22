@@ -1,6 +1,6 @@
 {
 	"project": "AIOutsystemsFED",
-	"namespace": "ClaudeTest",
+	"namespace": "AIOutsystemsFED",
 	"outsystemsUi": "2.30.0",
 	"o11": {
 		"script": "Components",
@@ -8,5 +8,9 @@
 		"flow": "MainFlow",
 		"layout": "LayoutTopMenu",
 		"harnessRole": "Registered"
+	},
+	"budgets": {
+		"releaseJsKB": 100,
+		"releaseCssKB": 50
 	}
 }

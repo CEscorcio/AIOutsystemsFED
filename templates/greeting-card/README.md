@@ -32,9 +32,9 @@ Set through `ExtendedClass`, for example `ExtendedClass = "greeting-card--compac
 
 ## In the browser
 
-The release's Script registers `window.ClaudeTest.GreetingCard`. The Block drives it from three lifecycle handlers:
+The release's Script registers `window.AIOutsystemsFED.GreetingCard`. The Block drives it from three lifecycle handlers:
 
-- **OnReady**: `new ClaudeTest.GreetingCard({ runtimeId, name, buttonLabel, events })`, mounted in the Block's `MountPoint` container
+- **OnReady**: `new AIOutsystemsFED.GreetingCard({ runtimeId, name, buttonLabel, events })`, mounted in the Block's `MountPoint` container
 - **OnParametersChanged**: `instance.onParametersChanged({ name, buttonLabel })`
 - **OnDestroy**: `instance.destroy()`
 

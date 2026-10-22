@@ -30,7 +30,7 @@ The BEM block is derived: `StatusBadge` → `status-badge`. It must not be an Ou
 From the repo root:
 
 ```bash
-node .claude/skills/new-pattern/scaffold.mjs <Pattern> <Namespace>
+node .claude/skills/new-pattern/scaffold.mjs <Pattern>
 ```
 
 It creates `components/<pattern-name>/` from `templates/greeting-card/`, skipping `node_modules` and `dist`, and replaces in file contents and paths:
@@ -39,13 +39,12 @@ It creates `components/<pattern-name>/` from `templates/greeting-card/`, skippin
 |---|---|
 | `GreetingCard` | `<Pattern>` |
 | `greeting-card` | `<pattern-name>` |
-| `ClaudeTest` | `<Namespace>` |
 | `gc-test-mount` | `<pattern-name>-test-mount` |
 
 Then confirm nothing was missed and the copy is healthy before changing any behaviour:
 
 ```bash
-grep -rn -E "GreetingCard|greeting-card|ClaudeTest|gc-test" --exclude-dir=node_modules components/<pattern-name>   # must print nothing
+grep -rn -E "GreetingCard|greeting-card|gc-test" --exclude-dir=node_modules components/<pattern-name>   # must print nothing
 npm install                              # at the repo root: registers the new workspace
 npm test -w components/<pattern-name>    # must be green
 ```
@@ -57,7 +56,7 @@ Work in this order. Run `npm test` after each step.
 1. **`component.json` and `types.ts`, the contract.** `component.json` lists the Block as data (inputs with type, mandatory, default, description and example; events with their params; modifiers); the generators in `platform/o11/` build the Block from it. Keep `namespace` the same as the other components, and don't list `ExtendedClass`. `types.ts` says the same in TypeScript; `npm test` runs `check-contracts` and fails when they disagree. Rewrite the header comment and the interfaces for the real Input Parameters and Events. Keep `ExtendedClass` (Text, not mandatory, default `""`), documented as applied by the Block's main container, never by the class, and list the modifiers it accepts. Every Event gets its bridge Client Action named in the comment.
 2. **The class.** Keep the three members and their rules ([Components.md](../../../docs/guide/Components.md), step 3): the constructor finds the mount by `runtimeId` and throws a clear error; `onParametersChanged` takes partial updates and keeps user state; `destroy` removes every listener and makes later calls no-ops. Platform data goes in through `textContent`. The class never touches the mount element's own classes.
 3. **`style/<pattern-name>.scss`.** The component's styles in SCSS, compiled by the build to its own stylesheet (`dist/<Pattern>.css`); never add CSS from the class. Nest under the block with `&__element`, keep elements flat, no Sass variables for values and no `@extend` (Style.md, Rule 8). Follow [Style.md](../../../docs/guide/Style.md): BEM elements `<pattern-name>__*`, OutSystems UI classes next to them, OutSystems UI variables with exact base-theme fallbacks, one-class selectors, `.phone`/`.tablet` for widths, logical properties, no focus styles, a reduced-motion override. The tests read every variable's base value from the installed `outsystems-ui` package; nothing to add by hand. Run `npm run lint` too (stylelint, ESLint, Prettier).
-4. **`test/checks.js`.** Replace the example's behaviour checks (greeting text, click counting) with the new component's. **Keep every structural check**: BEM classes and selectors, tokens and fallbacks, raw colours, `!important`, logical properties, focus, reduced motion, container classes untouched, the component adds no stylesheet, the stylesheet is ASCII-only, destroy and post-destroy safety, missing mount id.
+4. **`test/checks.js`.** It defines `var componentTest = { block, osuiClasses, config, behaviour }`. Set `block`, the OutSystems UI classes the component may render, and a valid `config`; replace the example's behaviour checks (greeting text, click counting) with the new component's. Only behaviour goes here: the structural checks (BEM, tokens, selectors, logical properties, focus, reduced motion, container classes, no injected CSS, destroy safety) are shared in `packages/toolchain/structural-checks.js` and run for every component; don't copy them.
 5. **`preview/index.html`.** Update the demo instance's parameters and events so the page shows the real component.
 
 ## 4. Hand over

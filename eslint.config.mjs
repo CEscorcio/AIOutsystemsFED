@@ -36,7 +36,7 @@ export default tseslint.config(
 	},
 	// Shared checks: a plain browser script (ES2017: var style, trailing commas allowed) that is also require()d by the test runner.
 	{
-		files: ['components/*/test/checks.js', 'templates/*/test/checks.js'],
+		files: ['components/*/test/checks.js', 'templates/*/test/checks.js', 'packages/toolchain/structural-checks.js'],
 		languageOptions: {
 			sourceType: 'script',
 			ecmaVersion: 2017,

@@ -11,6 +11,9 @@
 //   o11.flow      the UI flow new Blocks and harness screens go in
 //   o11.layout    the layout block harness screens use
 //   o11.harnessRole  the role harness screens are for
+//   budgets      optional size limits for the release, in KB: releaseJsKB
+//                (dist/components.js) and releaseCssKB (dist/components.css);
+//                npm run build:all fails over them
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
@@ -28,6 +31,10 @@ export function validateConfig(c) {
 	if (!/^\d+\.\d+\.\d+$/.test(c.outsystemsUi || '')) err('"outsystemsUi" must be a version, e.g. 2.30.0');
 	const o = c.o11 || {};
 	for (const key of ['script', 'theme', 'flow', 'layout', 'harnessRole']) if (!NAME.test(o[key] || '')) err(`"o11.${key}" must be an OutSystems element name`);
+	for (const [key, value] of Object.entries(c.budgets || {})) {
+		if (!['releaseJsKB', 'releaseCssKB'].includes(key)) err(`"budgets.${key}" isn't a budget; use releaseJsKB or releaseCssKB`);
+		else if (typeof value !== 'number' || value <= 0) err(`"budgets.${key}" must be a size in KB, greater than 0`);
+	}
 	return errors;
 }
 

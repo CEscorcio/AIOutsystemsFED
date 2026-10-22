@@ -65,17 +65,16 @@ function parseHeader(text) {
 	return { version: version[1], built: built ? built[1] : null };
 }
 
-// Splits a combined file into its components' sections, keyed by folder name
-// (components/<name>/dist/<File>.<ext>). Several files of one component are joined.
-function sections(text, ext) {
+// A release's components and their own builds. The stylesheet lists each
+// component with a marker (/* ---- components/<folder>/dist/<Class>.css ---- */);
+// each is compared by its committed build, components/<folder>/dist/<Class>.js
+// and .css, read from the same place as the release (a commit, the index or
+// the working tree), so it works whatever the bundle's format.
+function builds(cssText, readFile) {
 	const out = new Map();
-	if (!text) return out;
-	const marker = ext === 'js' ? /^\/\/ ---- components\/([^/]+)\/dist\/\S+\.js ----$/gm : /^\/\* ---- components\/([^/]+)\/dist\/\S+\.css ---- \*\/$/gm;
-	const found = [...text.matchAll(marker)];
-	found.forEach((m, i) => {
-		const body = text.slice(m.index + m[0].length, i + 1 < found.length ? found[i + 1].index : undefined).trim();
-		out.set(m[1], (out.has(m[1]) ? `${out.get(m[1])}\n` : '') + body);
-	});
+	for (const m of (cssText || '').matchAll(/^\/\* ---- components\/([^/]+)\/dist\/(\S+)\.css ---- \*\/$/gm)) {
+		out.set(m[1], { js: readFile(`components/${m[1]}/dist/${m[2]}.js`) ?? undefined, css: readFile(`components/${m[1]}/dist/${m[2]}.css`) ?? undefined });
+	}
 	return out;
 }
 
@@ -86,23 +85,21 @@ function compare(oldText, newText) {
 }
 
 // Where the new build comes from, and the commit range its notes cover.
-let newJs, newCss, tip;
+let newJs, newCss, tip, readNew;
 if (commitArg) {
 	const rev = revParse(commitArg) || fail(`"${commitArg}" is not a commit`);
-	newJs = show(`${rev}:dist/components.js`);
-	newCss = show(`${rev}:dist/components.css`);
+	readNew = (path) => show(`${rev}:${path}`);
 	if (!git('diff-tree', '--no-commit-id', '--name-only', '-r', '--root', rev, '--', 'dist/components.js').trim()) fail(`${commitArg} doesn't change dist/components.js, so it isn't a release`);
 	tip = revParse(`${rev}^`);
 } else if (hook) {
-	newJs = show(':dist/components.js');
-	newCss = show(':dist/components.css');
+	readNew = (path) => show(`:${path}`);
 	tip = revParse('HEAD');
 } else {
-	const read = (f) => (existsSync(join(root, 'dist', f)) ? readFileSync(join(root, 'dist', f), 'utf8').replace(/\r\n/g, '\n') : null);
-	newJs = read('components.js');
-	newCss = read('components.css');
+	readNew = (path) => (existsSync(join(root, path)) ? readFileSync(join(root, path), 'utf8').replace(/\r\n/g, '\n') : null);
 	tip = revParse('HEAD');
 }
+newJs = readNew('dist/components.js');
+newCss = readNew('dist/components.css');
 
 const next = parseHeader(newJs);
 if (!next) {
@@ -157,19 +154,18 @@ if (hook) {
 }
 
 // Components: added, removed, changed.
-const [jsOld, jsNew, cssOld, cssNew] = [sections(oldJs, 'js'), sections(newJs, 'js'), sections(oldCss, 'css'), sections(newCss, 'css')];
-const names = [...new Set([...jsOld.keys(), ...jsNew.keys(), ...cssOld.keys(), ...cssNew.keys()])].sort();
+const before = builds(oldCss, (path) => show(`${base}:${path}`));
+const after = builds(newCss, readNew);
+const names = [...new Set([...before.keys(), ...after.keys()])].sort();
 const componentLines = [];
 const unchanged = [];
 for (const name of names) {
-	const inOld = jsOld.has(name) || cssOld.has(name);
-	const inNew = jsNew.has(name) || cssNew.has(name);
-	if (!inOld) componentLines.push(`- **${name}**: added`);
-	else if (!inNew) componentLines.push(`- **${name}**: removed`);
+	if (!before.has(name)) componentLines.push(`- **${name}**: added`);
+	else if (!after.has(name)) componentLines.push(`- **${name}**: removed`);
 	else {
 		const parts = [
-			['JS', compare(jsOld.get(name), jsNew.get(name))],
-			['CSS', compare(cssOld.get(name), cssNew.get(name))],
+			['JS', compare(before.get(name).js, after.get(name).js)],
+			['CSS', compare(before.get(name).css, after.get(name).css)],
 		]
 			.filter(([, c]) => c)
 			.map(([what, c]) => (c === 'changed' ? what : `${what} (${c})`));
@@ -197,10 +193,20 @@ if (tip) {
 
 const date = (next.built || new Date().toISOString()).slice(0, 10);
 const since = previous ? `since ${previous.version}` : 'up to this release';
+// "dist/components.js 2.9 KB (+0.3 KB)": the size, and the change since the previous release.
+const size = (file, text, oldText) => {
+	const kb = (t) => Buffer.byteLength(t || '') / 1024;
+	if (!text) return `${file} missing`;
+	const delta = oldText ? kb(text) - kb(oldText) : null;
+	const change = delta === null ? '' : Math.abs(delta) < 0.05 ? ' (no change)' : ` (${delta > 0 ? '+' : ''}${delta.toFixed(1)} KB)`;
+	return `${file} ${kb(text).toFixed(1)} KB${change}`;
+};
 const notes = [
 	`## ${next.version} (${date})`,
 	'',
 	`Built ${next.built || 'at an unknown time'}${previous ? `. Previous release: ${previous.version}` : '. First release'}.`,
+	'',
+	`Size: ${size('dist/components.js', newJs, oldJs)}, ${size('dist/components.css', newCss, oldCss)}.`,
 	'',
 	'### Components',
 	'',

@@ -1,7 +1,6 @@
 {
 	"class": "GreetingCard",
 	"block": "greeting-card",
-	"namespace": "ClaudeTest",
 	"description": "A card that greets a name and counts how many times its button was clicked.",
 	"inputs": [
 		{
@@ -25,8 +24,19 @@
 		{
 			"name": "OnGreetClicked",
 			"description": "Raised on every button click.",
-			"params": [{ "name": "Count", "type": "Integer", "description": "How many times the button was clicked." }]
+			"params": [
+				{
+					"name": "Count",
+					"type": "Integer",
+					"description": "How many times the button was clicked."
+				}
+			]
 		}
 	],
-	"modifiers": [{ "class": "greeting-card--compact", "description": "Tighter padding and a smaller title." }]
+	"modifiers": [
+		{
+			"class": "greeting-card--compact",
+			"description": "Tighter padding and a smaller title."
+		}
+	]
 }

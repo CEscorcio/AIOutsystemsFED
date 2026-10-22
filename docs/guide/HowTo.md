@@ -61,7 +61,7 @@ More: [AITools.md, "Setting up a machine"](AITools.md#setting-up-a-machine).
 3. **Write the contract:** `component.json` and `src/status-badge/types.ts` together. Then `npm run docs:components` writes the component's `README.md` from it.
 4. **Write the class** in `src/status-badge/StatusBadge.ts`: three public members (constructor, `onParametersChanged`, `destroy`), data into the DOM through `textContent` only.
 5. **Write the styles** in `style/status-badge.scss`, following [Style.md](Style.md): BEM classes, OutSystems UI variables with their base-theme fallbacks.
-6. **Rewrite the tests** in `test/checks.js` (keep every structural check) and the preview page.
+6. **Rewrite the behaviour checks** in `test/checks.js` (the structural checks every component passes are shared, in `packages/toolchain/`) and the preview page.
 7. `npm test` at the repo root, then open a pull request.
 
 More: [NewComponent.md](NewComponent.md), the full step-by-step.

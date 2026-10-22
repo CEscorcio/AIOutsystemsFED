@@ -6,13 +6,13 @@
 //   - types.ts: <Class>Parameters has one property per input (camelCase,
 //     matching type) and nothing else; <Class>Events has one optional
 //     callback per event, with the event's parameters in order
-//   - src/index.ts registers window.<namespace>.<class>
+//   - src/index.ts exports the class and doesn't touch window (the build
+//     registers it on factory.config.json's namespace)
 //   - dist/<Class>.css: the modifiers it styles are exactly the contract's
 //   - README.md is the one generated from component.json (npm run docs:components)
-//   - components (not templates) register on the config's namespace, and no
-//     class is registered twice
+//   - no class is registered twice
 // Templates (templates/*) are checked the same way, since new components are
-// copied from them, but they don't ship and may use any namespace.
+// copied from them, but they don't ship.
 // Runs after the components are built (npm test, npm run build:all).
 //
 // Usage (from the repo root): node scripts/check-contracts.mjs
@@ -100,9 +100,19 @@ function checkOne(dir, folder, label) {
 		for (const m of events) if (!c.events.some((e) => e.name === m.name)) at(`${c.class}Events.${m.name} isn't an event in component.json`);
 	}
 
+	// src/index.ts exports the class; the build registers it on the namespace.
 	const index = join(base, 'src', 'index.ts');
-	const indexText = existsSync(index) ? readFileSync(index, 'utf8') : '';
-	if (!new RegExp(`\\.${c.namespace}\\.${c.class}\\s*=`).test(indexText)) at(`src/index.ts doesn't register window.${c.namespace}.${c.class}`);
+	if (!existsSync(index)) at('src/index.ts is missing');
+	else {
+		const sf = ts.createSourceFile(index, readFileSync(index, 'utf8'), ts.ScriptTarget.ES2019, true);
+		const exported = sf.statements.some(
+			(s) =>
+				(ts.isExportDeclaration(s) && s.exportClause && ts.isNamedExports(s.exportClause) && s.exportClause.elements.some((e) => e.name.text === c.class)) ||
+				(ts.isClassDeclaration(s) && s.name && s.name.text === c.class && (s.modifiers || []).some((m) => m.kind === ts.SyntaxKind.ExportKeyword)),
+		);
+		if (!exported) at(`src/index.ts must export ${c.class} (export { ${c.class} } from '...')`);
+		if (/\bwindow\b/.test(sf.text.replace(/\/\/.*$|\/\*[\s\S]*?\*\//gm, ''))) at("src/index.ts mustn't touch window: the build registers the class on factory.config.json's namespace");
+	}
 
 	const cssPath = join(base, 'dist', `${c.class}.css`);
 	if (!existsSync(cssPath)) at(`dist/${c.class}.css is missing; build the component first`);
@@ -130,7 +140,6 @@ const classes = new Map();
 for (const folder of components) {
 	const c = checkOne(componentsDir, folder, '');
 	if (!c) continue;
-	if (config && c.namespace !== config.namespace) problems.push(`${folder}: namespace is ${c.namespace}; factory.config.json says every component registers on ${config.namespace}`);
 	if (classes.has(c.class)) problems.push(`${folder}: class ${c.class} is also used by ${classes.get(c.class)}`);
 	classes.set(c.class, folder);
 }

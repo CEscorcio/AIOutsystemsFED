@@ -20,6 +20,7 @@
 import { execFileSync } from 'node:child_process';
 import { existsSync, readdirSync, readFileSync, rmSync, statSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
+import { readmes, renderReadme } from './lib/component-docs.mjs';
 import { configPath, validateConfig } from './lib/config.mjs';
 import { componentsDir, root } from './lib/contract.mjs';
 import { releasesDir, writePage } from './lib/releases.mjs';
@@ -119,6 +120,10 @@ plan('docs/project/README.md: a new project page', () =>
 	),
 );
 plan('docs/project/Releases.md: regenerated, empty', () => writePage());
+// Component READMEs name the namespace, so they follow the new config.
+plan(`templates' and components' README.md: regenerated for window.${config.namespace}`, () => {
+	for (const r of readmes()) writeFileSync(r.path, renderReadme(r.contract, config.namespace));
+});
 
 if (!apply) {
 	console.log(`init: would do ${actions.length} things (nothing changed; add --yes to do them):`);

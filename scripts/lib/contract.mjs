@@ -3,9 +3,10 @@
 // generators (platform/o11/) and the release records all read.
 //
 // component.json:
-//   class        PascalCase class name, registered as window.<namespace>.<class>
+//   class        PascalCase class name; src/index.ts exports it, and the build
+//                registers it as window.<namespace>.<class> (the namespace is
+//                factory.config.json's, never repeated here)
 //   block        the BEM block, kebab-case of class (Style.md, Rule 0)
-//   namespace    the global the bundle registers on
 //   description  one sentence, shown in the docs and the Block's description
 //   inputs       Block Input Parameters, in order: name (PascalCase), type,
 //                mandatory, default (an OutSystems expression), description,
@@ -62,7 +63,7 @@ export function loadContract(folder, dir = componentsDir) {
 	if (!PASCAL.test(c.class || '')) err('"class" must be PascalCase');
 	if (c.block !== kebab(c.class || '')) err(`"block" must be "${kebab(c.class || '')}", the kebab-case of "class"`);
 	if (c.block !== folder) err(`"block" must match the folder name "${folder}"`);
-	if (!PASCAL.test(c.namespace || '')) err('"namespace" must be PascalCase');
+	if ('namespace' in c) err('remove "namespace": it lives in factory.config.json only, and the build registers the class on it');
 	if (!c.description) err('"description" is missing');
 	const names = new Set();
 	for (const [i, p] of (c.inputs || []).entries()) {

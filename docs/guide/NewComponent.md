@@ -48,7 +48,7 @@ This copies `templates/greeting-card/` to `components/status-badge/` and renames
 **Done when:** `npm test -w components/status-badge` is green, and this prints nothing:
 
 ```bash
-grep -rn -E "GreetingCard|greeting-card|ClaudeTest|gc-test" --exclude-dir=node_modules components/status-badge
+grep -rn -E "GreetingCard|greeting-card|gc-test" --exclude-dir=node_modules components/status-badge
 ```
 
 The copy still behaves like the greeting card. The next steps make it yours.
@@ -108,8 +108,9 @@ The tests read every OutSystems UI variable and its value from the installed `ou
 
 In `components/status-badge/test/checks.js`:
 
-- **Replace** the greeting card's behaviour checks (greeting text, click counting) with your component's: what it renders, what each Input Parameter changes, what each Event sends.
-- **Keep every structural check**: BEM classes and selectors, tokens and fallbacks, raw colours, `!important`, logical properties, focus, reduced motion, container classes untouched, the component adds no stylesheet, destroy, calls after destroy, missing mount id.
+- Set `componentTest`'s `block`, the OutSystems UI classes your component may render (`osuiClasses`), and a valid `config` the shared checks can create it with.
+- **Replace** the greeting card's behaviour checks (greeting text, click counting) with your component's: what it renders, what each Input Parameter changes, what each Event sends, and that its listeners go on `destroy`.
+- **Don't copy structural checks.** BEM classes and selectors, tokens and fallbacks, raw colours, `!important`, logical properties, focus, reduced motion, container classes untouched, no injected stylesheet, destroy safety and a missing mount id are checked for every component by `packages/toolchain/structural-checks.js`.
 
 In `components/status-badge/preview/index.html`, change the demo instance's parameters and events so the page shows your component.
 
@@ -179,7 +180,7 @@ Publish, then check three things. A "published successfully" message alone isn't
 3. `types.ts`: every input, event, modifier and bridge action listed.
 4. Class: three members, `textContent` only, mount classes untouched.
 5. CSS in `style/`: BEM, OutSystems UI variables with base fallbacks, Style.md checklist.
-6. Tests rewritten with every structural check kept; preview updated; `npm test` green.
+6. Behaviour checks rewritten (the structural ones are shared); preview updated; `npm test` green.
 7. Committed with `dist/`.
 8. Script, stylesheet, Block and harness in OutSystems, no validation errors.
 9. Published; live version, Script diff and browser check all pass.

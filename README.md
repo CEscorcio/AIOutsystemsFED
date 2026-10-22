@@ -50,9 +50,10 @@ This repository is a blueprint. Everything that differs between projects is in `
 ```jsonc
 {
   "project": "AIOutsystemsFED",      // README title, header of the combined files
-  "namespace": "ClaudeTest",         // window.<namespace>.<Class>; npm test enforces it
+  "namespace": "AIOutsystemsFED",    // the build registers every class as window.<namespace>.<Class>
   "outsystemsUi": "2.30.0",          // the version your O11 environment runs; must match the outsystems-ui pin
-  "o11": { "script": "Components", "theme": "Sandbox", "flow": "MainFlow", "layout": "LayoutTopMenu", "harnessRole": "Registered" }
+  "o11": { "script": "Components", "theme": "Sandbox", "flow": "MainFlow", "layout": "LayoutTopMenu", "harnessRole": "Registered" },
+  "budgets": { "releaseJsKB": 100, "releaseCssKB": 50 }  // build:all fails over them
 }
 ```
 
@@ -207,6 +208,7 @@ AIOutsystemsFED/
 │       ├── preview/            # Local preview page
 │       └── dist/               # Built <Class>.js and <Class>.css
 ├── templates/greeting-card/    # The example new components are copied from; tested, never shipped
+├── packages/toolchain/         # Builds and tests every component; the structural checks every component passes
 ├── platform/o11/               # Generators: component.json + dist/ -> Model API lambdas (out/ not committed)
 ├── scripts/                    # build-all, check-contracts, check-links, release-notes, release-record, init, install-hooks; lib/
 ├── dist/                       # components.js and components.css (versioned)

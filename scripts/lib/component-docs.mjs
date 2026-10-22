@@ -4,6 +4,7 @@
 // scripts/component-docs.mjs; check-contracts fails when one is missing or stale.
 import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
+import { loadConfig } from './config.mjs';
 import { bridgeAction, camel, componentsDir, listComponents, loadContract, templatesDir } from './contract.mjs';
 
 const cell = (text) =>
@@ -13,9 +14,10 @@ const cell = (text) =>
 		.replace(/\r?\n/g, ' ');
 const code = (text) => `\`${String(text).replace(/`/g, "'")}\``;
 
-// Only names from the contract and relative links: a README copied by the
-// scaffold and renamed must equal the one generated for the copy.
-export function renderReadme(c) {
+// Only names from the contract and the project's namespace, and relative links:
+// a README copied by the scaffold and renamed must equal the one generated for
+// the copy. npm run init regenerates every README when it sets a new namespace.
+export function renderReadme(c, namespace = loadConfig().namespace) {
 	const out = [
 		`# ${c.class}`,
 		'',
@@ -53,9 +55,9 @@ export function renderReadme(c) {
 		'',
 		'## In the browser',
 		'',
-		`The release's Script registers \`window.${c.namespace}.${c.class}\`. The Block drives it from three lifecycle handlers:`,
+		`The release's Script registers \`window.${namespace}.${c.class}\`. The Block drives it from three lifecycle handlers:`,
 		'',
-		`- **OnReady**: \`new ${c.namespace}.${c.class}({ runtimeId, ${[...c.inputs.map((p) => camel(p.name)), ...(c.events.length ? ['events'] : [])].join(', ')} })\`, mounted in the Block's \`MountPoint\` container`,
+		`- **OnReady**: \`new ${namespace}.${c.class}({ runtimeId, ${[...c.inputs.map((p) => camel(p.name)), ...(c.events.length ? ['events'] : [])].join(', ')} })\`, mounted in the Block's \`MountPoint\` container`,
 		`- **OnParametersChanged**: \`instance.onParametersChanged({ ${c.inputs.map((p) => camel(p.name)).join(', ')} })\``,
 		'- **OnDestroy**: `instance.destroy()`',
 		'',
@@ -81,7 +83,7 @@ export function readmes() {
 			const { contract, errors } = loadContract(folder, dir);
 			if (!contract || errors.length) continue;
 			const path = join(dir, folder, 'README.md');
-			all.push({ path, expected: renderReadme(contract), actual: existsSync(path) ? readFileSync(path, 'utf8').replace(/\r\n/g, '\n') : null });
+			all.push({ path, contract, expected: renderReadme(contract), actual: existsSync(path) ? readFileSync(path, 'utf8').replace(/\r\n/g, '\n') : null });
 		}
 	}
 	return all;

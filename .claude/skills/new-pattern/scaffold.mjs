@@ -1,16 +1,15 @@
 // Copies the example pattern into a new folder and renames it consistently.
 //
-// Usage: node scaffold.mjs <PatternName> [<Namespace>] [--from <example-dir>] [--to <target-dir>]
-//   PatternName  PascalCase class name, e.g. StatusBadge
-//   Namespace    global namespace the bundle registers on window (default: the
-//                "namespace" in factory.config.json, which npm test enforces)
+// Usage: node scaffold.mjs <PatternName> [--from <example-dir>] [--to <target-dir>]
+//   PatternName  PascalCase class name, e.g. StatusBadge. The build registers it
+//                as window.<namespace>.<PatternName>, the namespace from
+//                factory.config.json; components never name it.
 //   --from       example to copy (default: <repo>/templates/greeting-card)
 //   --to         new folder (default: <repo>/components/<pattern-name>)
 //
 // Renames, in file contents and paths:
 //   GreetingCard   -> <PatternName>   (class, types, file names, runXChecks)
 //   greeting-card  -> <pattern-name>  (BEM block, style/ file, folder, package name)
-//   ClaudeTest     -> <Namespace>     (window.<Namespace>.<PatternName>)
 //   gc-test-mount  -> <pattern-name>-test-mount
 // Skips node_modules and dist (dist is rebuilt by npm test).
 import { cpSync, existsSync, readdirSync, readFileSync, renameSync, statSync, writeFileSync } from 'node:fs';
@@ -67,18 +66,17 @@ const option = (name) => {
 };
 
 const repo = resolve(dirname(fileURLToPath(import.meta.url)), '../../..');
-const [pascal, givenNamespace] = positional;
-if (!pascal) fail('usage: node scaffold.mjs <PatternName> [<Namespace>] [--from dir] [--to dir]');
-let namespace = givenNamespace;
-if (!namespace) {
-	try {
-		namespace = JSON.parse(readFileSync(join(repo, 'factory.config.json'), 'utf8')).namespace;
-	} catch {
-		fail('no <Namespace> given and no factory.config.json to read it from');
-	}
+const [pascal, extra] = positional;
+if (!pascal) fail('usage: node scaffold.mjs <PatternName> [--from dir] [--to dir]');
+if (extra) fail('the namespace is no longer an argument: it lives in factory.config.json, and the build registers every class on it');
+// Only shown in the summary; components never name the namespace.
+let namespace = '<namespace>';
+try {
+	namespace = JSON.parse(readFileSync(join(repo, 'factory.config.json'), 'utf8')).namespace;
+} catch {
+	// no config: the summary shows a placeholder
 }
 if (!/^[A-Z][A-Za-z0-9]+$/.test(pascal)) fail(`PatternName must be PascalCase letters and digits: ${pascal}`);
-if (!/^[A-Z][A-Za-z0-9]*$/.test(namespace)) fail(`Namespace must start with a capital letter: ${namespace}`);
 if (pascal === 'GreetingCard') fail("pick a name other than the example's");
 
 const kebab = pascal
@@ -100,7 +98,6 @@ cpSync(from, to, {
 const replacements = [
 	['GreetingCard', pascal],
 	['greeting-card', kebab],
-	['ClaudeTest', namespace],
 	['gc-test-mount', `${kebab}-test-mount`],
 ];
 const rewrite = (text) => replacements.reduce((t, [a, b]) => t.split(a).join(b), text);

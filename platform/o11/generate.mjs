@@ -145,7 +145,7 @@ function block() {
 	const blockName = option('name', c.class);
 	const flowName = option('flow', config.o11.flow);
 	const isPublic = flag('public');
-	const ns = `${c.namespace}.${c.class}`;
+	const ns = `${config.namespace}.${c.class}`;
 	const modifiers = c.modifiers.length ? ` Modifiers: ${c.modifiers.map((m) => `${m.class} (${m.description})`).join('; ')}.` : '';
 	const L = [];
 	const add = (line) => L.push(`\t${line}`);

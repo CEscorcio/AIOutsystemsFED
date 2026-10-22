@@ -71,47 +71,45 @@ const files = {
 	'dist/components.css': { bytes: Buffer.byteLength(css), sha256: sha256(css) },
 };
 
-// Per-component sections of the combined files (the separators build-all.mjs writes).
-function sections(text, ext) {
-	const marker = ext === 'js' ? /^\/\/ ---- components\/([^/]+)\/dist\/(\S+)\.js ----$/gm : /^\/\* ---- components\/([^/]+)\/dist\/(\S+)\.css ---- \*\/$/gm;
-	const found = [...text.matchAll(marker)];
-	return new Map(found.map((m, i) => [m[1], { file: m[2], text: text.slice(m.index + m[0].length, i + 1 < found.length ? found[i + 1].index : undefined).trim() }]));
-}
-const jsParts = sections(js, 'js');
-const cssParts = sections(css, 'css');
-const components = [...new Set([...jsParts.keys(), ...cssParts.keys()])].sort().map((folder) => {
-	let contract = null;
-	let meta = {};
-	if (fromCommit) {
-		const raw = show(`${fromCommit}:components/${folder}/component.json`);
-		if (raw) {
-			meta = JSON.parse(raw);
-			contract = contractSnapshot({ inputs: [], events: [], modifiers: [], ...meta });
-		} else {
-			// Released before component.json existed: today's contract describes it only if
-			// the component's compiled JS is still the same.
-			const now = existsSync(join(root, 'dist', 'components.js')) ? sections(readFileSync(join(root, 'dist', 'components.js'), 'utf8').replace(/\r\n/g, '\n'), 'js').get(folder) : null;
-			const { contract: c, errors } = loadContract(folder);
-			if (now && jsParts.has(folder) && sha256(now.text) === sha256(jsParts.get(folder).text) && c && !errors.length) {
-				meta = { ...c, contractSource: "today's component.json (the compiled JS is identical)" };
-				contract = contractSnapshot(c);
+// The release's components: the per-component markers build-all writes in the
+// stylesheet (/* ---- components/<folder>/dist/<Class>.css ---- */). Each one is
+// hashed by its own committed build, components/<folder>/dist/<Class>.js and
+// .css, which exist at every release commit whatever the bundle's format.
+// (Records written before 2026-10-22 hashed each component's section of the
+// combined files instead.)
+const markers = [...css.matchAll(/^\/\* ---- components\/([^/]+)\/dist\/(\S+)\.css ---- \*\/$/gm)].map((m) => ({ folder: m[1], className: m[2] }));
+const namespace = (() => {
+	const raw = read('factory.config.json');
+	return raw ? JSON.parse(raw).namespace || null : null;
+})();
+const components = markers
+	.sort((a, b) => (a.folder < b.folder ? -1 : 1))
+	.map(({ folder, className }) => {
+		let contract = null;
+		let meta = {};
+		const raw = read(`components/${folder}/component.json`);
+		if (fromCommit) {
+			if (raw) {
+				meta = JSON.parse(raw);
+				contract = contractSnapshot({ inputs: [], events: [], modifiers: [], ...meta });
 			}
+		} else {
+			const { contract: c, errors } = loadContract(folder);
+			if (!c || errors.length) fail(`components/${folder}/component.json: ${errors.join('; ') || 'missing'}`);
+			meta = c;
+			contract = contractSnapshot(c);
 		}
-	} else {
-		const { contract: c, errors } = loadContract(folder);
-		if (!c || errors.length) fail(`components/${folder}/component.json: ${errors.join('; ') || 'missing'}`);
-		meta = c;
-		contract = contractSnapshot(c);
-	}
-	return {
-		folder,
-		class: meta.class || (jsParts.get(folder) || {}).file || null,
-		namespace: meta.namespace || null,
-		contract,
-		...(meta.contractSource ? { contractSource: meta.contractSource } : {}),
-		sha256: { js: jsParts.has(folder) ? sha256(jsParts.get(folder).text) : null, css: cssParts.has(folder) ? sha256(cssParts.get(folder).text) : null },
-	};
-});
+		const builtJs = read(`components/${folder}/dist/${className}.js`);
+		const builtCss = read(`components/${folder}/dist/${className}.css`);
+		return {
+			folder,
+			class: meta.class || className,
+			namespace: namespace || meta.namespace || null,
+			contract,
+			sha256: { js: builtJs ? sha256(builtJs) : null, css: builtCss ? sha256(builtCss) : null },
+		};
+	});
+if (components.length === 0) fail('dist/components.css lists no component; was it built by npm run build:all?');
 
 let deployment = null;
 if (!flag('no-deployment')) {

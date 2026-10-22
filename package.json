@@ -8,12 +8,13 @@
 	},
 	"workspaces": [
 		"components/*",
-		"templates/*"
+		"templates/*",
+		"packages/*"
 	],
 	"scripts": {
 		"lint": "eslint . && node scripts/check-links.mjs && stylelint \"{components,templates}/*/style/**/*.{css,scss}\" && prettier --check .",
 		"format": "prettier --write . && stylelint \"{components,templates}/*/style/**/*.{css,scss}\" --fix && eslint . --fix",
-		"test": "npm run lint && npm test --workspaces && node scripts/check-contracts.mjs",
+		"test": "npm run lint && npm test --workspaces --if-present && node scripts/check-contracts.mjs",
 		"build:all": "node scripts/build-all.mjs",
 		"prepare": "node scripts/install-hooks.mjs",
 		"release-notes": "node scripts/release-notes.mjs",

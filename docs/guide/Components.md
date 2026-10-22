@@ -48,23 +48,23 @@ Nothing in steps 1 to 5 needs an OutSystems environment. [Components_11.md](Comp
 Copy [`greeting-card/`](../../templates/greeting-card/) and rename. With Claude Code, ask for a new pattern (the `new-pattern` skill), or run the script it uses:
 
 ```bash
-node .claude/skills/new-pattern/scaffold.mjs <Pattern> [<Namespace>] # e.g. StatusBadge; the namespace defaults to factory.config.json
+node .claude/skills/new-pattern/scaffold.mjs <Pattern>     # e.g. StatusBadge
 ```
 
 The layout:
 
 ```
-src/index.ts                         registers window.<Namespace>.<Component>
-src/greeting-card/types.ts           the contract with the Block
+component.json                       the contract as data; README.md is generated from it
+src/index.ts                         exports the class (the build registers it on the namespace)
+src/greeting-card/types.ts           the contract with the Block, in TypeScript
 src/greeting-card/GreetingCard.ts    the class
 style/greeting-card.scss             the component's styles (SCSS), shipped as their own stylesheet
-build.mjs                            esbuild -> dist/GreetingCard.js; Dart Sass, style/ -> dist/GreetingCard.css
-test/checks.js                       scripted checks, shared by browser and Node
-test/run.mjs                         runs the checks in jsdom (npm test)
+test/checks.js                       the component's own behaviour checks (componentTest)
 preview/index.html                   local page; ?test=1 runs the checks in the browser
+package.json, tsconfig.json          point at the shared toolchain; nothing to change
 ```
 
-Four things to rename consistently: the **namespace** (set once per project in `factory.config.json`; the scaffold uses it), the **class name**, the **output file**, and the **BEM block** (`greeting-card` → your pattern in kebab-case, in every CSS class, the stylesheet's file name and the tests; see [Rule 0](#rules-for-every-custom-pattern)). The namespace is global, so make it unique to your team.
+No build code lives in the component: `packages/toolchain/` builds and tests every component the same way (esbuild, Dart Sass, TypeScript, jsdom), and runs the structural checks every component must pass. The **namespace** isn't in the component either: it's set once per project in `factory.config.json`, and the build registers every class on it (`window.<namespace>.<Class>`). Three things to rename consistently: the **class name**, the **output file**, and the **BEM block** (`greeting-card` → your pattern in kebab-case, in every CSS class, the stylesheet's file name and the tests; see [Rule 0](#rules-for-every-custom-pattern)). The namespace is global, so make it unique to your team.
 
 ```
 npm install
@@ -169,17 +169,17 @@ Step 6 builds this in OutSystems. Two of its parts need explaining:
 ## Step 4: build for diffability, not size
 
 ```js
-// build.mjs
-await build({
-  entryPoints: ["src/index.ts"],
-  outfile: "dist/GreetingCard.js",
+// packages/toolchain/lib.mjs: the settings every component and the release use
+export const ESBUILD = {
   bundle: true,
   format: "iife",       // no module loader on the platform side
   target: "es2019",
   minify: false,        // so the published copy can be diffed against disk
   legalComments: "none",
-});
+};
 ```
+
+The build bundles a small generated entry that imports the class from `src/index.ts` and registers it as `window.<namespace>.<Class>`, so component code never names the namespace.
 
 Not minifying is the point: step 8 compares the published Script with this file line by line. Compare the published copy with this file before trusting it; the platform may add a byte-order mark or drop the final newline, but the code itself should match line for line.
 
@@ -187,19 +187,21 @@ Commit `dist/` too. It's the artifact that goes to OutSystems, and having it in 
 
 Each component's build also writes `dist/<Name>.css` from its `style/` folder: every `.scss` file there compiled with Dart Sass and formatted with Prettier, and every `.css` file as it is, joined in alphabetical order. Partials (`_name.scss`) are only included through `@use`. See [Style.md, Rule 8](Style.md#rule-8-scss-grouping-not-values).
 
-**Several components, one release.** `npm run build:all` at the repo root runs every component's `npm test` and writes two files, each starting with a header that gives the same version, build timestamp (UTC) and contents. The **version** is `<ISO year>.<ISO week>.<N>` from the build's UTC date, with no padding (for example `2026.42.1`). Weeks follow ISO 8601: they start on Monday, and the week's Thursday decides its year, so 31 Dec 2029 is `2030.1.N`. N counts committed releases within the week: one more than the version in the last committed `dist/components.js` if that's from the same week, otherwise 1. Test builds don't use up numbers, which is why the files are committed only when they're uploaded. The two files:
+**Several components, one release.** `npm run build:all` at the repo root runs every component's `npm test`, then bundles **one entry that imports every component**, so code they share is included once. It writes two files, each starting with a header that gives the same version, build timestamp (UTC) and contents. The **version** is `<ISO year>.<ISO week>.<N>` from the build's UTC date, with no padding (for example `2026.42.1`). Weeks follow ISO 8601: they start on Monday, and the week's Thursday decides its year, so 31 Dec 2029 is `2030.1.N`. N counts committed releases within the week: one more than the version in the last committed `dist/components.js` if that's from the same week, otherwise 1. Test builds don't use up numbers, which is why the files are committed only when they're uploaded. The two files:
 
-- `dist/components.js`: every component's bundle, with `"use strict"` declared once at the top. Ship it as one Script (for example `Components`) instead of one Script per component.
+- `dist/components.js`: one bundle of every component, with `"use strict"` declared once at the top. It registers each class on the namespace and sets `window.<namespace>.__release` to the version, so the browser console says which release a page runs. Ship it as one Script (for example `Components`) instead of one Script per component.
 - `dist/components.css`: every component's stylesheet. Ship it in the app's theme stylesheet ([Style.md, Rule 7](Style.md#rule-7-where-a-patterns-css-lives)).
+
+Both files have a size budget (`budgets` in `factory.config.json`); the build fails over it, and the release notes show each release's size and its change.
 
 Upload both files from the same build, so their timestamps match, and check them after publishing the same way as a single bundle: the published Script must match `dist/components.js`. Every build gets a new timestamp, so rebuild just before uploading and commit the files you uploaded. The commit also gets the release's notes in `CHANGELOG.md`, added by the pre-commit hook (see the README, Release Notes).
 
 ## Step 5: prove it locally before going to the platform
 
-`npm test` runs `tsc --noEmit`, builds, and then runs [`test/checks.js`](../../templates/greeting-card/test/checks.js) against the bundle in jsdom:
+`npm test` runs `tsc --noEmit`, builds, and then runs the structural checks every component passes ([`packages/toolchain/structural-checks.js`](../../packages/toolchain/structural-checks.js)) and the component's own [`test/checks.js`](../../templates/greeting-card/test/checks.js) against the bundle in jsdom:
 
 ```
-PASS  bundle registers window.ClaudeTest.GreetingCard
+PASS  bundle registers window.AIOutsystemsFED.GreetingCard
 PASS  renders inside the mount container
 PASS  uses OutSystems UI card and button classes
 PASS  every component class is BEM or OutSystems UI
@@ -207,8 +209,8 @@ PASS  every variable is an OutSystems UI token with its base-theme fallback
 PASS  click fires OnGreetClicked with count 1
 PASS  onParametersChanged keeps the count
 PASS  markup in data renders as text, not HTML
-PASS  container classes (pattern class + ExtendedClass) are untouched on create
-PASS  ExtendedClass is not duplicated on the card root
+PASS  container classes (block class + ExtendedClass) are untouched on create
+PASS  ExtendedClass is not applied inside the component
 PASS  destroy removes the click listener
 PASS  calls after destroy are safe
 PASS  missing mount id throws a clear error
@@ -230,7 +232,7 @@ The same file runs in the browser at `preview/index.html?test=1`. Write a check 
 
 1. Copy `templates/greeting-card/` into `components/<your-component>/` with the `new-pattern` skill or `scaffold.mjs`, then run `npm install` at the repo root.
 2. Write `types.ts`: every Input Parameter, every Event and its payload, and the modifiers `ExtendedClass` accepts. Every pattern gets `ExtendedClass` (Text, not mandatory, default `""`), documented as applied by the main container, not the class.
-3. Write the class to the three-member rules and the CSS to [Style.md](Style.md); keep every structural check and add one for each new behaviour; `npm test` until green.
+3. Write the class to the three-member rules and the CSS to [Style.md](Style.md); add a behaviour check for each new behaviour (the structural checks are shared); `npm test` until green.
 4. Commit, including `dist/`.
 5. Steps 6 to 8 in [Components_11.md](Components_11.md): Script, stylesheet, Block (one bridge Client Action per Event; the main container's Style Classes set to `"<pattern>" + If(ExtendedClass <> NullTextIdentifier(), " " + ExtendedClass, "")`), harness screen, publish, verify.
 6. Only then use the Block on real screens.

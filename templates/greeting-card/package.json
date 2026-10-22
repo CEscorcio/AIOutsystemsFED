@@ -4,14 +4,7 @@
 	"private": true,
 	"description": "Example component: a TypeScript class driven from an OutSystems Block. The template new components are copied from.",
 	"scripts": {
-		"build": "node build.mjs",
-		"typecheck": "tsc --noEmit",
-		"test": "npm run typecheck && npm run build && node test/run.mjs"
-	},
-	"devDependencies": {
-		"esbuild": "0.28.2",
-		"jsdom": "30.1.3",
-		"sass": "1.105.2",
-		"typescript": "7.0.2"
+		"build": "node ../../packages/toolchain/build.mjs",
+		"test": "node ../../packages/toolchain/test.mjs"
 	}
 }
