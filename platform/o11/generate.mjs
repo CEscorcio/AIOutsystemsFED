@@ -9,6 +9,9 @@
 //   node platform/o11/generate.mjs theme [--theme <Theme>]
 //   node platform/o11/generate.mjs block <component> [--name <Block>] [--flow <Flow>] [--public]
 //   node platform/o11/generate.mjs harness <component> [--screen <Class>Test] [--flow <Flow>] [--block <Block>] [--block-flow <Flow>]
+//   node platform/o11/generate.mjs showcase <component> [--screen <Screen>] [--block <Block>]
+//   any of script, theme, block, showcase with --traditional: for a Traditional Web module,
+//   with the names in factory.config.json's "traditional" section
 //
 // Script, theme, flows, layout and harness role default to factory.config.json ("o11"):
 // Blocks go in o11.blockFlow, harness screens in o11.flow.
@@ -86,8 +89,260 @@ function contractOf(folder) {
 	return contract;
 }
 
+// ---- Traditional Web (--traditional): the same release in a Traditional module ----
+// Measured 2026-10-28 in a Traditional style-guide module (Components_11.md, Traditional Web):
+// - Traditional Web Blocks have no Required Scripts: the bundle is the JavaScript of one
+//   Web Block (traditional.scriptBlock), and each component Block contains an instance of it.
+// - A Web Block has no lifecycle events, and its On Render JavaScript can't reference
+//   widgets; the class is started by an Expression widget (Escape Content off) that
+//   writes a <script> with the widgets' ids, on every render (Ajax refreshes included).
+// - A container's Style Classes is static text; the mount's classes are an extended
+//   property "class" (block class + ExtendedClass).
+// - Each event is a hidden Link (in <block>__bridge) whose On Click raises the Block
+//   event by Ajax; the class's callback clicks it. Events with parameters aren't supported.
+const TRADITIONAL = flag('traditional');
+const WEB = 'OutSystems.Model.UI.Web';
+function traditionalConfig() {
+	if (!config.traditional) fail('factory.config.json has no "traditional" section; add one to generate for a Traditional Web module');
+	return config.traditional;
+}
+const webBlocks = `eSpace.WebFlows.SelectMany(f => f.Nodes).OfType<${WEB}.IWebBlock>()`;
+
+function scriptTraditional() {
+	const t = traditionalConfig();
+	const name = option('name', t.scriptBlock);
+	const js = readDist('components.js');
+	const body = (tail) => `eSpace => {
+	var flow = eSpace.WebFlows.FirstOrDefault(f => f.Name == ${cs(t.blockFlow)}) ?? eSpace.CreateWebFlow(${cs(t.blockFlow)});
+	var s = ${webBlocks}.FirstOrDefault(b => b.Name == ${cs(name)}) ?? flow.CreateBlock(${cs(name)});
+	s.Description = ${cs(`AIOutsystemsFED components: dist/components.js ${js.version}, built ${js.built}, as this Web Block's JavaScript. Every component Block contains an instance of this Block, which loads it. Generated from the repo; don't edit here, rebuild and replace.`)};
+	s.Public = false;
+	s.JavaScript = ${cs(js.text)};${tail}
+}`;
+	const probe = `
+	var j = s.JavaScript; ${CHECKSUM_CS('j')}
+	throw new Exception("PROBE:block=" + s.Name + " len=" + j.Length + " hash=" + h);`;
+	write('script-traditional', body(''), body(probe), `block=${name} len=${js.text.length} hash=${checksum(js.text)}`);
+}
+
+// The <script> an Expression widget writes on every render: waits for the bundle, then
+// starts the class on the mount with the Block's inputs, ids and event links.
+function initExpression(c) {
+	// JS parts use single quotes only, so as OutSystems text literals they need no escaping.
+	const parts = [];
+	const js = (text) => {
+		const last = parts[parts.length - 1];
+		if (last && last.text !== undefined) last.text += text;
+		else parts.push({ text });
+	};
+	const val = (expr) => parts.push({ expr });
+	js(
+		`<script>(function start(n) { var ns = window.${config.namespace}; if (!ns || !ns.${c.class}) { if (n < 100) setTimeout(function () { start(n + 1); }, 50); return; } new ns.${c.class}({ runtimeId: '`,
+	);
+	val('MountPoint.Id');
+	js("'");
+	for (const p of c.placeholders) {
+		js(`, ${camel(p.name)}Id: '`);
+		val(`${p.name}Container.Id`);
+		js("'");
+	}
+	for (const p of c.inputs) {
+		if (p.type === 'Text') {
+			js(`, ${camel(p.name)}: '`);
+			val(`EncodeJavaScript(${p.name})`);
+			js("'");
+		} else if (p.type === 'Boolean') {
+			js(`, ${camel(p.name)}: `);
+			val(`If(${p.name}, "true", "false")`);
+		} else {
+			js(`, ${camel(p.name)}: `);
+			val(p.name);
+		}
+	}
+	if (c.events.length) {
+		js(', events: { ');
+		c.events.forEach((e, i) => {
+			js(`${i ? ', ' : ''}${e.name}: function () { var l = document.getElementById('`);
+			val(`${e.name}Link.Id`);
+			js("'); if (l) l.click(); }");
+		});
+		js(' }');
+	}
+	js(' }); })(0);</script>');
+	if (parts.some((p) => p.text !== undefined && /["\\]/.test(p.text))) fail('internal: the init script must not contain double quotes or backslashes');
+	return parts.map((p) => (p.text !== undefined ? `"${p.text}"` : p.expr)).join(' + ');
+}
+
+function blockTraditional() {
+	const t = traditionalConfig();
+	const c = contractOf(target);
+	const blockName = option('name', c.class);
+	const flowName = option('flow', t.blockFlow);
+	const ns = `${config.namespace}.${c.class}`;
+	for (const e of c.events) if ((e.params || []).length) fail(`${c.class}.${e.name} has parameters; the Traditional Block raises events through a Link, which can't pass them yet`);
+	const modifiers = c.modifiers.length ? ` Modifiers: ${c.modifiers.map((m) => `${m.class} (${m.description})`).join('; ')}.` : '';
+	const L = [];
+	const add = (line) => L.push(`\t${line}`);
+	add(`var flow = eSpace.WebFlows.FirstOrDefault(f => f.Name == ${cs(flowName)}) ?? eSpace.CreateWebFlow(${cs(flowName)});`);
+	add(`if (${webBlocks}.Any(b => b.Name == ${cs(blockName)})) throw new Exception("PROBE:a Web Block named ${blockName} already exists; this generator only creates Blocks");`);
+	add(`var scriptBlock = ${webBlocks}.FirstOrDefault(b => b.Name == ${cs(t.scriptBlock)});`);
+	add(`if (scriptBlock == null) throw new Exception("PROBE:no Web Block named ${t.scriptBlock}; apply script-traditional.cs first");`);
+	add(`var block = flow.CreateBlock(${cs(blockName)});`);
+	add(
+		`block.Description = ${cs(`${c.description} Bridge to window.${ns} (the JavaScript of Web Block ${t.scriptBlock}). Generated from ${c.dir === templatesDir ? 'templates' : 'components'}/${c.folder}/component.json.`)};`,
+	);
+	add(`block.Public = ${flag('public') ? 'true' : 'false'};`);
+	c.inputs.forEach((p, i) => {
+		add(
+			`var in${i} = block.CreateInputParameter(${cs(p.name)}); in${i}.DataType = ${TYPES[p.type].modelApi}; in${i}.IsMandatory = ${p.mandatory}; in${i}.SetDefaultValue(${cs(p.default)}); in${i}.Description = ${cs(p.description)};`,
+		);
+	});
+	add(`var inExt = block.CreateInputParameter("ExtendedClass"); inExt.DataType = eSpace.TextType; inExt.IsMandatory = false; inExt.SetDefaultValue(${cs('""')});`);
+	add(`inExt.Description = ${cs(`Extra classes for the main container (MountPoint). Applied by the Block, never passed to the class.${modifiers}`)};`);
+	c.events.forEach((e, i) => add(`var ev${i} = block.CreateEvent(${cs(e.name)}); ev${i}.IsMandatory = false; ev${i}.Description = ${cs(e.description)};`));
+	add(`var mount = block.CreateWidget<${WEB}.Widgets.IContainerWidget>("MountPoint");`);
+	add(`mount.EffectiveWidth = OutSystems.Model.Enumerations.EffectiveWidthType.InlineBlock; mount.Width = null;`);
+	add(
+		`var mountClass = mount.CreateExtendedProperty(); mountClass.Property = "class"; mountClass.SetValue(${cs(`"${c.block}" + If(ExtendedClass <> NullTextIdentifier(), " " + ExtendedClass, "")`)});`,
+	);
+	c.placeholders.forEach((p, i) => {
+		add(`var ph${i}c = mount.CreateWidget<${WEB}.Widgets.IContainerWidget>(${cs(`${p.name}Container`)}); ph${i}c.StyleClasses = ${cs(`${c.block}__${kebab(p.name)}`)};`);
+		add(`var ph${i} = ph${i}c.CreateWidget<${WEB}.Widgets.IPlaceholderWidget>(${cs(p.name)}); ph${i}.Description = ${cs(p.description)};`);
+	});
+	if (c.events.length) {
+		add(`var bridge = block.CreateWidget<${WEB}.Widgets.IContainerWidget>("Bridge"); bridge.StyleClasses = ${cs(`${c.block}__bridge`)};`);
+		c.events.forEach((e, i) => {
+			add(
+				`var link${i} = bridge.CreateWidget<${WEB}.Widgets.ILinkWidget>(${cs(`${e.name}Link`)}); link${i}.OnClick.Destination = ev${i}; link${i}.OnClick.Method = OutSystems.Model.Enumerations.Method.Ajax;`,
+			);
+			add(`link${i}.CreateWidget<${WEB}.Widgets.ITextWidget>().Text = ${cs(e.name)};`);
+		});
+	}
+	add(`var scriptInstance = block.CreateWidget<${WEB}.Widgets.IWebBlockInstanceWidget>(); scriptInstance.SourceBlock = scriptBlock;`);
+	add(`var init = block.CreateWidget<${WEB}.Widgets.IExpressionWidget>("Init"); init.EscapeContent = false;`);
+	add(`init.SetValue(${cs(initExpression(c))});`);
+	const summary = `"PROBE:block=" + block.Name + " inputs=" + string.Join(",", block.InputParameters.Select(p => p.Name)) + " events=" + string.Join(",", block.Events.Select(e => e.Name)) + " placeholders=" + string.Join(",", block.GetAllDescendantsOfType<${WEB}.Widgets.IPlaceholderWidget>().Select(p => p.Name)) + " script=" + scriptInstance.SourceBlock.Name`;
+	const expected = `block=${blockName} inputs=${[...c.inputs.map((p) => p.name), 'ExtendedClass'].join(',')} events=${c.events.map((e) => e.name).join(',')} placeholders=${c.placeholders.map((p) => p.name).join(',')} script=${t.scriptBlock}`;
+	const code = (tail) => `eSpace => {\n${L.join('\n')}${tail}\n}`;
+	write(`block-${c.folder}-traditional`, code(''), code(`\n\tthrow new Exception(${summary});`), expected);
+}
+
+// A Traditional screen action shows a message through RichWidgets' Feedback_Message.
+function feedbackAction(add, v, name, params, message) {
+	add(`var ${v} = scr.CreateScreenAction(${cs(name)});`);
+	params.forEach((pname, j) => add(`var ${v}p${j} = ${v}.CreateInputParameter(${cs(pname)}); ${v}p${j}.DataType = eSpace.TextType;`));
+	add(`var ${v}Start = ${v}.CreateNode<OutSystems.Model.Logic.Nodes.IStartNode>();`);
+	add(`var ${v}Msg = ${v}.CreateNode<OutSystems.Model.Logic.Nodes.IExecuteServerActionNode>().ConnectedBelow(${v}Start); ${v}Msg.Action = feedback;`);
+	add(
+		`${v}Msg.SetArgumentValue(feedback.InputParameters.First(p => p.Name == "MessageText"), ${cs(message)}); ${v}Msg.SetArgumentValue(feedback.InputParameters.First(p => p.Name == "MessageType"), "Entities.MessageType.Info");`,
+	);
+	add(`${v}.CreateNode<OutSystems.Model.Logic.Nodes.IEndNode>().ConnectedBelow(${v}Msg);`);
+}
+
+function showcaseTraditional() {
+	const t = traditionalConfig();
+	const c = contractOf(target);
+	if (!c.showcase) fail(`${c.folder}/component.json has no "showcase"`);
+	const s = c.showcase;
+	const screenName = option('screen', s.screen);
+	const blockName = option('block', c.class);
+	const flowName = option('flow', t.flow);
+	const L = [];
+	const add = (line) => L.push(`\t${line}`);
+	add(`var flow = eSpace.WebFlows.FirstOrDefault(f => f.Name == ${cs(flowName)});`);
+	add(`if (flow == null) throw new Exception("PROBE:no UI flow named ${flowName}");`);
+	add(`if (flow.Nodes.OfType<${WEB}.IWebScreen>().Any(x => x.Name == ${cs(screenName)})) throw new Exception("PROBE:a screen named ${screenName} already exists");`);
+	add(`var cardBlock = eSpace.WebFlows.Where(f => f.Name == ${cs(t.blockFlow)}).SelectMany(f => f.Nodes).OfType<${WEB}.IWebBlock>().FirstOrDefault(b => b.Name == ${cs(blockName)});`);
+	add(`if (cardBlock == null) throw new Exception("PROBE:no Web Block named ${blockName} in ${t.blockFlow}; apply the block lambda first");`);
+	add(`var layoutRef = eSpace.References.FirstOrDefault(r => r.Name == ${cs(t.layout.module)});`);
+	add(`if (layoutRef == null) throw new Exception("PROBE:no reference to ${t.layout.module}");`);
+	add(`var layoutBlk = layoutRef.WebFlows.First(f => f.Name == ${cs(t.layout.flow)}).Nodes.OfType<${WEB}.IWebBlockSignature>().First(b => b.Name == ${cs(t.layout.block)});`);
+	add(`var feedback = eSpace.References.First(r => r.Name == "RichWidgets").ServerActions.First(a => a.Name == "Feedback_Message");`);
+	add(`var x = flow.Nodes.OfType<${WEB}.IWebScreen>().Select(z => z.HorizontalPosition).DefaultIfEmpty(0).Max() + 1000;`);
+	add(`var scr = flow.CreateScreen(${cs(screenName)});`);
+	add(`scr.Widgets.ToList().ForEach(w => w.Delete());`);
+	add(`scr.Description = ${cs(`Examples of the ${blockName} Web Block, generated from ${c.dir === templatesDir ? 'templates' : 'components'}/${c.folder}/component.json (showcase).`)};`);
+	add(`scr.SetTitle(${cs(`"${s.title}"`)});`);
+	add(`scr.HorizontalPosition = x; scr.VerticalPosition = 700;`);
+	add(`scr.Roles.Add(eSpace.SystemRoles.OfType<OutSystems.Model.Logic.ISystemRole>().First(r => r.Name == ${cs(t.harnessRole)}));`);
+	add(`var layout = scr.CreateWidget<${WEB}.Widgets.IWebBlockInstanceWidget>(); layout.SourceBlock = layoutBlk;`);
+	Object.entries(t.layoutFill || {}).forEach(([ph, b], i) => {
+		add(`var fill${i} = layout.PlaceholdersContent.First(p => p.Placeholder?.Name == ${cs(ph)}).CreateWidget<${WEB}.Widgets.IWebBlockInstanceWidget>();`);
+		add(`fill${i}.SourceBlock = ${webBlocks}.First(b => b.Name == ${cs(b)});`);
+	});
+	add(`layout.PlaceholdersContent.First(p => p.Placeholder?.Name == "Title").CreateWidget<${WEB}.Widgets.ITextWidget>().Text = ${cs(s.title)};`);
+	add(`var main = layout.PlaceholdersContent.First(p => p.Placeholder?.Name == "MainContent");`);
+	add(`var intro = main.CreateWidget<${WEB}.Widgets.IContainerWidget>("Intro"); intro.StyleClasses = "text-neutral-7 margin-bottom-l";`);
+	add(`intro.CreateWidget<${WEB}.Widgets.ITextWidget>().Text = ${cs(c.description)};`);
+
+	c.events.forEach((e, i) => feedbackAction(add, `on${i}`, `Example${e.name}`, ['Example'], `Example + ": ${e.name}"`));
+	const hasItems = c.placeholders.some((p) => (p.example || []).length);
+	if (hasItems) feedbackAction(add, 'onItem', 'ItemClicked', ['Item', 'Example'], 'Example + ": " + Item');
+
+	// The examples are data, and C# loops build them: the lambda stays short enough to pass
+	// on unchanged (written out widget by widget it was 56 KB for 11 examples).
+	const all = s.groups.flatMap((g, gi) => g.examples.map((ex) => ({ ...ex, g: gi })));
+	const n = all.length;
+	for (const ex of all) if (/["\\]/.test(ex.title)) fail(`showcase example "${ex.title}": titles can't contain double quotes or backslashes`);
+	const items = c.placeholders.filter((p) => (p.example || []).length);
+	add(`var groups = new[] { ${s.groups.map((g) => cs(g.title)).join(', ')} };`);
+	add(`var inputs = new[] { ${c.inputs.map((p) => cs(p.name)).join(', ')} };`);
+	add('var examples = new[] {');
+	for (const ex of all) {
+		const args = ex.args || {};
+		add(`\tnew { G = ${ex.g}, Title = ${cs(ex.title)}, Ext = ${cs(args.ExtendedClass || '')}, Args = new[] { ${c.inputs.map((p) => cs(args[p.name] ?? p.example ?? p.default)).join(', ')} } },`);
+	}
+	add('};');
+	items.forEach((p, pi) => add(`var items${pi} = new[] { ${p.example.map((it) => `new[] { ${cs(it.label)}, ${cs(it.icon || '')} }`).join(', ')} };`));
+	add(`var rows = new List<${WEB}.Widgets.IContainerWidget>();`);
+	add('for (var gi = 0; gi < groups.Length; gi++) {');
+	add(`\tvar g = main.CreateWidget<${WEB}.Widgets.IContainerWidget>("Group" + (gi + 1)); g.StyleClasses = "margin-bottom-l";`);
+	add(`\tvar gh = g.CreateWidget<${WEB}.Widgets.IContainerWidget>("Group" + (gi + 1) + "Title"); gh.StyleClasses = "heading5 margin-bottom-m";`);
+	add(`\tgh.CreateWidget<${WEB}.Widgets.ITextWidget>().Text = groups[gi];`);
+	add(`\tvar gr = g.CreateWidget<${WEB}.Widgets.IContainerWidget>("Group" + (gi + 1) + "Examples"); gr.StyleClasses = "display-flex flex-wrap gap-xl";`);
+	add('\trows.Add(gr);');
+	add('}');
+	add('var counts = new int[groups.Length];');
+	add('foreach (var ex in examples) {');
+	add('\tcounts[ex.G]++;');
+	add('\tvar id = "Example" + (ex.G + 1) + "_" + counts[ex.G];');
+	add('\tvar label = "\\"" + ex.Title + "\\"";');
+	add(`\tvar box = rows[ex.G].CreateWidget<${WEB}.Widgets.IContainerWidget>(id); box.StyleClasses = "display-flex flex-direction-column gap-s";`);
+	add(`\tvar cap = box.CreateWidget<${WEB}.Widgets.IContainerWidget>(id + "Caption"); cap.StyleClasses = "font-size-xs text-neutral-7";`);
+	add(`\tcap.CreateWidget<${WEB}.Widgets.ITextWidget>().Text = ex.Title;`);
+	add(`\tvar inst = box.CreateWidget<${WEB}.Widgets.IWebBlockInstanceWidget>(); inst.SourceBlock = cardBlock;`);
+	add('\tfor (var i = 0; i < inputs.Length; i++) inst.SetArgumentValue(cardBlock.InputParameters.First(p => p.Name == inputs[i]), ex.Args[i]);');
+	add('\tif (ex.Ext != "") inst.SetArgumentValue(cardBlock.InputParameters.First(p => p.Name == "ExtendedClass"), ex.Ext);');
+	c.events.forEach((e, i) => {
+		add(`\tvar h${i} = inst.EventHandlers.First(h => h.Event.Name == ${cs(e.name)}); h${i}.Handler = on${i};`);
+		add(`\th${i}.Arguments.First(a => a.Parameter.Name == "Example").SetValue(label);`);
+	});
+	items.forEach((p, pi) => {
+		add(`\tvar pc${pi} = inst.PlaceholdersContent.First(q => q.Placeholder?.Name == ${cs(p.name)});`);
+		add(`\tforeach (var it in items${pi}) {`);
+		add(`\t\tvar l = pc${pi}.CreateWidget<${WEB}.Widgets.ILinkWidget>();${p.itemClass ? ` l.StyleClasses = ${cs(p.itemClass)};` : ''}`);
+		add('\t\tl.OnClick.Destination = onItem; l.OnClick.Method = OutSystems.Model.Enumerations.Method.Ajax;');
+		add('\t\tl.OnClick.Arguments.First(a => a.Parameter.Name == "Item").SetValue("\\"" + it[0] + "\\"");');
+		add('\t\tl.OnClick.Arguments.First(a => a.Parameter.Name == "Example").SetValue(label);');
+		add(
+			`\t\tif (it[1] != "") { var ic = l.CreateWidget<${WEB}.Widgets.IExpressionWidget>(); ic.EscapeContent = false; ic.SetValue("\\"<span class='icon fa fa-" + it[1] + "' aria-hidden='true'></span>\\""); }`,
+		);
+		add(`\t\tl.CreateWidget<${WEB}.Widgets.ITextWidget>().Text = it[0];`);
+		add('\t}');
+	});
+	add('}');
+
+	const links = c.placeholders.reduce((sum, p) => sum + (p.example || []).length, 0) * n;
+	const summary = `"PROBE:screen=" + scr.Name + " instances=" + scr.GetAllDescendantsOfType<${WEB}.Widgets.IWebBlockInstanceWidget>().Count(w => w.SourceBlock == cardBlock) + " links=" + scr.GetAllDescendantsOfType<${WEB}.Widgets.ILinkWidget>().Count() + " actions=" + string.Join(",", scr.ScreenActions.Select(a => a.Name).OrderBy(z => z))`;
+	const actions = [...c.events.map((e) => `Example${e.name}`), ...(hasItems ? ['ItemClicked'] : [])].sort();
+	const expected = `screen=${screenName} instances=${n} links=${links} actions=${actions.join(',')}`;
+	const code = (tail) => `eSpace => {\n${L.join('\n')}${tail}\n}`;
+	write(`showcase-${c.folder}-traditional`, code(''), code(`\n\tthrow new Exception(${summary});`), expected);
+}
+
 // ---- script: dist/components.js as one Script, created or replaced ----
 function script() {
+	if (TRADITIONAL) return scriptTraditional();
 	const name = option('name', SCRIPT);
 	const js = readDist('components.js');
 	const body = (tail) => `eSpace => {
@@ -103,13 +358,15 @@ function script() {
 
 // ---- theme: dist/components.css as one marked section of a theme stylesheet ----
 function theme() {
-	const themeName = option('theme', config.o11.theme);
+	const themeName = option('theme', TRADITIONAL ? traditionalConfig().theme : config.o11.theme);
+	const themeType = TRADITIONAL ? `${WEB}.IWebTheme` : 'IMobileTheme';
+	const outName = TRADITIONAL ? 'theme-traditional' : 'theme';
 	const css = readDist('components.css');
 	const GUARD = '.components-start { }';
 	const END = '/* ==== components: end ==== */';
 	// The guard rule absorbs the 2 characters Theme Editor's block has been seen to drop (Components_11.md, The stylesheet).
 	const section = `${GUARD}\n/* ==== components: start (built ${css.built}) ==== */\n${css.text}${END}\n`;
-	const find = `var t = eSpace.GetAllDescendantsOfType<IMobileTheme>().FirstOrDefault(x => x.Name == ${cs(themeName)});
+	const find = `var t = eSpace.GetAllDescendantsOfType<${themeType}>().FirstOrDefault(x => x.Name == ${cs(themeName)});
 	if (t == null) throw new Exception("PROBE:no theme named ${themeName}");
 	var css = t.StyleSheet ?? "";
 	var guard = ${cs(GUARD)}; var endMarker = ${cs(END)};
@@ -136,12 +393,13 @@ function theme() {
 	var sections = css.Split(new[] { guard }, StringSplitOptions.None).Length - 1;
 	throw new Exception("PROBE:sections=" + sections + " len=" + got.Length + " hash=" + h);
 }`;
-	write('theme', apply, probe, `sections=1 len=${section.length} hash=${checksum(section)}`);
-	console.log('Apply theme.cs, then run theme.probe.cs (the stylesheet reads back only after a save), then merge.');
+	write(outName, apply, probe, `sections=1 len=${section.length} hash=${checksum(section)}`);
+	console.log(`Apply ${outName}.cs, then run ${outName}.probe.cs (the stylesheet reads back only after a save), then merge.`);
 }
 
 // ---- block: the Block that bridges to the class, from component.json ----
 function block() {
+	if (TRADITIONAL) return blockTraditional();
 	const c = contractOf(target);
 	const blockName = option('name', c.class);
 	const flowName = option('flow', config.o11.blockFlow);
@@ -308,6 +566,7 @@ function screenStart(add, c, { screenName, flowName, blockName, blockFlow, descr
 
 // ---- harness: a test screen that drives every input and shows every event ----
 function harness() {
+	if (TRADITIONAL) fail('harness has no Traditional Web version yet; use showcase --traditional');
 	const c = contractOf(target);
 	const screenName = option('screen', `${c.class}Test`);
 	const flowName = option('flow', config.o11.flow);
@@ -365,6 +624,7 @@ function harness() {
 // example). Every event goes to one screen action, Example<Event>, and every item put
 // in a placeholder to ItemClicked; both show a message naming the example.
 function showcase() {
+	if (TRADITIONAL) return showcaseTraditional();
 	const c = contractOf(target);
 	if (!c.showcase) fail(`${c.folder}/component.json has no "showcase"`);
 	const s = c.showcase;

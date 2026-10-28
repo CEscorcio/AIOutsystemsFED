@@ -12,6 +12,19 @@
 //   o11.blockFlow the UI flow the component Blocks go in, apart from the screens
 //   o11.layout    the layout block harness screens use
 //   o11.harnessRole  the role harness screens are for
+//   traditional  optional: the same release in a Traditional Web module
+//                (o11:generate -- <command> --traditional):
+//     theme        the Web theme whose stylesheet holds dist/components.css
+//     flow         the UI flow showcase screens go in
+//     blockFlow    the UI flow the component Blocks go in
+//     scriptBlock  the Web Block whose JavaScript holds dist/components.js; every
+//                  component Block contains an instance of it, which loads the bundle
+//                  (Traditional Web Blocks have no Required Scripts)
+//     layout       { block, module, flow }: the layout Web Block screens use, and the
+//                  referenced module and flow it comes from
+//     layoutFill   { <placeholder>: <Web Block> }: blocks of this module the layout's
+//                  placeholders get on every screen (a menu, an application title)
+//     harnessRole  the role showcase screens are for
 //   budgets      optional size limits for the release, in KB: releaseJsKB
 //                (dist/components.js) and releaseCssKB (dist/components.css);
 //                npm run build:all fails over them
@@ -32,6 +45,12 @@ export function validateConfig(c) {
 	if (!/^\d+\.\d+\.\d+$/.test(c.outsystemsUi || '')) err('"outsystemsUi" must be a version, e.g. 2.30.0');
 	const o = c.o11 || {};
 	for (const key of ['script', 'theme', 'flow', 'blockFlow', 'layout', 'harnessRole']) if (!NAME.test(o[key] || '')) err(`"o11.${key}" must be an OutSystems element name`);
+	if (c.traditional !== undefined) {
+		const t = c.traditional;
+		for (const key of ['theme', 'flow', 'blockFlow', 'scriptBlock', 'harnessRole']) if (!NAME.test(t[key] || '')) err(`"traditional.${key}" must be an OutSystems element name`);
+		for (const key of ['block', 'module', 'flow']) if (!NAME.test((t.layout || {})[key] || '')) err(`"traditional.layout.${key}" must be an OutSystems element name`);
+		for (const [ph, b] of Object.entries(t.layoutFill || {})) if (!NAME.test(ph) || !NAME.test(b)) err(`"traditional.layoutFill.${ph}" must map a placeholder to a Web Block name`);
+	}
 	for (const [key, value] of Object.entries(c.budgets || {})) {
 		if (!['releaseJsKB', 'releaseCssKB'].includes(key)) err(`"budgets.${key}" isn't a budget; use releaseJsKB or releaseCssKB`);
 		else if (typeof value !== 'number' || value <= 0) err(`"budgets.${key}" must be a size in KB, greater than 0`);

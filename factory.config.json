@@ -10,6 +10,22 @@
 		"layout": "LayoutTopMenu",
 		"harnessRole": "Registered"
 	},
+	"traditional": {
+		"theme": "SGLiveStyleGuideTraditional_SandBox",
+		"flow": "MainFlow",
+		"blockFlow": "Patterns",
+		"scriptBlock": "ComponentsScript",
+		"layout": {
+			"block": "LayoutSidebar",
+			"module": "SG_Traditional_Pat",
+			"flow": "PageLayout"
+		},
+		"layoutFill": {
+			"SlideContent": "Menu",
+			"Header": "ApplicationTitle"
+		},
+		"harnessRole": "Registered"
+	},
 	"budgets": {
 		"releaseJsKB": 100,
 		"releaseCssKB": 50

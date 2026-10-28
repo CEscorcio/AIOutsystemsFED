@@ -7,6 +7,7 @@
   var FOCUSABLE = 'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])';
   var SVG = "http://www.w3.org/2000/svg";
   var kebab = (name) => name.replace(/([a-z])([A-Z])/g, "$1-$2").toLowerCase();
+  var instances = /* @__PURE__ */ new WeakMap();
   var DropdownButton = class {
     constructor(config) {
       this.params = { label: "", variant: "Primary", size: "Medium", enabled: true, url: "", icon: "", menuLabel: "More options" };
@@ -57,6 +58,9 @@
       };
       const mount = document.getElementById(config.runtimeId);
       if (!mount) throw new Error(`DropdownButton: mount element "${config.runtimeId}" not found`);
+      const previous = instances.get(mount);
+      if (previous) previous.destroy();
+      instances.set(mount, this);
       this.mount = mount;
       this.menu = config.menuId ? document.getElementById(config.menuId) : null;
       this.events = config.events || {};
@@ -114,6 +118,7 @@
         this.menu.removeEventListener("keydown", this.handleMenuKeydown);
       }
       this.group.remove();
+      if (instances.get(this.mount) === this) instances.delete(this.mount);
     }
     /** True while the menu is shown. */
     get isOpen() {

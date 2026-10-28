@@ -9,6 +9,11 @@ const SVG = 'http://www.w3.org/2000/svg';
 
 const kebab = (name: string): string => name.replace(/([a-z])([A-Z])/g, '$1-$2').toLowerCase();
 
+// The live instance on each mount. A Traditional Web Block starts the class from a
+// script it renders, so a second start on the same mount replaces the first
+// instead of adding a second pair of buttons.
+const instances = new WeakMap<HTMLElement, DropdownButton>();
+
 /**
  * A split button. The action part runs the default action: a button that
  * raises OnClick, or a link when Url is set. The chevron part shows and hides
@@ -37,6 +42,9 @@ export class DropdownButton {
 	constructor(config: DropdownButtonConfig) {
 		const mount = document.getElementById(config.runtimeId);
 		if (!mount) throw new Error(`DropdownButton: mount element "${config.runtimeId}" not found`);
+		const previous = instances.get(mount);
+		if (previous) previous.destroy();
+		instances.set(mount, this);
 		this.mount = mount;
 		this.menu = config.menuId ? document.getElementById(config.menuId) : null;
 		this.events = config.events || {};
@@ -102,6 +110,7 @@ export class DropdownButton {
 			this.menu.removeEventListener('keydown', this.handleMenuKeydown);
 		}
 		this.group.remove();
+		if (instances.get(this.mount) === this) instances.delete(this.mount);
 	}
 
 	/** True while the menu is shown. */

@@ -11,7 +11,8 @@
  * - BEM block dropdown-button:
  *     elements  dropdown-button__group, __action, __icon, __label, __divider,
  *               __trigger, __chevron, __menu (the Block's MenuContainer),
- *               __item (the Style Class of each Link a screen puts in the menu)
+ *               __item (the Style Class of each Link a screen puts in the menu),
+ *               __bridge (Traditional Web: the hidden Link that raises OnClick)
  *     states    dropdown-button__group--primary | --secondary | --tertiary | --transparent,
  *               --medium | --small | --extra-small, --is-disabled;
  *               dropdown-button__trigger--is-open, dropdown-button__menu--is-open
@@ -161,6 +162,10 @@
 
 .dropdown-button__item:hover {
 	background-color: var(--color-neutral-2, #f1f3f5);
+}
+
+.dropdown-button__bridge {
+	display: none;
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -11,7 +11,7 @@ The OutSystems side of [Components.md](Components.md). It starts where that page
 >
 > The Service Studio MCP workflow itself was also used earlier on O11 to build two screens; what that showed is in [Working with the Service Studio MCP](#working-with-the-service-studio-mcp).
 
-**Reactive Web only.** The bridge relies on Block lifecycle events (`OnReady`, `OnParametersChanged`, `OnDestroy`) and JavaScript nodes with `$parameters` / `$actions`. Those exist in Reactive Web and Mobile modules. Traditional Web Blocks don't have that lifecycle, so this recipe doesn't apply to them.
+**Reactive Web first.** The bridge described on this page relies on Block lifecycle events (`OnReady`, `OnParametersChanged`, `OnDestroy`) and JavaScript nodes with `$parameters` / `$actions`. Those exist in Reactive Web and Mobile modules. Traditional Web Blocks don't have that lifecycle; they get a different bridge, generated with `--traditional` ([Traditional Web](#traditional-web)).
 
 ## How the agent works here
 
@@ -227,6 +227,21 @@ Open the harness screen and click through:
 3. Typing in the input updates the greeting live (proves `onParametersChanged`).
 4. DevTools → Elements: the main container carries `greeting-card` plus any `ExtendedClass`, and every class inside it is `greeting-card__*`, `greeting-card--*` or OutSystems UI.
 5. DevTools → Console is clean.
+
+## Traditional Web
+
+The same release and the same component classes also run in a Traditional Web module, with a different bridge. `factory.config.json`'s `traditional` section names the theme, the flows, the script Web Block and the layout. Each generator command takes `--traditional`:
+
+| Step | Command | What it builds |
+|---|---|---|
+| Script | `npm run o11:generate -- script --traditional` | A Web Block (`traditional.scriptBlock`, e.g. `ComponentsScript`) whose JavaScript is `dist/components.js`. Traditional Web Blocks have no Required Scripts, so each component Block contains an instance of this Block, which loads the bundle |
+| Stylesheet | `npm run o11:generate -- theme --traditional` | The components section of the module's Web theme, appended or replaced between the same markers |
+| Block | `npm run o11:generate -- block <component> --traditional [--name <Block>]` | A Web Block: the mount container (its classes through an extended property `class`, since a Traditional container's Style Classes is static text), each placeholder in its container, a hidden Link per event in `<block>__bridge` whose Ajax On Click raises the Block event, the script Block's instance, and an Expression widget (Escape Content off) that writes the `<script>` starting the class with the widgets' ids on every render. Events with parameters aren't supported yet |
+| Showcase | `npm run o11:generate -- showcase <component> --traditional [--block <Block>]` | The example screen on the configured layout (`traditional.layout`, with `layoutFill` blocks such as the menu); events and menu items show a message through RichWidgets' `Feedback_Message`. The lambda builds the examples with C# loops over data, which keeps it short enough to pass on unchanged |
+
+Same rules as the Reactive side: dry-run each lambda (its probe), apply, merge, one element at a time; for the theme, apply first and run the read-back probe before merging. There is no `harness` for Traditional yet, and `o11:verify` reads the Reactive `moduleinfo` manifest, which Traditional apps don't have.
+
+**Run on 2026-10-28** in a Traditional style-guide module (DropdownButton as `DropdownButtonPattern`): the script Block, the theme section, the Block and the showcase screen each matched their probe and merged, and the module's validation was empty. **Not yet verified:** publishing, the served files, and the browser click-through.
 
 ## Working with the Service Studio MCP
 

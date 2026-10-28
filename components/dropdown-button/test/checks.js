@@ -150,6 +150,14 @@ var componentTest = {
 		db.onParametersChanged({ label: '<img src=x onerror=alert(1)>' });
 		t.check('markup in data renders as text, not HTML', host.querySelector('img') === null && action().textContent.indexOf('<img') !== -1);
 
+		// A Traditional Web Block starts the class from a script it renders; a second
+		// start on the same mount replaces the first.
+		var again = new t.Ctor({ runtimeId: 'db-test-mount', menuId: 'db-test-menu', label: 'Again' });
+		t.check('a second start on the same mount replaces the first: one pair of buttons', host.querySelectorAll('.dropdown-button__group').length === 1 && host.firstChild.textContent === 'Again');
+		again.destroy();
+		db = new t.Ctor({ runtimeId: 'db-test-mount', menuId: 'db-test-menu', label: 'Save' });
+		trigger = host.querySelector('.dropdown-button__trigger');
+
 		trigger.click();
 		db.destroy();
 		t.check('destroy removes the buttons, closes the menu and leaves the menu in place', host.querySelector('.dropdown-button__group') === null && !isOpen() && host.firstChild === menu);
