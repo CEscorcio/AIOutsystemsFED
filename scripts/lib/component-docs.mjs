@@ -33,7 +33,9 @@ export function renderReadme(c, namespace = loadConfig().namespace) {
 		'',
 		'| Name | Type | Mandatory | Default | Description |',
 		'|---|---|---|---|---|',
-		...c.inputs.map((p) => `| \`${p.name}\` | ${p.type} | ${p.mandatory ? 'Yes' : 'No'} | ${code(p.default)} | ${cell(p.description)} |`),
+		...c.inputs.map(
+			(p) => `| \`${p.name}\` | ${p.type} | ${p.mandatory ? 'Yes' : 'No'} | ${code(p.default)} | ${cell(p.description)}${p.values ? ` One of: ${p.values.map((v) => code(v)).join(', ')}.` : ''} |`,
+		),
 		`| \`ExtendedClass\` | Text | No | ${code('""')} | Extra classes for the Block's main container, such as a modifier below. Applied by the Block; never reaches the class. |`,
 		'',
 		'### Events',
@@ -46,6 +48,10 @@ export function renderReadme(c, namespace = loadConfig().namespace) {
 			out.push(`| \`${e.name}\` | ${params} | ${cell(e.description)} Raised through the Block's \`${bridgeAction(e.name)}\` client action. |`);
 		}
 	} else out.push('None.');
+	if (c.placeholders.length) {
+		out.push('', '### Placeholders', '', '| Placeholder | What goes in it |', '|---|---|');
+		for (const p of c.placeholders) out.push(`| \`${p.name}\` | ${cell(p.description)}${p.itemClass ? ` Give each widget the Style Class \`${p.itemClass}\`.` : ''} |`);
+	}
 	out.push('', '### Modifiers', '');
 	if (c.modifiers.length) {
 		out.push('Set through `ExtendedClass`, for example `ExtendedClass = "' + c.modifiers[0].class + '"`.', '', '| Class | Effect |', '|---|---|');
@@ -57,10 +63,16 @@ export function renderReadme(c, namespace = loadConfig().namespace) {
 		'',
 		`The release's Script registers \`window.${namespace}.${c.class}\`. The Block drives it from three lifecycle handlers:`,
 		'',
-		`- **OnReady**: \`new ${namespace}.${c.class}({ runtimeId, ${[...c.inputs.map((p) => camel(p.name)), ...(c.events.length ? ['events'] : [])].join(', ')} })\`, mounted in the Block's \`MountPoint\` container`,
+		`- **OnReady**: \`new ${namespace}.${c.class}({ runtimeId, ${[...c.placeholders.map((p) => `${camel(p.name)}Id`), ...c.inputs.map((p) => camel(p.name)), ...(c.events.length ? ['events'] : [])].join(', ')} })\`, mounted in the Block's \`MountPoint\` container${c.placeholders.length ? `; ${c.placeholders.map((p) => `\`${camel(p.name)}Id\` is the id of the \`${p.name}Container\` around the \`${p.name}\` placeholder`).join(', ')}` : ''}`,
 		`- **OnParametersChanged**: \`instance.onParametersChanged({ ${c.inputs.map((p) => camel(p.name)).join(', ')} })\``,
 		'- **OnDestroy**: `instance.destroy()`',
 		'',
+		...(c.showcase
+			? [
+					`An example screen, \`${c.showcase.screen}\`, comes from \`npm run o11:generate -- showcase ${c.block}\`: ${c.showcase.groups.map((g) => `${cell(g.title)} (${g.examples.map((x) => cell(x.title)).join(', ')})`).join('; ')}.`,
+					'',
+				]
+			: []),
 		'## Files',
 		'',
 		'| File | What it is |',

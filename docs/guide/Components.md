@@ -246,7 +246,7 @@ For a component with real behaviour (a data table, a chart, a rich editor) the p
 Not tested here, but the obvious next steps:
 
 - **Structured data.** Pass lists as JSON Text parameters and parse in the class. Don't have an AI agent retype that JSON from a prompt: a column-configuration JSON once came back rewritten that way (labels changed, columns reordered, keys translated) while still valid, so nothing failed loudly but nothing matched the data either. Paste it by hand, or have it set from a file, and re-read any value that has to match data from the published app.
-- **Placeholders.** Let low-code content render inside the component by putting a Placeholder in the Block next to the mount Container and having the class leave it alone.
+- **Placeholders** are supported by the contract and the generators since DropdownButton (2026-10-28): a Placeholder in a container inside the mount, whose id the class gets, and whose content the class leaves alone. See [NewComponent.md, step 3](NewComponent.md#step-3-write-the-contract). The class's buttons sit next to content React renders in the same mount; that has not been verified in a browser yet.
 - **A library instead of an app.** Put the Script and Block in a Reactive library so several apps consume one reviewed copy. [Components_11.md, "Where to put it"](Components_11.md#where-to-put-it) covers what changes.
 
 ## References

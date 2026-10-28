@@ -61,6 +61,9 @@ Edit `components/status-badge/component.json` and `components/status-badge/src/s
 - `ExtendedClass` (Text, not mandatory, default `""`), applied by the Block's main container and **not** passed to the class
 - the **modifiers** a screen may put in `ExtendedClass` (for example `status-badge--compact`)
 - every **Event**, its payload, and the bridge Client Action that raises it (`OnStatusClicked(Status: Text)` ← `TriggerStatusClicked(Status)`)
+- optionally, the **values** a Text input takes (`"values": ["Primary", "Secondary"]`), shown in the README; the class falls back to the default for anything else
+- optionally, **placeholders** the screen fills with its own widgets (`"placeholders": [{ "name": "Menu", ... }]`). Each gets a container `<Name>Container` (class `<block>__<name>`) inside the mount, and the class receives its id as `config.<name>Id`. The class may show, hide or position that container, but never adds, moves or removes what OutSystems renders in it. `components/dropdown-button` is the example
+- optionally, a **showcase**: the example screen `npm run o11:generate -- showcase <component>` builds, one Block instance per example (`"showcase": { "screen", "title", "groups": [...] }`)
 
 Details: [Components.md, step 2](Components.md#step-2-write-the-contract-first) and [the rules for every pattern](Components.md#rules-for-every-custom-pattern).
 

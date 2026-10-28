@@ -10,9 +10,20 @@
 //   description  one sentence, shown in the docs and the Block's description
 //   inputs       Block Input Parameters, in order: name (PascalCase), type,
 //                mandatory, default (an OutSystems expression), description,
-//                example (an expression the harness uses)
+//                example (an expression the harness uses), and for a Text input
+//                that takes a fixed set, values (["Primary", "Secondary"])
 //   events       Block Events: name (On...), description, params [{ name, type, description }]
 //   modifiers    BEM modifiers accepted through ExtendedClass: [{ class, description }]
+//   placeholders optional Block Placeholders the screen fills with its own widgets:
+//                [{ name, description, itemClass, example: [{ label, icon }] }]. Each sits
+//                in a container "<Name>Container" (class <block>__<name>) inside the
+//                mount; the class gets that container's id as config.<name>Id.
+//                itemClass is the class each widget put in it should have; example is
+//                what the generated screens put in it (Links with an icon and a label)
+//   showcase     optional example screen (npm run o11:generate -- showcase):
+//                { screen, title, groups: [{ title, examples: [{ title, args }] }] }.
+//                args maps an input (or ExtendedClass) to an OutSystems expression;
+//                inputs not given use their example
 //
 // ExtendedClass is not listed: every Block gets it (Text, not mandatory,
 // default ""), applied by the Block's main container and never passed to
@@ -76,6 +87,10 @@ export function loadContract(folder, dir = componentsDir) {
 		if (typeof p.mandatory !== 'boolean') err(`${at}.mandatory must be true or false`);
 		if (typeof p.default !== 'string') err(`${at}.default must be an OutSystems expression, e.g. "\\"\\"" or "0"`);
 		if (!p.description) err(`${at}.description is missing`);
+		if (p.values !== undefined) {
+			if (p.type !== 'Text' || !Array.isArray(p.values) || !p.values.length || !p.values.every((v) => PASCAL.test(v))) err(`${at}.values must be a list of PascalCase names, on a Text input`);
+			else if (!p.values.some((v) => p.default === `"${v}"`)) err(`${at}.default must be one of its values, e.g. "\\"${p.values[0]}\\""`);
+		}
 	}
 	for (const [i, e] of (c.events || []).entries()) {
 		const at = `events[${i}]`;
@@ -91,5 +106,27 @@ export function loadContract(folder, dir = componentsDir) {
 		if ((m.class || '').includes('--is-')) err(`modifiers[${i}]: --is-* is a state the component sets, not a modifier`);
 		if (!m.description) err(`modifiers[${i}].description is missing`);
 	}
-	return { contract: { inputs: [], events: [], modifiers: [], ...c, folder, dir }, errors };
+	for (const [i, p] of (c.placeholders || []).entries()) {
+		const at = `placeholders[${i}]`;
+		if (!PASCAL.test(p.name || '')) err(`${at}.name must be PascalCase`);
+		if (names.has(p.name)) err(`${at}: "${p.name}" is also an input`);
+		if (!p.description) err(`${at}.description is missing`);
+		if (p.itemClass !== undefined && !new RegExp(`^${c.block}__[a-z0-9]+(-[a-z0-9]+)*$`).test(p.itemClass)) err(`${at}.itemClass must be ${c.block}__<element>`);
+		for (const [j, x] of (p.example || []).entries()) if (!x.label) err(`${at}.example[${j}].label is missing`);
+	}
+	if (c.showcase !== undefined) {
+		const s = c.showcase;
+		if (!/^[A-Z][A-Za-z0-9_]*$/.test(s.screen || '')) err('showcase.screen must be a screen name, e.g. StatusBadgeDemo');
+		if (!s.title) err('showcase.title is missing');
+		if (!Array.isArray(s.groups) || !s.groups.length) err('showcase.groups must list at least one group');
+		for (const [i, g] of (s.groups || []).entries()) {
+			if (!g.title) err(`showcase.groups[${i}].title is missing`);
+			if (!Array.isArray(g.examples) || !g.examples.length) err(`showcase.groups[${i}].examples must list at least one example`);
+			for (const [j, x] of (g.examples || []).entries()) {
+				if (!x.title) err(`showcase.groups[${i}].examples[${j}].title is missing`);
+				for (const k of Object.keys(x.args || {})) if (k !== 'ExtendedClass' && !names.has(k)) err(`showcase.groups[${i}].examples[${j}].args.${k} isn't an input`);
+			}
+		}
+	}
+	return { contract: { inputs: [], events: [], modifiers: [], placeholders: [], ...c, folder, dir }, errors };
 }

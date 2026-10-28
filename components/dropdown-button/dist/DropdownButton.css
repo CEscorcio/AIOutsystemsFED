@@ -1,0 +1,170 @@
+/*
+ * DropdownButton styles, written to the rules in docs/guide/Style.md.
+ *
+ * - The two parts are OutSystems UI buttons: btn (Secondary), btn btn-primary
+ *   (Primary), plus btn-small (Small and ExtraSmall), so the app's theme
+ *   styles them. This stylesheet joins them into one control and adds what
+ *   OutSystems UI 2.30.0 has no class for: Tertiary, Transparent, ExtraSmall,
+ *   and the menu.
+ * - Every colour, space, radius, border, shadow and layer is an OutSystems UI
+ *   variable with its base-theme value as fallback.
+ * - BEM block dropdown-button:
+ *     elements  dropdown-button__group, __action, __icon, __label, __divider,
+ *               __trigger, __chevron, __menu (the Block's MenuContainer),
+ *               __item (the Style Class of each Link a screen puts in the menu)
+ *     states    dropdown-button__group--primary | --secondary | --tertiary | --transparent,
+ *               --medium | --small | --extra-small, --is-disabled;
+ *               dropdown-button__trigger--is-open, dropdown-button__menu--is-open
+ *               (all set by the component)
+ *     modifiers dropdown-button--menu-end   (through ExtendedClass)
+ * - The divider sits between the two buttons, so OutSystems UI's .btn + .btn
+ *   spacing doesn't apply to them.
+ * - Focus is left to OutSystems UI.
+ */
+.dropdown-button {
+	position: relative;
+	display: inline-block;
+	vertical-align: middle;
+}
+
+.dropdown-button__group {
+	display: inline-flex;
+	align-items: stretch;
+}
+
+.dropdown-button__action {
+	gap: var(--space-s, 8px);
+	border-inline-end-width: var(--space-none, 0);
+	border-start-end-radius: var(--space-none, 0);
+	border-end-end-radius: var(--space-none, 0);
+}
+
+.dropdown-button__label {
+	white-space: nowrap;
+}
+
+.dropdown-button__divider {
+	flex-shrink: 0;
+	width: var(--border-size-s, 1px);
+	background-color: var(--color-primary, #1068eb);
+}
+
+.dropdown-button__trigger {
+	padding-inline: var(--space-s, 8px);
+	border-inline-start-width: var(--space-none, 0);
+	border-start-start-radius: var(--space-none, 0);
+	border-end-start-radius: var(--space-none, 0);
+}
+
+.dropdown-button__chevron {
+	width: 1em;
+	height: 1em;
+	fill: none;
+	stroke: currentcolor;
+	stroke-width: 1.5;
+	stroke-linecap: round;
+	stroke-linejoin: round;
+	transition: transform 0.15s ease;
+}
+
+.dropdown-button__trigger--is-open .dropdown-button__chevron {
+	transform: rotate(180deg);
+}
+
+.dropdown-button__group--primary .dropdown-button__divider {
+	opacity: 0.5;
+}
+
+.dropdown-button__group--tertiary .dropdown-button__action,
+.dropdown-button__group--tertiary .dropdown-button__trigger {
+	color: var(--color-neutral-9, #272b30);
+	border-color: var(--color-neutral-4, #dee2e6);
+}
+
+.dropdown-button__group--tertiary .dropdown-button__divider {
+	background-color: var(--color-neutral-4, #dee2e6);
+}
+
+.dropdown-button__group--transparent .dropdown-button__action,
+.dropdown-button__group--transparent .dropdown-button__trigger {
+	color: var(--color-neutral-9, #272b30);
+	background-color: transparent;
+	border-color: transparent;
+}
+
+.dropdown-button__group--transparent .dropdown-button__divider {
+	background-color: transparent;
+}
+
+.dropdown-button__group--extra-small .dropdown-button__action,
+.dropdown-button__group--extra-small .dropdown-button__trigger {
+	height: var(--space-m, 24px);
+	font-size: var(--font-size-xs, 12px);
+}
+
+.dropdown-button__group--extra-small .dropdown-button__action {
+	padding-inline: var(--space-s, 8px);
+}
+
+.dropdown-button__group--extra-small .dropdown-button__trigger {
+	padding-inline: var(--space-xs, 4px);
+}
+
+.dropdown-button__group--is-disabled .dropdown-button__action,
+.dropdown-button__group--is-disabled .dropdown-button__trigger {
+	color: var(--color-neutral-6, #adb5bd);
+	background-color: var(--color-neutral-2, #f1f3f5);
+	border-color: var(--color-neutral-4, #dee2e6);
+	cursor: default;
+}
+
+.dropdown-button__group--is-disabled .dropdown-button__divider {
+	background-color: var(--color-neutral-4, #dee2e6);
+	opacity: 1;
+}
+
+.dropdown-button__menu {
+	position: absolute;
+	inset-block-start: 100%;
+	inset-inline-start: var(--space-none, 0);
+	z-index: var(--layer-local-tier-5, 5);
+	display: none;
+	flex-direction: column;
+	width: max-content;
+	min-width: 100%;
+	margin-block-start: var(--space-xs, 4px);
+	padding-block: var(--space-xs, 4px);
+	background-color: var(--color-neutral-0, #ffffff);
+	border: var(--border-size-s, 1px) solid var(--color-neutral-4, #dee2e6);
+	border-radius: var(--border-radius-soft, 4px);
+	box-shadow: var(--shadow-m, 0 4px 6px rgba(0, 0, 0, 0.1));
+}
+
+.dropdown-button__menu--is-open {
+	display: flex;
+}
+
+.dropdown-button--menu-end .dropdown-button__menu {
+	inset-inline: auto var(--space-none, 0);
+}
+
+.dropdown-button__item {
+	display: flex;
+	align-items: center;
+	gap: var(--space-s, 8px);
+	padding: var(--space-s, 8px) var(--space-base, 16px);
+	font-size: var(--font-size-s, 14px);
+	color: var(--color-neutral-9, #272b30);
+	white-space: nowrap;
+	text-decoration: none;
+}
+
+.dropdown-button__item:hover {
+	background-color: var(--color-neutral-2, #f1f3f5);
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.dropdown-button__chevron {
+		transition: none;
+	}
+}

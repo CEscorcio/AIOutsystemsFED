@@ -132,6 +132,7 @@ A release is one Script (`dist/components.js`) and one stylesheet section (`dist
    npm run o11:generate -- theme
    npm run o11:generate -- block status-badge      # only for a new component
    npm run o11:generate -- harness status-badge    # a test screen for it
+   npm run o11:generate -- showcase status-badge   # or an example screen, if component.json has a showcase
    ```
 3. **Apply them in Service Studio** (Windows, MCP Server on, the module open), with Claude Code or Copilot agent mode. Each lambda is dry-run first, then applied and merged, and you review each merge. Follow [Components_11.md](Components_11.md#generated-lambdas).
 4. **Publish** (1-Click Publish, or ask the agent; it only publishes when asked), then **check what's live** against `dist/`: the Script, the theme section and the compiled Blocks ([Components_11.md, step 8](Components_11.md#step-8-verify-what-was-actually-published)):
@@ -238,7 +239,7 @@ When the OutSystems 11 environment upgrades OutSystems UI:
 | `npm run docs:components` | Regenerate component READMEs from `component.json` |
 | `npm run build:all` | Build the versioned release in `dist/` (runs every check first) |
 | `npm run release-notes` | What the build in `dist/` contains |
-| `npm run o11:generate -- <script \| theme \| block <c> \| harness <c>>` | Write the Model API lambdas for Service Studio |
+| `npm run o11:generate -- <script \| theme \| block <c> \| harness <c> \| showcase <c>>` | Write the Model API lambdas for Service Studio |
 | `npm run o11:verify -- --app https://<server>/<App>` | Check what a published app serves against `dist/` |
 | `npm run release:record -- …` | Record a release or a deployment |
 | `npm run check:contracts` | Check every contract against its code |

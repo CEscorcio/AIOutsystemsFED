@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<title>DropdownButton preview</title>
+		<!-- The base theme, as the app loads it: OutSystems UI from the installed package -->
+		<link rel="stylesheet" href="../../../node_modules/outsystems-ui/dist/O11.OutSystemsUI.css" />
+		<style>
+			body {
+				font-family: system-ui, sans-serif;
+				max-width: 880px;
+				margin: 32px auto;
+				padding: 0 16px;
+			}
+			.grid {
+				display: grid;
+				grid-template-columns: 120px repeat(4, 1fr);
+				gap: 24px 16px;
+				align-items: start;
+				margin-bottom: 200px;
+			}
+			.grid > b {
+				font-size: 13px;
+				color: #6a7178;
+			}
+			#log {
+				font-family: ui-monospace, monospace;
+				font-size: 13px;
+				white-space: pre-wrap;
+			}
+			.pass {
+				color: #0a7a2f;
+			}
+			.fail {
+				color: #b00020;
+				font-weight: 600;
+			}
+			.skip {
+				color: #6a7178;
+			}
+		</style>
+		<!-- The component's own stylesheet, as the app loads it -->
+		<link rel="stylesheet" href="../dist/DropdownButton.css" />
+	</head>
+	<body>
+		<h1>DropdownButton</h1>
+		<p>A split button: the left part runs the default action (an OnClick event, or a link when Url is set) and the chevron opens a menu of other actions that the screen puts in the Menu placeholder.</p>
+		<p>Open with <code>?test=1</code> to run the checks. Each cell mirrors the Block: the mount (block class + ExtendedClass) holding the MenuContainer with the screen's Links.</p>
+		<p id="events">Click a button or a menu item.</p>
+		<div class="grid" id="grid"></div>
+		<div id="log"></div>
+
+		<script src="../dist/DropdownButton.js"></script>
+		<!-- The checks every component passes, then this component's own -->
+		<script src="../../../packages/toolchain/structural-checks.js"></script>
+		<script src="../test/checks.js"></script>
+		<script>
+			// The build registers the class on the namespace in factory.config.json; find it
+			// without naming the namespace: the global that has __release and the class.
+			var DropdownButton = Object.keys(window)
+				.map(function (k) {
+					try {
+						return window[k] && window[k].__release && window[k].DropdownButton;
+					} catch (e) {
+						return null;
+					}
+				})
+				.filter(Boolean)[0];
+			function logEvent(text) {
+				document.getElementById('events').textContent = text;
+			}
+
+			var grid = document.getElementById('grid');
+			var n = 0;
+			// One Block: the mount, the MenuContainer inside it with four Links, then the class.
+			function block(cell, params, extendedClass) {
+				var id = 'db' + n++;
+				var mount = document.createElement('div');
+				mount.id = id;
+				mount.className = 'dropdown-button' + (extendedClass ? ' ' + extendedClass : '');
+				var menu = document.createElement('div');
+				menu.id = id + '-menu';
+				menu.className = 'dropdown-button__menu';
+				['Edit', 'Duplicate', 'Share', 'Archive'].forEach(function (label) {
+					var a = document.createElement('a');
+					a.href = '#';
+					a.className = 'dropdown-button__item';
+					a.textContent = label;
+					a.addEventListener('click', function (e) {
+						e.preventDefault();
+						logEvent('Menu item: ' + label);
+					});
+					menu.appendChild(a);
+				});
+				mount.appendChild(menu);
+				cell.appendChild(mount);
+				var config = {
+					runtimeId: id,
+					menuId: menu.id,
+					label: 'Label',
+					events: {
+						OnClick: function () {
+							logEvent('OnClick: ' + (params.variant || 'Primary') + ', ' + (params.size || 'Medium'));
+						},
+					},
+				};
+				Object.keys(params).forEach(function (k) {
+					config[k] = params[k];
+				});
+				return new DropdownButton(config);
+			}
+			function row(title, cells) {
+				var head = document.createElement('b');
+				head.textContent = title;
+				grid.appendChild(head);
+				cells.forEach(function (c) {
+					var cell = document.createElement('div');
+					grid.appendChild(cell);
+					block(cell, c.params, c.extendedClass);
+				});
+			}
+
+			['Primary', 'Secondary', 'Tertiary', 'Transparent'].forEach(function (v) {
+				var head = document.createElement('b');
+				head.textContent = v;
+				if (v === 'Primary') grid.appendChild(document.createElement('span'));
+				grid.appendChild(head);
+			});
+			['Medium', 'Small', 'ExtraSmall'].forEach(function (size) {
+				row(
+					size,
+					['Primary', 'Secondary', 'Tertiary', 'Transparent'].map(function (v) {
+						return { params: { variant: v, size: size } };
+					}),
+				);
+			});
+			row('Options', [
+				{ params: { enabled: false } },
+				{ params: { icon: 'th-large', label: 'Create' } },
+				{ params: { url: '#', variant: 'Secondary', label: 'Open' } },
+				{ params: { variant: 'Tertiary' }, extendedClass: 'dropdown-button--menu-end' },
+			]);
+
+			if (new URLSearchParams(location.search).get('test') === '1') {
+				var results = runComponentChecks(window, DropdownButton, componentTest);
+				var log = document.getElementById('log');
+				var failed = 0;
+				results.forEach(function (r) {
+					if (!r.ok) failed++;
+					var line = document.createElement('div');
+					line.className = r.skipped ? 'skip' : r.ok ? 'pass' : 'fail';
+					line.textContent = (r.skipped ? 'SKIP  ' : r.ok ? 'PASS  ' : 'FAIL  ') + r.name + (r.skipped ? ' (CSS checks run in npm test)' : '');
+					log.appendChild(line);
+				});
+				var summary = document.createElement('div');
+				summary.textContent = '\n' + (results.length - failed) + '/' + results.length + ' passed';
+				log.appendChild(summary);
+			}
+		</script>
+	</body>
+</html>

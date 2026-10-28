@@ -5,7 +5,8 @@
 //   - component.json is valid (scripts/lib/contract.mjs)
 //   - types.ts: <Class>Parameters has one property per input (camelCase,
 //     matching type) and nothing else; <Class>Events has one optional
-//     callback per event, with the event's parameters in order
+//     callback per event, with the event's parameters in order; <Class>Config
+//     has an optional <name>Id string per placeholder
 //   - src/index.ts exports the class and doesn't touch window (the build
 //     registers it on factory.config.json's namespace)
 //   - dist/<Class>.css: the modifiers it styles are exactly the contract's
@@ -100,6 +101,18 @@ function checkOne(dir, folder, label) {
 			if (want.join(',') !== got.join(',')) at(`${c.class}Events.${e.name} takes (${got.join(', ')}); component.json says (${want.join(', ')})`);
 		}
 		for (const m of events) if (!c.events.some((e) => e.name === m.name)) at(`${c.class}Events.${m.name} isn't an event in component.json`);
+	}
+
+	// Each placeholder's container id reaches the class as config.<name>Id.
+	if (c.placeholders.length) {
+		const config = readInterface(join(base, 'src'), `${c.class}Config`);
+		if (!config) at(`no interface ${c.class}Config in src/`);
+		else
+			for (const p of c.placeholders) {
+				const m = config.find((x) => x.name === `${camel(p.name)}Id`);
+				if (!m) at(`${c.class}Config has no "${camel(p.name)}Id" (placeholder ${p.name} in component.json)`);
+				else if (m.type !== 'string' || !m.optional) at(`${c.class}Config.${camel(p.name)}Id must be an optional string`);
+			}
 	}
 
 	// src/index.ts exports the class; the build registers it on the namespace.

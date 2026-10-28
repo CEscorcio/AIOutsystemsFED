@@ -21,7 +21,7 @@
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { loadConfig } from '../../scripts/lib/config.mjs';
-import { bridgeAction, listComponents, loadContract, root } from '../../scripts/lib/contract.mjs';
+import { bridgeAction, camel, listComponents, loadContract, root } from '../../scripts/lib/contract.mjs';
 
 const config = loadConfig();
 const args = process.argv.slice(2);
@@ -98,9 +98,16 @@ for (const folder of positional.length ? positional : listComponents()) {
 		check(block.includes(`new ${config.namespace}.${c.class}(`), `${c.class}: creates ${config.namespace}.${c.class}`);
 		check(block.includes('.onParametersChanged(') && block.includes('.destroy()'), `${c.class}: updates and destroys it`);
 		for (const e of c.events) check(block.includes(bridgeAction(e.name)), `${c.class}: wires ${bridgeAction(e.name)}`);
+		for (const p of c.placeholders) check(block.includes(`${p.name}Container`) && block.includes(`${camel(p.name)}Id`), `${c.class}: passes the ${p.name}Container id`);
 	}
-	const screen = await served(`scripts/${appName}.${config.o11.flow}.${c.class}Test.mvc.js`);
-	if (screen !== undefined) check(screen.includes(`${config.o11.blockFlow}.${c.class}`), `${c.class}Test: uses the ${c.class} Block`);
+	// The screens that show the Block: its <Class>Test harness and its showcase screen,
+	// whichever were generated; at least one must be served.
+	const screens = [`${c.class}Test`, ...(c.showcase ? [c.showcase.screen] : [])].filter((s) => listed.has(`/${appName}/scripts/${appName}.${config.o11.flow}.${s}.mvc.js`));
+	if (!screens.length) check(false, `${c.class}: a ${c.class}Test${c.showcase ? ` or ${c.showcase.screen}` : ''} screen is listed in moduleinfo`);
+	for (const s of screens) {
+		const screen = await served(`scripts/${appName}.${config.o11.flow}.${s}.mvc.js`);
+		if (screen !== undefined) check(screen.includes(`${config.o11.blockFlow}.${c.class}`), `${s}: uses the ${c.class} Block`);
+	}
 }
 
 console.log(failed ? `verify: ${failed} check(s) failed` : `verify: ${appName} serves dist/ ${version}`);

@@ -191,6 +191,7 @@ npm run o11:generate -- script                       # Script "Components" from 
 npm run o11:generate -- theme --theme Sandbox        # the components section of the theme stylesheet, appended or replaced
 npm run o11:generate -- block status-badge           # the Block, from component.json
 npm run o11:generate -- harness status-badge         # a test screen that drives every input and shows every event
+npm run o11:generate -- showcase dropdown-button     # an example screen from component.json's "showcase"
 ```
 
 Each command writes the lambda and a probe, and prints what the probe must report (lengths, checksums, names), so what lands in the module is checked against the repo before it's merged. [Components_11.md](docs/guide/Components_11.md#generated-lambdas) has the order. The Block generator only creates Blocks: changing an existing Block's contract is still done by hand in Service Studio.
@@ -204,7 +205,7 @@ AIOutsystemsFED/
 ├── factory.config.json         # The project's settings: name, namespace, OutSystems UI version, O11 names
 ├── components/                 # One folder per component (npm workspace); everything here ships
 │   └── <name>/
-│       ├── component.json      # The contract as data: inputs, events, modifiers
+│       ├── component.json      # The contract as data: inputs, events, modifiers, placeholders
 │       ├── src/                # TypeScript: contract (types.ts), class, registration
 │       ├── style/              # The component's styles (SCSS)
 │       ├── test/               # Checks run in jsdom and in the browser

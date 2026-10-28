@@ -24,7 +24,7 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { loadConfig } from '../../scripts/lib/config.mjs';
-import { bridgeAction, camel, componentsDir, loadContract, root, templatesDir, TYPES } from '../../scripts/lib/contract.mjs';
+import { bridgeAction, camel, componentsDir, kebab, loadContract, root, templatesDir, TYPES } from '../../scripts/lib/contract.mjs';
 
 // Names default to factory.config.json ("o11"); the options override them.
 const config = loadConfig();
@@ -178,6 +178,12 @@ function block() {
 	add(`var instance = block.CreateLocalVariable("Instance"); instance.DataType = eSpace.ObjectType;`);
 	add(`var mount = block.CreateWidget<ServiceStudio.Plugin.NRWidgets.IContainer>("MountPoint");`);
 	add(`mount.SetStyle(${cs(`"${c.block}" + If(ExtendedClass <> NullTextIdentifier(), " " + ExtendedClass, "")`)});`);
+	// Each placeholder sits in a container of its own inside the mount (class <block>__<name>);
+	// the class gets that container's id and only shows, hides or positions it.
+	c.placeholders.forEach((p, i) => {
+		add(`var ph${i}c = mount.CreateWidget<ServiceStudio.Plugin.NRWidgets.IContainer>(${cs(`${p.name}Container`)}); ph${i}c.SetStyle(${cs(`"${c.block}__${kebab(p.name)}"`)});`);
+		add(`var ph${i} = ph${i}c.CreateWidget<OutSystems.Model.UI.Mobile.Widgets.IPlaceholderWidget>(${cs(p.name)}); ph${i}.Description = ${cs(p.description)};`);
+	});
 
 	// One bridge Client Action per event: $actions in a JS node lists Client Actions, not Block Events.
 	// A parameter named like a Block input would be renamed (Value -> Value2) and the trigger's
@@ -219,10 +225,16 @@ function block() {
 	const events = c.events.length ? [`  events: { ${c.events.map((e) => `${e.name}: $actions.${bridgeAction(e.name)}`).join(', ')} }`] : [];
 	const createJs = [
 		`$parameters.Instance = new ${ns}({`,
-		['  runtimeId: $parameters.RuntimeId', ...c.inputs.map((p) => `  ${camel(p.name)}: $parameters.${p.name}`), ...events].join(',\n'),
+		[
+			'  runtimeId: $parameters.RuntimeId',
+			...c.placeholders.map((p) => `  ${camel(p.name)}Id: $parameters.${p.name}Id`),
+			...c.inputs.map((p) => `  ${camel(p.name)}: $parameters.${p.name}`),
+			...events,
+		].join(',\n'),
 		'});',
 	].join('\n');
-	handler('OnReady', `Create${c.class}`, createJs, [['RuntimeId', 'eSpace.TextType', 'MountPoint.Id'], ...inputArgs], true);
+	const placeholderArgs = c.placeholders.map((p) => [`${p.name}Id`, 'eSpace.TextType', `${p.name}Container.Id`]);
+	handler('OnReady', `Create${c.class}`, createJs, [['RuntimeId', 'eSpace.TextType', 'MountPoint.Id'], ...placeholderArgs, ...inputArgs], true);
 	if (c.inputs.length) {
 		const updateJs = ['if ($parameters.Instance) {', `  $parameters.Instance.onParametersChanged({`, c.inputs.map((p) => `    ${camel(p.name)}: $parameters.${p.name}`).join(',\n'), '  });', '}'].join(
 			'\n',
@@ -231,11 +243,67 @@ function block() {
 	}
 	handler('OnDestroy', `Destroy${c.class}`, 'if ($parameters.Instance) {\n  $parameters.Instance.destroy();\n}', [['Instance', 'eSpace.ObjectType', 'Instance']], false);
 
-	const summary = `"PROBE:block=" + block.Name + " inputs=" + string.Join(",", block.InputParameters.Select(p => p.Name)) + " events=" + string.Join(",", block.Events.Select(e => e.Name)) + " actions=" + string.Join(",", block.ScreenActions.Select(a => a.Name).OrderBy(n => n)) + " scripts=" + string.Join(",", block.RequiredScripts.Select(s => s.Name))`;
+	// Placeholders only appear in the probe line of a Block that has them, so the other Blocks' lines don't change.
+	const placeholderProbe = c.placeholders.length ? ` + " placeholders=" + string.Join(",", new[] { ${c.placeholders.map((p, i) => `ph${i}.Name`).join(', ')} })` : '';
+	const summary = `"PROBE:block=" + block.Name + " inputs=" + string.Join(",", block.InputParameters.Select(p => p.Name)) + " events=" + string.Join(",", block.Events.Select(e => e.Name)) + " actions=" + string.Join(",", block.ScreenActions.Select(a => a.Name).OrderBy(n => n)) + " scripts=" + string.Join(",", block.RequiredScripts.Select(s => s.Name))${placeholderProbe}`;
 	const actions = [...c.events.map((e) => bridgeAction(e.name)), 'OnDestroy', ...(c.inputs.length ? ['OnParametersChanged'] : []), 'OnReady'].sort((a, b) => (a < b ? -1 : a > b ? 1 : 0));
-	const expected = `block=${blockName} inputs=${[...c.inputs.map((p) => p.name), 'ExtendedClass'].join(',')} events=${c.events.map((e) => e.name).join(',')} actions=${actions.join(',')} scripts=${SCRIPT}`;
+	const expected = `block=${blockName} inputs=${[...c.inputs.map((p) => p.name), 'ExtendedClass'].join(',')} events=${c.events.map((e) => e.name).join(',')} actions=${actions.join(',')} scripts=${SCRIPT}${c.placeholders.length ? ` placeholders=${c.placeholders.map((p) => p.name).join(',')}` : ''}`;
 	const code = (tail) => `eSpace => {\n${L.join('\n')}${tail}\n}`;
 	write(`block-${c.folder}`, code(''), code(`\n\tthrow new Exception(${summary});`), expected);
+}
+
+// Fills each placeholder of a Block instance with the contract's example: one Link per
+// item, an Icon then the label, with the placeholder's itemClass. Each Link's On Click
+// goes to the screen action in itemAction (variable name), with Item = the label and,
+// when given, Example = example (an expression).
+function fillPlaceholders(add, c, inst, itemAction, example) {
+	c.placeholders.forEach((p, i) => {
+		if (!(p.example || []).length) return;
+		const v = `${inst}ph${i}`;
+		add(`var ${v} = ${inst}.PlaceholdersContent.First(pc => pc.Placeholder?.Name == ${cs(p.name)});`);
+		p.example.forEach((item, j) => {
+			const l = `${v}l${j}`;
+			add(`var ${l} = ${v}.CreateWidget<ServiceStudio.Plugin.NRWidgets.ILink>();${p.itemClass ? ` ${l}.SetStyle(${cs(`"${p.itemClass}"`)});` : ''}`);
+			add(`${l}.Widgets.OfType<OutSystems.Model.UI.Mobile.Widgets.ITextWidget>().First().Text = ${cs(item.label)};`);
+			if (item.icon) {
+				add(`var ${l}i = ${l}.CreateWidget<ServiceStudio.Plugin.NRWidgets.IIcon>(); ${l}i.Icon = ${cs(item.icon)};`);
+				add(`((OutSystems.Model.ISequence<OutSystems.Model.UI.Mobile.Widgets.IMobileWidget>)${l}.Widgets).MoveToStart(${l}i);`);
+			}
+			add(`${l}.OnClick.Destination = ${itemAction};`);
+			add(`${l}.OnClick.Arguments.First(a => a.Parameter.Name == "Item").SetValue(${cs(`"${item.label}"`)});`);
+			if (example) add(`${l}.OnClick.Arguments.First(a => a.Parameter.Name == "Example").SetValue(${cs(example)});`);
+		});
+	});
+}
+
+// A screen action that shows a message: name, Text input parameters, and the message expression.
+function messageAction(add, v, name, params, message) {
+	add(`var ${v} = scr.CreateScreenAction(${cs(name)});`);
+	params.forEach(([pname, type], j) => add(`var ${v}p${j} = ${v}.CreateInputParameter(${cs(pname)}); ${v}p${j}.DataType = ${type};`));
+	add(`var ${v}Start = ${v}.CreateNode<OutSystems.Model.Logic.Nodes.IStartNode>();`);
+	add(`var ${v}Msg = ${v}.CreateNode<OutSystems.Model.Logic.Nodes.IMessageNode>().ConnectedBelow(${v}Start); ${v}Msg.SetMessage(${cs(message)});`);
+	add(`${v}.CreateNode<OutSystems.Model.Logic.Nodes.IEndNode>().ConnectedBelow(${v}Msg);`);
+}
+
+// The start of a screen on the layout, in a flow, for a Block: shared by harness and showcase.
+function screenStart(add, c, { screenName, flowName, blockName, blockFlow, description, title }) {
+	add(`var flow = eSpace.MobileFlows.FirstOrDefault(f => f.Name == ${cs(flowName)});`);
+	add(`if (flow == null) throw new Exception("PROBE:no UI flow named ${flowName}");`);
+	add(`if (flow.Nodes.OfType<IMobileScreen>().Any(s => s.Name == ${cs(screenName)})) throw new Exception("PROBE:a screen named ${screenName} already exists");`);
+	add(`var cardBlock = eSpace.MobileFlows.Where(f => f.Name == ${cs(blockFlow)}).SelectMany(f => f.Nodes).OfType<IMobileBlock>().FirstOrDefault(b => b.Name == ${cs(blockName)});`);
+	add(`if (cardBlock == null) throw new Exception("PROBE:no Block named ${blockName} in ${blockFlow}; apply the block lambda first");`);
+	add(`var layoutBlk = eSpace.MobileFlows.First(f => f.Name == "Layouts").Nodes.OfType<IMobileBlock>().First(b => b.Name == ${cs(config.o11.layout)});`);
+	add(`var x = flow.Nodes.OfType<IMobileScreen>().Select(s => s.HorizontalPosition).DefaultIfEmpty(0).Max() + 1000;`);
+	add(`var scr = flow.CreateScreen(${cs(screenName)});`);
+	add(`scr.Widgets.ToList().ForEach(w => w.Delete());`);
+	add(`scr.Description = ${cs(description)};`);
+	add(`scr.SetTitle(${cs(`"${title}"`)});`);
+	add(`scr.HorizontalPosition = x; scr.VerticalPosition = 700;`);
+	add(`scr.Roles.Add(eSpace.SystemRoles.OfType<OutSystems.Model.Logic.ISystemRole>().First(r => r.Name == ${cs(config.o11.harnessRole)}));`);
+	add(`var layout = scr.CreateWidget<OutSystems.Model.UI.Mobile.Widgets.IMobileBlockInstanceWidget>();`);
+	add(`layout.SourceBlock = layoutBlk;`);
+	add(`layout.PlaceholdersContent.First(p => p.Placeholder?.Name == "Title").CreateWidget<OutSystems.Model.UI.Mobile.Widgets.ITextWidget>().Text = ${cs(title)};`);
+	add(`var main = layout.PlaceholdersContent.First(p => p.Placeholder?.Name == "MainContent");`);
 }
 
 // ---- harness: a test screen that drives every input and shows every event ----
@@ -247,25 +315,14 @@ function harness() {
 	const blockFlow = option('block-flow', config.o11.blockFlow);
 	const L = [];
 	const add = (line) => L.push(`\t${line}`);
-	add(`var flow = eSpace.MobileFlows.FirstOrDefault(f => f.Name == ${cs(flowName)});`);
-	add(`if (flow == null) throw new Exception("PROBE:no UI flow named ${flowName}");`);
-	add(`if (flow.Nodes.OfType<IMobileScreen>().Any(s => s.Name == ${cs(screenName)})) throw new Exception("PROBE:a screen named ${screenName} already exists");`);
-	add(`var cardBlock = eSpace.MobileFlows.Where(f => f.Name == ${cs(blockFlow)}).SelectMany(f => f.Nodes).OfType<IMobileBlock>().FirstOrDefault(b => b.Name == ${cs(blockName)});`);
-	add(`if (cardBlock == null) throw new Exception("PROBE:no Block named ${blockName} in ${blockFlow}; apply the block lambda first");`);
-	add(`var layoutBlk = eSpace.MobileFlows.First(f => f.Name == "Layouts").Nodes.OfType<IMobileBlock>().First(b => b.Name == ${cs(config.o11.layout)});`);
-	add(`var x = flow.Nodes.OfType<IMobileScreen>().Select(s => s.HorizontalPosition).DefaultIfEmpty(0).Max() + 1000;`);
-	add(`var scr = flow.CreateScreen(${cs(screenName)});`);
-	add(`scr.Widgets.ToList().ForEach(w => w.Delete());`);
-	add(
-		`scr.Description = ${cs(`Test harness for the ${blockName} Block, generated from ${c.dir === templatesDir ? 'templates' : 'components'}/${c.folder}/component.json. Not an app screen; delete it once the Block is used on real screens.`)};`,
-	);
-	add(`scr.SetTitle(${cs(`"${c.class} test"`)});`);
-	add(`scr.HorizontalPosition = x; scr.VerticalPosition = 700;`);
-	add(`scr.Roles.Add(eSpace.SystemRoles.OfType<OutSystems.Model.Logic.ISystemRole>().First(r => r.Name == ${cs(config.o11.harnessRole)}));`);
-	add(`var layout = scr.CreateWidget<OutSystems.Model.UI.Mobile.Widgets.IMobileBlockInstanceWidget>();`);
-	add(`layout.SourceBlock = layoutBlk;`);
-	add(`layout.PlaceholdersContent.First(p => p.Placeholder?.Name == "Title").CreateWidget<OutSystems.Model.UI.Mobile.Widgets.ITextWidget>().Text = ${cs(`${c.class} test`)};`);
-	add(`var main = layout.PlaceholdersContent.First(p => p.Placeholder?.Name == "MainContent");`);
+	screenStart(add, c, {
+		screenName,
+		flowName,
+		blockName,
+		blockFlow,
+		title: `${c.class} test`,
+		description: `Test harness for the ${blockName} Block, generated from ${c.dir === templatesDir ? 'templates' : 'components'}/${c.folder}/component.json. Not an app screen; delete it once the Block is used on real screens.`,
+	});
 	add(`var harness = main.CreateWidget<ServiceStudio.Plugin.NRWidgets.IContainer>(${cs(`${c.class}Harness`)});`);
 	c.inputs.forEach((p, i) => {
 		add(`var v${i} = scr.CreateLocalVariable(${cs(`${p.name}Value`)}); v${i}.DataType = ${TYPES[p.type].modelApi}; v${i}.SetDefaultValue(${cs(p.example || p.default)});`);
@@ -291,15 +348,97 @@ function harness() {
 		add(`var ${a}H = inst.EventHandlers.First(h => h.Event.Name == ${cs(e.name)}); ${a}H.Handler = ${a};`);
 		(e.params || []).forEach((p) => add(`${a}H.Arguments.First(arg => arg.Parameter.Name == ${cs(p.name)}).SetValue(${cs(p.name)});`));
 	});
+	const hasItems = c.placeholders.some((p) => (p.example || []).length);
+	if (hasItems) {
+		messageAction(add, 'onItem', 'ItemClicked', [['Item', 'eSpace.TextType']], '"Clicked: " + Item');
+		fillPlaceholders(add, c, 'inst', 'onItem');
+	}
 	const summary = `"PROBE:screen=" + scr.Name + " vars=" + string.Join(",", scr.LocalVariables.Select(v => v.Name)) + " actions=" + string.Join(",", scr.ScreenActions.Select(a => a.Name).OrderBy(n => n))`;
-	const expected = `screen=${screenName} vars=${c.inputs.map((p) => `${p.name}Value`).join(',')} actions=${c.events
-		.map((e) => `${c.class}${e.name}`)
-		.sort()
-		.join(',')}`;
+	const expected = `screen=${screenName} vars=${c.inputs.map((p) => `${p.name}Value`).join(',')} actions=${[...c.events.map((e) => `${c.class}${e.name}`), ...(hasItems ? ['ItemClicked'] : [])].sort().join(',')}`;
 	const code = (tail) => `eSpace => {\n${L.join('\n')}${tail}\n}`;
 	write(`harness-${c.folder}`, code(''), code(`\n\tthrow new Exception(${summary});`), expected);
 }
 
-const commands = { script, theme, block, harness };
+// ---- showcase: an example screen, one Block instance per example in component.json ----
+// Each group is a heading and a wrapping row of examples; each example is a caption
+// above a Block instance with the example's arguments (inputs not given use their
+// example). Every event goes to one screen action, Example<Event>, and every item put
+// in a placeholder to ItemClicked; both show a message naming the example.
+function showcase() {
+	const c = contractOf(target);
+	if (!c.showcase) fail(`${c.folder}/component.json has no "showcase"`);
+	const s = c.showcase;
+	const screenName = option('screen', s.screen);
+	const blockName = option('block', c.class);
+	const L = [];
+	const add = (line) => L.push(`\t${line}`);
+	screenStart(add, c, {
+		screenName,
+		flowName: option('flow', config.o11.flow),
+		blockName,
+		blockFlow: option('block-flow', config.o11.blockFlow),
+		title: s.title,
+		description: `Examples of the ${blockName} Block, generated from ${c.dir === templatesDir ? 'templates' : 'components'}/${c.folder}/component.json (showcase).`,
+	});
+	add(`var intro = main.CreateWidget<ServiceStudio.Plugin.NRWidgets.IContainer>("Intro"); intro.SetStyle(${cs('"text-neutral-7 margin-bottom-l"')});`);
+	add(`intro.CreateWidget<OutSystems.Model.UI.Mobile.Widgets.ITextWidget>().Text = ${cs(c.description)};`);
+
+	// One action per event and one for placeholder items, each told which example raised it.
+	c.events.forEach((e, i) => {
+		const params = [...(e.params || []).map((p) => [p.name, TYPES[p.type].modelApi]), ['Example', 'eSpace.TextType']];
+		const message = ['Example', `": ${e.name}"`, ...(e.params || []).map((p, j) => `"${j ? ', ' : ' ('}${p.name} = " + ${p.name}`), ...((e.params || []).length ? ['")"'] : [])].join(' + ');
+		messageAction(add, `on${i}`, `Example${e.name}`, params, message);
+	});
+	const hasItems = c.placeholders.some((p) => (p.example || []).length);
+	if (hasItems)
+		messageAction(
+			add,
+			'onItem',
+			'ItemClicked',
+			[
+				['Item', 'eSpace.TextType'],
+				['Example', 'eSpace.TextType'],
+			],
+			'Example + ": " + Item',
+		);
+
+	let n = 0;
+	s.groups.forEach((g, gi) => {
+		const gv = `g${gi}`;
+		add(`var ${gv} = main.CreateWidget<ServiceStudio.Plugin.NRWidgets.IContainer>(${cs(`Group${gi + 1}`)}); ${gv}.SetStyle(${cs('"margin-bottom-l"')});`);
+		add(`var ${gv}h = ${gv}.CreateWidget<ServiceStudio.Plugin.NRWidgets.IContainer>(${cs(`Group${gi + 1}Title`)}); ${gv}h.SetStyle(${cs('"heading5 margin-bottom-m"')});`);
+		add(`${gv}h.CreateWidget<OutSystems.Model.UI.Mobile.Widgets.ITextWidget>().Text = ${cs(g.title)};`);
+		add(`var ${gv}r = ${gv}.CreateWidget<ServiceStudio.Plugin.NRWidgets.IContainer>(${cs(`Group${gi + 1}Examples`)}); ${gv}r.SetStyle(${cs('"display-flex flex-wrap gap-xl"')});`);
+		g.examples.forEach((x, xi) => {
+			const ev = `e${gi}_${xi}`;
+			const id = `Example${gi + 1}_${xi + 1}`;
+			const label = `"${x.title}"`;
+			add(`var ${ev} = ${gv}r.CreateWidget<ServiceStudio.Plugin.NRWidgets.IContainer>(${cs(id)}); ${ev}.SetStyle(${cs('"display-flex flex-direction-column gap-s"')});`);
+			add(`var ${ev}t = ${ev}.CreateWidget<ServiceStudio.Plugin.NRWidgets.IContainer>(${cs(`${id}Caption`)}); ${ev}t.SetStyle(${cs('"font-size-xs text-neutral-7"')});`);
+			add(`${ev}t.CreateWidget<OutSystems.Model.UI.Mobile.Widgets.ITextWidget>().Text = ${cs(x.title)};`);
+			const inst = `${ev}b`;
+			add(`var ${inst} = ${ev}.CreateWidget<OutSystems.Model.UI.Mobile.Widgets.IMobileBlockInstanceWidget>(); ${inst}.SourceBlock = cardBlock;`);
+			const args = x.args || {};
+			for (const p of c.inputs) add(`${inst}.SetArgumentValue(cardBlock.InputParameters.First(p => p.Name == ${cs(p.name)}), ${cs(args[p.name] ?? p.example ?? p.default)});`);
+			if (args.ExtendedClass) add(`${inst}.SetArgumentValue(cardBlock.InputParameters.First(p => p.Name == "ExtendedClass"), ${cs(args.ExtendedClass)});`);
+			c.events.forEach((e, i) => {
+				add(`var ${inst}h${i} = ${inst}.EventHandlers.First(h => h.Event.Name == ${cs(e.name)}); ${inst}h${i}.Handler = on${i};`);
+				(e.params || []).forEach((p) => add(`${inst}h${i}.Arguments.First(arg => arg.Parameter.Name == ${cs(p.name)}).SetValue(${cs(p.name)});`));
+				add(`${inst}h${i}.Arguments.First(arg => arg.Parameter.Name == "Example").SetValue(${cs(label)});`);
+			});
+			if (hasItems) fillPlaceholders(add, c, inst, 'onItem', label);
+			n++;
+		});
+	});
+
+	const links = c.placeholders.reduce((sum, p) => sum + (p.example || []).length, 0) * n;
+	const summary = `"PROBE:screen=" + scr.Name + " instances=" + scr.GetAllDescendantsOfType<OutSystems.Model.UI.Mobile.Widgets.IMobileBlockInstanceWidget>().Count(w => w.SourceBlock == cardBlock) + " links=" + scr.GetAllDescendantsOfType<ServiceStudio.Plugin.NRWidgets.ILink>().Count() + " actions=" + string.Join(",", scr.ScreenActions.Select(a => a.Name).OrderBy(n => n))`;
+	const actions = [...c.events.map((e) => `Example${e.name}`), ...(hasItems ? ['ItemClicked'] : [])].sort();
+	const expected = `screen=${screenName} instances=${n} links=${links} actions=${actions.join(',')}`;
+	const code = (tail) => `eSpace => {\n${L.join('\n')}${tail}\n}`;
+	write(`showcase-${c.folder}`, code(''), code(`\n\tthrow new Exception(${summary});`), expected);
+}
+
+const commands = { script, theme, block, harness, showcase };
 if (!commands[command]) fail(`unknown command "${command || ''}"; use one of: ${Object.keys(commands).join(', ')}`);
 commands[command]();

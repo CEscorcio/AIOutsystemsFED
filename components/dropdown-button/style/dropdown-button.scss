@@ -1,0 +1,180 @@
+/*
+ * DropdownButton styles, written to the rules in docs/guide/Style.md.
+ *
+ * - The two parts are OutSystems UI buttons: btn (Secondary), btn btn-primary
+ *   (Primary), plus btn-small (Small and ExtraSmall), so the app's theme
+ *   styles them. This stylesheet joins them into one control and adds what
+ *   OutSystems UI 2.30.0 has no class for: Tertiary, Transparent, ExtraSmall,
+ *   and the menu.
+ * - Every colour, space, radius, border, shadow and layer is an OutSystems UI
+ *   variable with its base-theme value as fallback.
+ * - BEM block dropdown-button:
+ *     elements  dropdown-button__group, __action, __icon, __label, __divider,
+ *               __trigger, __chevron, __menu (the Block's MenuContainer),
+ *               __item (the Style Class of each Link a screen puts in the menu)
+ *     states    dropdown-button__group--primary | --secondary | --tertiary | --transparent,
+ *               --medium | --small | --extra-small, --is-disabled;
+ *               dropdown-button__trigger--is-open, dropdown-button__menu--is-open
+ *               (all set by the component)
+ *     modifiers dropdown-button--menu-end   (through ExtendedClass)
+ * - The divider sits between the two buttons, so OutSystems UI's .btn + .btn
+ *   spacing doesn't apply to them.
+ * - Focus is left to OutSystems UI.
+ */
+
+// SCSS only groups the block's rules (Style.md, Rule 8).
+.dropdown-button {
+	position: relative;
+	display: inline-block;
+	vertical-align: middle;
+
+	&__group {
+		display: inline-flex;
+		align-items: stretch;
+	}
+
+	&__action {
+		gap: var(--space-s, 8px);
+		border-inline-end-width: var(--space-none, 0);
+		border-start-end-radius: var(--space-none, 0);
+		border-end-end-radius: var(--space-none, 0);
+	}
+
+	&__label {
+		white-space: nowrap;
+	}
+
+	&__divider {
+		flex-shrink: 0;
+		width: var(--border-size-s, 1px);
+		background-color: var(--color-primary, #1068eb);
+	}
+
+	&__trigger {
+		padding-inline: var(--space-s, 8px);
+		border-inline-start-width: var(--space-none, 0);
+		border-start-start-radius: var(--space-none, 0);
+		border-end-start-radius: var(--space-none, 0);
+	}
+
+	&__chevron {
+		width: 1em;
+		height: 1em;
+		fill: none;
+		stroke: currentcolor;
+		stroke-width: 1.5;
+		stroke-linecap: round;
+		stroke-linejoin: round;
+		transition: transform 0.15s ease;
+	}
+
+	&__trigger--is-open &__chevron {
+		transform: rotate(180deg);
+	}
+
+	// Primary: OutSystems UI's btn-primary; a lighter line between the parts.
+	&__group--primary &__divider {
+		opacity: 0.5;
+	}
+
+	// Tertiary: a neutral outline.
+	&__group--tertiary &__action,
+	&__group--tertiary &__trigger {
+		color: var(--color-neutral-9, #272b30);
+		border-color: var(--color-neutral-4, #dee2e6);
+	}
+
+	&__group--tertiary &__divider {
+		background-color: var(--color-neutral-4, #dee2e6);
+	}
+
+	// Transparent: no background and no outline.
+	&__group--transparent &__action,
+	&__group--transparent &__trigger {
+		color: var(--color-neutral-9, #272b30);
+		background-color: transparent;
+		border-color: transparent;
+	}
+
+	&__group--transparent &__divider {
+		background-color: transparent;
+	}
+
+	// ExtraSmall: smaller than OutSystems UI's btn-small.
+	&__group--extra-small &__action,
+	&__group--extra-small &__trigger {
+		height: var(--space-m, 24px);
+		font-size: var(--font-size-xs, 12px);
+	}
+
+	&__group--extra-small &__action {
+		padding-inline: var(--space-s, 8px);
+	}
+
+	&__group--extra-small &__trigger {
+		padding-inline: var(--space-xs, 4px);
+	}
+
+	// Disabled, after the variants so it wins over them; OutSystems UI's
+	// .btn[disabled] gives the same look to the Primary and Secondary parts.
+	&__group--is-disabled &__action,
+	&__group--is-disabled &__trigger {
+		color: var(--color-neutral-6, #adb5bd);
+		background-color: var(--color-neutral-2, #f1f3f5);
+		border-color: var(--color-neutral-4, #dee2e6);
+		cursor: default;
+	}
+
+	&__group--is-disabled &__divider {
+		background-color: var(--color-neutral-4, #dee2e6);
+		opacity: 1;
+	}
+
+	// The menu: the Block's MenuContainer, hidden until the chevron opens it.
+	&__menu {
+		position: absolute;
+		inset-block-start: 100%;
+		inset-inline-start: var(--space-none, 0);
+		z-index: var(--layer-local-tier-5, 5);
+		display: none;
+		flex-direction: column;
+		width: max-content;
+		min-width: 100%;
+		margin-block-start: var(--space-xs, 4px);
+		padding-block: var(--space-xs, 4px);
+		background-color: var(--color-neutral-0, #ffffff);
+		border: var(--border-size-s, 1px) solid var(--color-neutral-4, #dee2e6);
+		border-radius: var(--border-radius-soft, 4px);
+		box-shadow: var(--shadow-m, 0 4px 6px rgba(0, 0, 0, 0.1));
+	}
+
+	&__menu--is-open {
+		display: flex;
+	}
+
+	&--menu-end &__menu {
+		inset-inline: auto var(--space-none, 0);
+	}
+
+	// Each Link a screen puts in the Menu placeholder, through its Style Classes.
+	&__item {
+		display: flex;
+		align-items: center;
+		gap: var(--space-s, 8px);
+		padding: var(--space-s, 8px) var(--space-base, 16px);
+		font-size: var(--font-size-s, 14px);
+		color: var(--color-neutral-9, #272b30);
+		white-space: nowrap;
+		text-decoration: none;
+	}
+
+	&__item:hover {
+		background-color: var(--color-neutral-2, #f1f3f5);
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		&__chevron {
+			transition: none;
+		}
+	}
+}

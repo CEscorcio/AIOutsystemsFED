@@ -75,6 +75,7 @@ The requests below describe each element in words. Since the first run, the repo
 | Stylesheet | `npm run o11:generate -- theme --theme <Theme>` | Apply `theme.cs` (it appends the section, or replaces it between the markers); run `theme.probe.cs` on the saved copy; merge |
 | Block | `npm run o11:generate -- block <component>` | Dry run with `block-<component>.probe.cs`; apply `block-<component>.cs`; read the Block back; merge |
 | Harness | `npm run o11:generate -- harness <component>` | Dry run, apply, merge |
+| Showcase | `npm run o11:generate -- showcase <component>` | For a component whose `component.json` has a `showcase`: an example screen, one instance per example, with any placeholders filled with the example Links. Dry run, apply, merge |
 
 The agent passes each file's content to `applyModelApiCode` as it is. The probes report lengths, checksums or names, and the generator printed what they must be, so a copy that's off by one character is caught before the merge.
 

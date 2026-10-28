@@ -1,0 +1,118 @@
+{
+	"class": "DropdownButton",
+	"block": "dropdown-button",
+	"description": "A split button: the left part runs the default action (an OnClick event, or a link when Url is set) and the chevron opens a menu of other actions that the screen puts in the Menu placeholder.",
+	"inputs": [
+		{
+			"name": "Label",
+			"type": "Text",
+			"mandatory": true,
+			"default": "\"\"",
+			"description": "The action button's text: verb-led, sentence case, one to three words.",
+			"example": "\"Label\""
+		},
+		{
+			"name": "Variant",
+			"type": "Text",
+			"mandatory": false,
+			"default": "\"Primary\"",
+			"values": ["Primary", "Secondary", "Tertiary", "Transparent"],
+			"description": "The look. Primary and Secondary are OutSystems UI's btn-primary and btn; Tertiary and Transparent are styled by this component with OutSystems UI variables. Any other value uses Primary.",
+			"example": "\"Primary\""
+		},
+		{
+			"name": "Size",
+			"type": "Text",
+			"mandatory": false,
+			"default": "\"Medium\"",
+			"values": ["Medium", "Small", "ExtraSmall"],
+			"description": "The height: Medium is OutSystems UI's default button, Small is btn-small, ExtraSmall is this component's own. Any other value uses Medium.",
+			"example": "\"Medium\""
+		},
+		{
+			"name": "Enabled",
+			"type": "Boolean",
+			"mandatory": false,
+			"default": "True",
+			"description": "False disables both parts and closes the menu.",
+			"example": "True"
+		},
+		{
+			"name": "Url",
+			"type": "Text",
+			"mandatory": false,
+			"default": "\"\"",
+			"description": "When set, the action button is a link to this URL and OnClick isn't raised. Empty makes it a button that raises OnClick.",
+			"example": "\"\""
+		},
+		{
+			"name": "Icon",
+			"type": "Text",
+			"mandatory": false,
+			"default": "\"\"",
+			"description": "An optional leading icon: a Font Awesome 4 icon name, as in an OutSystems Icon widget (for example th-large). Empty shows none.",
+			"example": "\"\""
+		},
+		{
+			"name": "MenuLabel",
+			"type": "Text",
+			"mandatory": false,
+			"default": "\"More options\"",
+			"description": "The chevron's name for screen readers. Translate it like any other label.",
+			"example": "\"More options\""
+		}
+	],
+	"events": [
+		{
+			"name": "OnClick",
+			"description": "Raised when the action button is clicked and Url is empty. Do the default action here.",
+			"params": []
+		}
+	],
+	"modifiers": [{ "class": "dropdown-button--menu-end", "description": "Opens the menu aligned to the button's end edge, for a button at the end of a row." }],
+	"placeholders": [
+		{
+			"name": "Menu",
+			"description": "The menu's actions: Links (an Icon and a Text inside each), each with its own On Click. It opens from the chevron and closes on a choice, Escape or a click outside.",
+			"itemClass": "dropdown-button__item",
+			"example": [
+				{ "label": "Edit", "icon": "pencil" },
+				{ "label": "Duplicate", "icon": "copy" },
+				{ "label": "Share", "icon": "share-alt" },
+				{ "label": "Archive", "icon": "archive" }
+			]
+		}
+	],
+	"showcase": {
+		"screen": "DropdownBTN",
+		"title": "Dropdown button",
+		"groups": [
+			{
+				"title": "Variants",
+				"examples": [
+					{ "title": "Primary", "args": { "Variant": "\"Primary\"" } },
+					{ "title": "Secondary", "args": { "Variant": "\"Secondary\"" } },
+					{ "title": "Tertiary", "args": { "Variant": "\"Tertiary\"" } },
+					{ "title": "Transparent", "args": { "Variant": "\"Transparent\"" } },
+					{ "title": "Disabled", "args": { "Variant": "\"Primary\"", "Enabled": "False" } }
+				]
+			},
+			{
+				"title": "Sizes",
+				"examples": [
+					{ "title": "Medium", "args": { "Size": "\"Medium\"" } },
+					{ "title": "Small", "args": { "Size": "\"Small\"" } },
+					{ "title": "Extra small", "args": { "Size": "\"ExtraSmall\"" } }
+				]
+			},
+			{
+				"title": "Options",
+				"examples": [
+					{ "title": "Leading icon", "args": { "Icon": "\"th-large\"", "Label": "\"Create\"" } },
+					{ "title": "Action as a link (Url)", "args": { "Url": "\"#\"", "Variant": "\"Secondary\"", "Label": "\"Open\"" } },
+					{ "title": "Menu at the end", "args": { "ExtendedClass": "\"dropdown-button--menu-end\"", "Variant": "\"Tertiary\"" } }
+				]
+			}
+		]
+	}
+}
