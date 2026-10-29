@@ -1,0 +1,357 @@
+{
+	"version": "2026.44.1",
+	"built": "2026-10-28T16:14:28.459Z",
+	"description": "DropdownButton added: a split button with a Menu placeholder. First release in a Traditional Web module, through the new --traditional generators; the six other components are unchanged.",
+	"sourceCommit": "4df209994a1dbb497756b1212de11d639eddecf8",
+	"previousVersion": "2026.43.2",
+	"files": {
+		"dist/components.js": {
+			"bytes": 29867,
+			"sha256": "c8ee180ee597bd6da6c4de3e1ed548388cdf7a0b294e4b618c538b8d9b949ef9"
+		},
+		"dist/components.css": {
+			"bytes": 15175,
+			"sha256": "9606a00dff7f8d9a43d24b37c2f1239f69d4dacb83af0d3e4852fa6ea0d4b335"
+		}
+	},
+	"components": [
+		{
+			"folder": "confirm-button",
+			"class": "ConfirmButton",
+			"namespace": "AIOutsystemsFED",
+			"contract": {
+				"inputs": [
+					{
+						"name": "Label",
+						"type": "Text",
+						"mandatory": true
+					},
+					{
+						"name": "ConfirmLabel",
+						"type": "Text",
+						"mandatory": false
+					},
+					{
+						"name": "TimeoutSeconds",
+						"type": "Integer",
+						"mandatory": false
+					},
+					{
+						"name": "IsDisabled",
+						"type": "Boolean",
+						"mandatory": false
+					}
+				],
+				"events": [
+					{
+						"name": "OnConfirmed",
+						"params": []
+					}
+				],
+				"modifiers": [
+					"confirm-button--full-width"
+				]
+			},
+			"sha256": {
+				"js": "0f6a73c0f47d75ea620a776497a0b39c370ab18b25a03a8f928e8ba04b96b44f",
+				"css": "1d089c7cf5e01e64197f209616a13bba57e5ab03d4950ed75d571930f180f337"
+			}
+		},
+		{
+			"folder": "copy-field",
+			"class": "CopyField",
+			"namespace": "AIOutsystemsFED",
+			"contract": {
+				"inputs": [
+					{
+						"name": "Value",
+						"type": "Text",
+						"mandatory": true
+					},
+					{
+						"name": "Label",
+						"type": "Text",
+						"mandatory": false
+					},
+					{
+						"name": "CopyLabel",
+						"type": "Text",
+						"mandatory": false
+					},
+					{
+						"name": "CopiedLabel",
+						"type": "Text",
+						"mandatory": false
+					}
+				],
+				"events": [
+					{
+						"name": "OnCopied",
+						"params": [
+							{
+								"name": "Value",
+								"type": "Text"
+							}
+						]
+					}
+				],
+				"modifiers": [
+					"copy-field--compact"
+				]
+			},
+			"sha256": {
+				"js": "ff5a5437f2a4d34a2320929b3dd77b4080a18f3f6385adf4d7615957291de94e",
+				"css": "60466235dd57ad4f445e2bd6d040ddfba0bc97200dcf3a420a7acf42d7741c7e"
+			}
+		},
+		{
+			"folder": "dropdown-button",
+			"class": "DropdownButton",
+			"namespace": "AIOutsystemsFED",
+			"contract": {
+				"inputs": [
+					{
+						"name": "Label",
+						"type": "Text",
+						"mandatory": true
+					},
+					{
+						"name": "Variant",
+						"type": "Text",
+						"mandatory": false
+					},
+					{
+						"name": "Size",
+						"type": "Text",
+						"mandatory": false
+					},
+					{
+						"name": "Enabled",
+						"type": "Boolean",
+						"mandatory": false
+					},
+					{
+						"name": "Url",
+						"type": "Text",
+						"mandatory": false
+					},
+					{
+						"name": "Icon",
+						"type": "Text",
+						"mandatory": false
+					},
+					{
+						"name": "MenuLabel",
+						"type": "Text",
+						"mandatory": false
+					}
+				],
+				"events": [
+					{
+						"name": "OnClick",
+						"params": []
+					}
+				],
+				"modifiers": [
+					"dropdown-button--menu-end"
+				]
+			},
+			"sha256": {
+				"js": "4097cb002901996dafa7a6e224f7fece95f5f9dd7fc8ef42bdc64432adc597b5",
+				"css": "0002d515853562bff685bef39a8f97de22d2f980e104ad7dcb690a1effe14a26"
+			}
+		},
+		{
+			"folder": "greeting-card",
+			"class": "GreetingCard",
+			"namespace": "AIOutsystemsFED",
+			"contract": {
+				"inputs": [
+					{
+						"name": "Name",
+						"type": "Text",
+						"mandatory": true
+					},
+					{
+						"name": "ButtonLabel",
+						"type": "Text",
+						"mandatory": false
+					},
+					{
+						"name": "Greeting",
+						"type": "Text",
+						"mandatory": false
+					},
+					{
+						"name": "FallbackName",
+						"type": "Text",
+						"mandatory": false
+					},
+					{
+						"name": "CountLabel",
+						"type": "Text",
+						"mandatory": false
+					},
+					{
+						"name": "CountLabelOne",
+						"type": "Text",
+						"mandatory": false
+					}
+				],
+				"events": [
+					{
+						"name": "OnGreetClicked",
+						"params": [
+							{
+								"name": "Count",
+								"type": "Integer"
+							}
+						]
+					}
+				],
+				"modifiers": [
+					"greeting-card--compact"
+				]
+			},
+			"sha256": {
+				"js": "a855b5b51cc27707743e2c2121d7b9c4bb71ef56e671abba8d1bb80989ed55a4",
+				"css": "6ddb9541b14a563000557017f8a61c063eb50aecd211b215a0a5e8b4dc51888f"
+			}
+		},
+		{
+			"folder": "read-more",
+			"class": "ReadMore",
+			"namespace": "AIOutsystemsFED",
+			"contract": {
+				"inputs": [
+					{
+						"name": "Text",
+						"type": "Text",
+						"mandatory": true
+					},
+					{
+						"name": "Lines",
+						"type": "Integer",
+						"mandatory": false
+					},
+					{
+						"name": "MoreLabel",
+						"type": "Text",
+						"mandatory": false
+					},
+					{
+						"name": "LessLabel",
+						"type": "Text",
+						"mandatory": false
+					}
+				],
+				"events": [
+					{
+						"name": "OnToggled",
+						"params": [
+							{
+								"name": "IsExpanded",
+								"type": "Boolean"
+							}
+						]
+					}
+				],
+				"modifiers": [
+					"read-more--muted"
+				]
+			},
+			"sha256": {
+				"js": "00ccc5a3793bc54bdd3e2ece73716857a786184df2a427735f39f3a98571f90a",
+				"css": "f4a9638db1743be88cd06c4b02b4fa17c13e1fed3b026651d5328d70c73386bd"
+			}
+		},
+		{
+			"folder": "relative-time",
+			"class": "RelativeTime",
+			"namespace": "AIOutsystemsFED",
+			"contract": {
+				"inputs": [
+					{
+						"name": "Timestamp",
+						"type": "Text",
+						"mandatory": true
+					},
+					{
+						"name": "Locale",
+						"type": "Text",
+						"mandatory": false
+					},
+					{
+						"name": "EmptyLabel",
+						"type": "Text",
+						"mandatory": false
+					},
+					{
+						"name": "Live",
+						"type": "Boolean",
+						"mandatory": false
+					}
+				],
+				"events": [],
+				"modifiers": [
+					"relative-time--muted"
+				]
+			},
+			"sha256": {
+				"js": "0d4c7e9a462fceceb49b27f87257f7c67b311e57a80d8273cf7d9a173a63330e",
+				"css": "5bea6a19cf3bd674d2080c54d054704a84c3bd1b89248de8b9cd7b8a0791b725"
+			}
+		},
+		{
+			"folder": "sparkline",
+			"class": "Sparkline",
+			"namespace": "AIOutsystemsFED",
+			"contract": {
+				"inputs": [
+					{
+						"name": "Values",
+						"type": "Text",
+						"mandatory": true
+					},
+					{
+						"name": "Label",
+						"type": "Text",
+						"mandatory": false
+					},
+					{
+						"name": "ShowLast",
+						"type": "Boolean",
+						"mandatory": false
+					}
+				],
+				"events": [],
+				"modifiers": [
+					"sparkline--positive",
+					"sparkline--negative"
+				]
+			},
+			"sha256": {
+				"js": "e8def4c061d432a9cc3297716e0fc908107f6f64bd52ef45e8dccc97a96ec92e",
+				"css": "b87e1bd7e756b01bd0856bc168e14e0aa62b602c5133dafcd6de4c59a8b49c51"
+			}
+		}
+	],
+	"contractChanges": [
+		{
+			"component": "dropdown-button",
+			"change": "component added",
+			"breaking": false
+		}
+	],
+	"deployments": [
+		{
+			"platform": "O11",
+			"environment": "styleguide",
+			"module": "SGLiveStyleGuideTraditional_SandBox",
+			"script": "ComponentsScript",
+			"theme": "SGLiveStyleGuideTraditional_SandBox",
+			"published": "2026-10-28",
+			"verified": "In Service Studio: the ComponentsScript Web Block's JavaScript read back identical to dist/components.js (length and checksum), the theme's components section read back identical to dist/components.css, the DropdownButtonPattern Block and DropdownBTN screen matched their probes, module validation empty, 1-Click Publish done. Not verified: the files the server serves (the app's URL isn't known here) and the browser click-through."
+		}
+	]
+}

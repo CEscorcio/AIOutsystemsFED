@@ -2,6 +2,30 @@
 
 Release notes for `dist/components.js` and `dist/components.css`, newest first. The pre-commit hook adds a section when a commit includes a new version ([scripts/release-notes.mjs](scripts/release-notes.mjs)); the commit message says where the release was uploaded.
 
+## 2026.44.1 (2026-10-28)
+
+Built 2026-10-28T16:14:28.459Z. Previous release: 2026.43.2.
+
+Size: dist/components.js 29.2 KB (+9.4 KB), dist/components.css 14.8 KB (+5.2 KB).
+
+### Components
+
+- **dropdown-button**: added
+- Unchanged: confirm-button, copy-field, greeting-card, read-more, relative-time, sparkline
+
+### Component commits since 2026.43.2
+
+- Traditional Web mode: components in a Traditional module (4df2099)
+- DropdownButton: a split button with a Menu placeholder (1a90c3f)
+
+### Tooling and docs since 2026.43.2
+
+- PlatformNotes: the Patterns move, published and verified (dfa24d2)
+- Component Blocks get their own UI flow: Patterns (e4c305f)
+- o11:verify: check what a published app serves against dist/ (29d4cba)
+- Harness generator: a Checkbox for Boolean inputs (a10ad38)
+- Docs: the generators have run against Service Studio (9e786cc)
+
 ## 2026.43.2 (2026-10-22)
 
 Built 2026-10-22T15:11:18.397Z. Previous release: 2026.43.1.

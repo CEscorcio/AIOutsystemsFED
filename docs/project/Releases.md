@@ -6,9 +6,41 @@ Every committed release of `dist/components.js` and `dist/components.css`, newes
 
 | Version | Built | Components | Deployed to | Breaking changes |
 |---|---|---|---|---|
+| [2026.44.1](#2026441) | 2026-10-28 | confirm-button, copy-field, dropdown-button, greeting-card, read-more, relative-time, sparkline | styleguide / SGLiveStyleGuideTraditional_SandBox | none |
 | [2026.43.2](#2026432) | 2026-10-22 | confirm-button, copy-field, greeting-card, read-more, relative-time, sparkline | personal / Sandbox | none |
 | [2026.43.1](#2026431) | 2026-10-21 | greeting-card | personal / Sandbox | none |
 | [2026.42.1](#2026421) | 2026-10-15 | greeting-card | not recorded | none |
+
+## 2026.44.1
+
+DropdownButton added: a split button with a Menu placeholder. First release in a Traditional Web module, through the new --traditional generators; the six other components are unchanged.
+
+- **Built:** 2026-10-28T16:14:28.459Z
+- **Source commit:** `4df209994a1d`
+- **dist/components.js:** 29867 bytes, sha256 `c8ee180ee597`
+- **dist/components.css:** 15175 bytes, sha256 `9606a00dff7f`
+
+| Component | Class | Inputs | Events | Modifiers |
+|---|---|---|---|---|
+| confirm-button | `AIOutsystemsFED.ConfirmButton` | Label: Text*, ConfirmLabel: Text, TimeoutSeconds: Integer, IsDisabled: Boolean | OnConfirmed() | confirm-button--full-width |
+| copy-field | `AIOutsystemsFED.CopyField` | Value: Text*, Label: Text, CopyLabel: Text, CopiedLabel: Text | OnCopied(Value: Text) | copy-field--compact |
+| dropdown-button | `AIOutsystemsFED.DropdownButton` | Label: Text*, Variant: Text, Size: Text, Enabled: Boolean, Url: Text, Icon: Text, MenuLabel: Text | OnClick() | dropdown-button--menu-end |
+| greeting-card | `AIOutsystemsFED.GreetingCard` | Name: Text*, ButtonLabel: Text, Greeting: Text, FallbackName: Text, CountLabel: Text, CountLabelOne: Text | OnGreetClicked(Count: Integer) | greeting-card--compact |
+| read-more | `AIOutsystemsFED.ReadMore` | Text: Text*, Lines: Integer, MoreLabel: Text, LessLabel: Text | OnToggled(IsExpanded: Boolean) | read-more--muted |
+| relative-time | `AIOutsystemsFED.RelativeTime` | Timestamp: Text*, Locale: Text, EmptyLabel: Text, Live: Boolean | none | relative-time--muted |
+| sparkline | `AIOutsystemsFED.Sparkline` | Values: Text*, Label: Text, ShowLast: Boolean | none | sparkline--positive, sparkline--negative |
+
+\* mandatory. Every Block also takes `ExtendedClass` (Text, optional).
+
+**Contract changes since the previous release:**
+
+- dropdown-button: component added
+
+**Deployments:**
+
+| Platform | Environment | Module | Script | Theme | Published | Verified |
+|---|---|---|---|---|---|---|
+| O11 | styleguide | SGLiveStyleGuideTraditional_SandBox | ComponentsScript | SGLiveStyleGuideTraditional_SandBox | 2026-10-28 | In Service Studio: the ComponentsScript Web Block's JavaScript read back identical to dist/components.js (length and checksum), the theme's components section read back identical to dist/components.css, the DropdownButtonPattern Block and DropdownBTN screen matched their probes, module validation empty, 1-Click Publish done. Not verified: the files the server serves (the app's URL isn't known here) and the browser click-through. |
 
 ## 2026.43.2
 
