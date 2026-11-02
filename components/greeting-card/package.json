@@ -1,0 +1,10 @@
+{
+	"name": "greeting-card",
+	"version": "1.0.0",
+	"private": true,
+	"description": "The GreetingCard component, shipped in this project: a copy of the template (templates/greeting-card), kept in step with it.",
+	"scripts": {
+		"build": "node ../../packages/toolchain/build.mjs",
+		"test": "node ../../packages/toolchain/test.mjs"
+	}
+}

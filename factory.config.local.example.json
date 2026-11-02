@@ -1,0 +1,20 @@
+{
+	"o11": {
+		"theme": "MyAppTheme"
+	},
+	"traditional": {
+		"theme": "MyTraditionalTheme",
+		"flow": "MainFlow",
+		"blockFlow": "Patterns",
+		"scriptBlock": "ComponentsScript",
+		"layout": {
+			"block": "LayoutTopMenu",
+			"module": "MyStyleGuide_Pat",
+			"flow": "PageLayout"
+		},
+		"layoutFill": {
+			"Header": "ApplicationTitle"
+		},
+		"harnessRole": "Registered"
+	}
+}

@@ -1,0 +1,12 @@
+{
+	"name": "@factory/toolchain",
+	"version": "1.0.0",
+	"private": true,
+	"description": "Builds and tests every component: esbuild, Sass, TypeScript and jsdom, with the structural checks every component must pass. Components hold no build code of their own.",
+	"devDependencies": {
+		"esbuild": "0.28.2",
+		"jsdom": "30.1.3",
+		"sass": "1.105.2",
+		"typescript": "7.0.2"
+	}
+}

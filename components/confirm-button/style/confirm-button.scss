@@ -1,0 +1,33 @@
+/*
+ * ConfirmButton styles, written to the rules in docs/guide/Style.md.
+ *
+ * - The look is OutSystems UI's own buttons: btn, and btn-error while armed,
+ *   so the app's theme styles both. This stylesheet only adds the armed
+ *   emphasis and the full-width modifier.
+ * - BEM block confirm-button:
+ *     elements  confirm-button__button, __status (a visually hidden live region)
+ *     state     confirm-button__button--is-armed   (set by the component)
+ *     modifiers confirm-button--full-width         (through ExtendedClass)
+ * - Focus is left to OutSystems UI.
+ */
+
+// SCSS only groups the block's rules (Style.md, Rule 8).
+.confirm-button {
+	&__button {
+		transition: box-shadow 0.15s ease;
+
+		&--is-armed {
+			box-shadow: 0 0 0 var(--border-size-m, 2px) var(--color-error-light, #fceaea);
+		}
+	}
+
+	&--full-width &__button {
+		width: 100%;
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		&__button {
+			transition: none;
+		}
+	}
+}

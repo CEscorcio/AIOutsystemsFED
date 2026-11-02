@@ -1,0 +1,340 @@
+{
+	"version": "2026.43.2",
+	"built": "2026-10-22T15:11:18.397Z",
+	"description": "Six components in one bundle: GreetingCard brought to the current rules (translatable text), plus CopyField, RelativeTime, Sparkline, ConfirmButton and ReadMore. First release whose Blocks and test screens all came from the generators.",
+	"sourceCommit": "8de216c024ff4df3346736ce0732b5b6e4564d56",
+	"previousVersion": "2026.43.1",
+	"files": {
+		"dist/components.js": {
+			"bytes": 20249,
+			"sha256": "706d63ea31e46b2b92790491be17fe071aa079640da15de66c1481aefe39b9f5"
+		},
+		"dist/components.css": {
+			"bytes": 9813,
+			"sha256": "38d2c63c394ff15fba2c3290feb60dc6ba53d1302adc2c9215f908237c63aa5a"
+		}
+	},
+	"components": [
+		{
+			"folder": "confirm-button",
+			"class": "ConfirmButton",
+			"namespace": "AIOutsystemsFED",
+			"contract": {
+				"inputs": [
+					{
+						"name": "Label",
+						"type": "Text",
+						"mandatory": true
+					},
+					{
+						"name": "ConfirmLabel",
+						"type": "Text",
+						"mandatory": false
+					},
+					{
+						"name": "TimeoutSeconds",
+						"type": "Integer",
+						"mandatory": false
+					},
+					{
+						"name": "IsDisabled",
+						"type": "Boolean",
+						"mandatory": false
+					}
+				],
+				"events": [
+					{
+						"name": "OnConfirmed",
+						"params": []
+					}
+				],
+				"modifiers": [
+					"confirm-button--full-width"
+				]
+			},
+			"sha256": {
+				"js": "0f6a73c0f47d75ea620a776497a0b39c370ab18b25a03a8f928e8ba04b96b44f",
+				"css": "1d089c7cf5e01e64197f209616a13bba57e5ab03d4950ed75d571930f180f337"
+			}
+		},
+		{
+			"folder": "copy-field",
+			"class": "CopyField",
+			"namespace": "AIOutsystemsFED",
+			"contract": {
+				"inputs": [
+					{
+						"name": "Value",
+						"type": "Text",
+						"mandatory": true
+					},
+					{
+						"name": "Label",
+						"type": "Text",
+						"mandatory": false
+					},
+					{
+						"name": "CopyLabel",
+						"type": "Text",
+						"mandatory": false
+					},
+					{
+						"name": "CopiedLabel",
+						"type": "Text",
+						"mandatory": false
+					}
+				],
+				"events": [
+					{
+						"name": "OnCopied",
+						"params": [
+							{
+								"name": "Value",
+								"type": "Text"
+							}
+						]
+					}
+				],
+				"modifiers": [
+					"copy-field--compact"
+				]
+			},
+			"sha256": {
+				"js": "ff5a5437f2a4d34a2320929b3dd77b4080a18f3f6385adf4d7615957291de94e",
+				"css": "60466235dd57ad4f445e2bd6d040ddfba0bc97200dcf3a420a7acf42d7741c7e"
+			}
+		},
+		{
+			"folder": "greeting-card",
+			"class": "GreetingCard",
+			"namespace": "AIOutsystemsFED",
+			"contract": {
+				"inputs": [
+					{
+						"name": "Name",
+						"type": "Text",
+						"mandatory": true
+					},
+					{
+						"name": "ButtonLabel",
+						"type": "Text",
+						"mandatory": false
+					},
+					{
+						"name": "Greeting",
+						"type": "Text",
+						"mandatory": false
+					},
+					{
+						"name": "FallbackName",
+						"type": "Text",
+						"mandatory": false
+					},
+					{
+						"name": "CountLabel",
+						"type": "Text",
+						"mandatory": false
+					},
+					{
+						"name": "CountLabelOne",
+						"type": "Text",
+						"mandatory": false
+					}
+				],
+				"events": [
+					{
+						"name": "OnGreetClicked",
+						"params": [
+							{
+								"name": "Count",
+								"type": "Integer"
+							}
+						]
+					}
+				],
+				"modifiers": [
+					"greeting-card--compact"
+				]
+			},
+			"sha256": {
+				"js": "a855b5b51cc27707743e2c2121d7b9c4bb71ef56e671abba8d1bb80989ed55a4",
+				"css": "6ddb9541b14a563000557017f8a61c063eb50aecd211b215a0a5e8b4dc51888f"
+			}
+		},
+		{
+			"folder": "read-more",
+			"class": "ReadMore",
+			"namespace": "AIOutsystemsFED",
+			"contract": {
+				"inputs": [
+					{
+						"name": "Text",
+						"type": "Text",
+						"mandatory": true
+					},
+					{
+						"name": "Lines",
+						"type": "Integer",
+						"mandatory": false
+					},
+					{
+						"name": "MoreLabel",
+						"type": "Text",
+						"mandatory": false
+					},
+					{
+						"name": "LessLabel",
+						"type": "Text",
+						"mandatory": false
+					}
+				],
+				"events": [
+					{
+						"name": "OnToggled",
+						"params": [
+							{
+								"name": "IsExpanded",
+								"type": "Boolean"
+							}
+						]
+					}
+				],
+				"modifiers": [
+					"read-more--muted"
+				]
+			},
+			"sha256": {
+				"js": "00ccc5a3793bc54bdd3e2ece73716857a786184df2a427735f39f3a98571f90a",
+				"css": "f4a9638db1743be88cd06c4b02b4fa17c13e1fed3b026651d5328d70c73386bd"
+			}
+		},
+		{
+			"folder": "relative-time",
+			"class": "RelativeTime",
+			"namespace": "AIOutsystemsFED",
+			"contract": {
+				"inputs": [
+					{
+						"name": "Timestamp",
+						"type": "Text",
+						"mandatory": true
+					},
+					{
+						"name": "Locale",
+						"type": "Text",
+						"mandatory": false
+					},
+					{
+						"name": "EmptyLabel",
+						"type": "Text",
+						"mandatory": false
+					},
+					{
+						"name": "Live",
+						"type": "Boolean",
+						"mandatory": false
+					}
+				],
+				"events": [],
+				"modifiers": [
+					"relative-time--muted"
+				]
+			},
+			"sha256": {
+				"js": "0d4c7e9a462fceceb49b27f87257f7c67b311e57a80d8273cf7d9a173a63330e",
+				"css": "5bea6a19cf3bd674d2080c54d054704a84c3bd1b89248de8b9cd7b8a0791b725"
+			}
+		},
+		{
+			"folder": "sparkline",
+			"class": "Sparkline",
+			"namespace": "AIOutsystemsFED",
+			"contract": {
+				"inputs": [
+					{
+						"name": "Values",
+						"type": "Text",
+						"mandatory": true
+					},
+					{
+						"name": "Label",
+						"type": "Text",
+						"mandatory": false
+					},
+					{
+						"name": "ShowLast",
+						"type": "Boolean",
+						"mandatory": false
+					}
+				],
+				"events": [],
+				"modifiers": [
+					"sparkline--positive",
+					"sparkline--negative"
+				]
+			},
+			"sha256": {
+				"js": "e8def4c061d432a9cc3297716e0fc908107f6f64bd52ef45e8dccc97a96ec92e",
+				"css": "b87e1bd7e756b01bd0856bc168e14e0aa62b602c5133dafcd6de4c59a8b49c51"
+			}
+		}
+	],
+	"contractChanges": [
+		{
+			"component": "confirm-button",
+			"change": "component added",
+			"breaking": false
+		},
+		{
+			"component": "copy-field",
+			"change": "component added",
+			"breaking": false
+		},
+		{
+			"component": "greeting-card",
+			"change": "input Greeting added",
+			"breaking": false
+		},
+		{
+			"component": "greeting-card",
+			"change": "input FallbackName added",
+			"breaking": false
+		},
+		{
+			"component": "greeting-card",
+			"change": "input CountLabel added",
+			"breaking": false
+		},
+		{
+			"component": "greeting-card",
+			"change": "input CountLabelOne added",
+			"breaking": false
+		},
+		{
+			"component": "read-more",
+			"change": "component added",
+			"breaking": false
+		},
+		{
+			"component": "relative-time",
+			"change": "component added",
+			"breaking": false
+		},
+		{
+			"component": "sparkline",
+			"change": "component added",
+			"breaking": false
+		}
+	],
+	"deployments": [
+		{
+			"platform": "O11",
+			"environment": "personal",
+			"module": "Sandbox",
+			"script": "Components",
+			"theme": "Sandbox",
+			"published": "2026-10-22",
+			"verified": "Served Script identical to dist/components.js after the platform's BOM; theme section identical to dist/components.css after line-ending normalisation, one section, Version 2026.43.2; the six compiled Blocks create their AIOutsystemsFED class, update, destroy and wire their Trigger actions; the six test screens use their Block. Browser check not run."
+		}
+	]
+}

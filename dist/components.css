@@ -1,0 +1,512 @@
+/*!
+ * Version: 2026.44.1
+ * AIOutsystemsFED components: styles
+ * Built: 2026-10-28T16:14:28.459Z
+ * Contains:
+ *   components/confirm-button/dist/ConfirmButton.css
+ *   components/copy-field/dist/CopyField.css
+ *   components/dropdown-button/dist/DropdownButton.css
+ *   components/greeting-card/dist/GreetingCard.css
+ *   components/read-more/dist/ReadMore.css
+ *   components/relative-time/dist/RelativeTime.css
+ *   components/sparkline/dist/Sparkline.css
+ */
+
+/* ---- components/confirm-button/dist/ConfirmButton.css ---- */
+/*
+ * ConfirmButton styles, written to the rules in docs/guide/Style.md.
+ *
+ * - The look is OutSystems UI's own buttons: btn, and btn-error while armed,
+ *   so the app's theme styles both. This stylesheet only adds the armed
+ *   emphasis and the full-width modifier.
+ * - BEM block confirm-button:
+ *     elements  confirm-button__button, __status (a visually hidden live region)
+ *     state     confirm-button__button--is-armed   (set by the component)
+ *     modifiers confirm-button--full-width         (through ExtendedClass)
+ * - Focus is left to OutSystems UI.
+ */
+.confirm-button__button {
+	transition: box-shadow 0.15s ease;
+}
+
+.confirm-button__button--is-armed {
+	box-shadow: 0 0 0 var(--border-size-m, 2px) var(--color-error-light, #fceaea);
+}
+
+.confirm-button--full-width .confirm-button__button {
+	width: 100%;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.confirm-button__button {
+		transition: none;
+	}
+}
+
+/* ---- components/copy-field/dist/CopyField.css ---- */
+/*
+ * CopyField styles, written to the rules in docs/guide/Style.md.
+ *
+ * - Every colour, space, radius, border and font value is an OutSystems UI
+ *   variable with its base-theme value (OutSystems UI 2.30.0) as fallback.
+ * - BEM block copy-field:
+ *     elements  copy-field__body, __label, __row, __value, __button, __status
+ *     modifiers copy-field--compact   (passed by a screen through ExtendedClass)
+ * - The button is OutSystems UI's btn btn-small; the live region uses its
+ *   wcag-hide-text. Focus is left to OutSystems UI.
+ */
+.copy-field__body {
+	display: flex;
+	flex-direction: column;
+	gap: var(--space-xs, 4px);
+	min-width: 0;
+}
+
+.copy-field__label {
+	font-size: var(--font-size-s, 14px);
+	font-weight: var(--font-semi-bold, 600);
+	color: var(--color-neutral-7, #6a7178);
+}
+
+.copy-field__row {
+	display: flex;
+	align-items: center;
+	gap: var(--space-s, 8px);
+	min-width: 0;
+}
+
+.copy-field__value {
+	flex: 1 1 auto;
+	min-width: 0;
+	padding: var(--space-xs, 4px) var(--space-s, 8px);
+	overflow: hidden;
+	font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+	font-size: var(--font-size-s, 14px);
+	color: var(--color-neutral-9, #272b30);
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	background-color: var(--color-neutral-2, #f1f3f5);
+	border: var(--border-size-s, 1px) solid var(--color-neutral-4, #dee2e6);
+	border-radius: var(--border-radius-soft, 4px);
+}
+
+.copy-field__button {
+	flex-shrink: 0;
+}
+
+.copy-field--compact .copy-field__value {
+	padding: var(--space-none, 0) var(--space-xs, 4px);
+	font-size: var(--font-size-xs, 12px);
+}
+
+.copy-field--compact .copy-field__label {
+	font-size: var(--font-size-xs, 12px);
+}
+
+/* ---- components/dropdown-button/dist/DropdownButton.css ---- */
+/*
+ * DropdownButton styles, written to the rules in docs/guide/Style.md.
+ *
+ * - The two parts are OutSystems UI buttons: btn (Secondary), btn btn-primary
+ *   (Primary), plus btn-small (Small and ExtraSmall), so the app's theme
+ *   styles them. This stylesheet joins them into one control and adds what
+ *   OutSystems UI 2.30.0 has no class for: Tertiary, Transparent, ExtraSmall,
+ *   and the menu.
+ * - Every colour, space, radius, border, shadow and layer is an OutSystems UI
+ *   variable with its base-theme value as fallback.
+ * - BEM block dropdown-button:
+ *     elements  dropdown-button__group, __action, __icon, __label, __divider,
+ *               __trigger, __chevron, __menu (the Block's MenuContainer),
+ *               __item (the Style Class of each Link a screen puts in the menu),
+ *               __bridge (Traditional Web: the hidden Link that raises OnClick)
+ *     states    dropdown-button__group--primary | --secondary | --tertiary | --transparent,
+ *               --medium | --small | --extra-small, --is-disabled;
+ *               dropdown-button__trigger--is-open, dropdown-button__menu--is-open
+ *               (all set by the component)
+ *     modifiers dropdown-button--menu-end   (through ExtendedClass)
+ * - The divider sits between the two buttons, so OutSystems UI's .btn + .btn
+ *   spacing doesn't apply to them.
+ * - Focus is left to OutSystems UI.
+ */
+.dropdown-button {
+	position: relative;
+	display: inline-block;
+	vertical-align: middle;
+}
+
+.dropdown-button__group {
+	display: inline-flex;
+	align-items: stretch;
+}
+
+.dropdown-button__action {
+	gap: var(--space-s, 8px);
+	border-inline-end-width: var(--space-none, 0);
+	border-start-end-radius: var(--space-none, 0);
+	border-end-end-radius: var(--space-none, 0);
+}
+
+.dropdown-button__label {
+	white-space: nowrap;
+}
+
+.dropdown-button__divider {
+	flex-shrink: 0;
+	width: var(--border-size-s, 1px);
+	background-color: var(--color-primary, #1068eb);
+}
+
+.dropdown-button__trigger {
+	padding-inline: var(--space-s, 8px);
+	border-inline-start-width: var(--space-none, 0);
+	border-start-start-radius: var(--space-none, 0);
+	border-end-start-radius: var(--space-none, 0);
+}
+
+.dropdown-button__chevron {
+	width: 1em;
+	height: 1em;
+	fill: none;
+	stroke: currentcolor;
+	stroke-width: 1.5;
+	stroke-linecap: round;
+	stroke-linejoin: round;
+	transition: transform 0.15s ease;
+}
+
+.dropdown-button__trigger--is-open .dropdown-button__chevron {
+	transform: rotate(180deg);
+}
+
+.dropdown-button__group--primary .dropdown-button__divider {
+	opacity: 0.5;
+}
+
+.dropdown-button__group--tertiary .dropdown-button__action,
+.dropdown-button__group--tertiary .dropdown-button__trigger {
+	color: var(--color-neutral-9, #272b30);
+	border-color: var(--color-neutral-4, #dee2e6);
+}
+
+.dropdown-button__group--tertiary .dropdown-button__divider {
+	background-color: var(--color-neutral-4, #dee2e6);
+}
+
+.dropdown-button__group--transparent .dropdown-button__action,
+.dropdown-button__group--transparent .dropdown-button__trigger {
+	color: var(--color-neutral-9, #272b30);
+	background-color: transparent;
+	border-color: transparent;
+}
+
+.dropdown-button__group--transparent .dropdown-button__divider {
+	background-color: transparent;
+}
+
+.dropdown-button__group--extra-small .dropdown-button__action,
+.dropdown-button__group--extra-small .dropdown-button__trigger {
+	height: var(--space-m, 24px);
+	font-size: var(--font-size-xs, 12px);
+}
+
+.dropdown-button__group--extra-small .dropdown-button__action {
+	padding-inline: var(--space-s, 8px);
+}
+
+.dropdown-button__group--extra-small .dropdown-button__trigger {
+	padding-inline: var(--space-xs, 4px);
+}
+
+.dropdown-button__group--is-disabled .dropdown-button__action,
+.dropdown-button__group--is-disabled .dropdown-button__trigger {
+	color: var(--color-neutral-6, #adb5bd);
+	background-color: var(--color-neutral-2, #f1f3f5);
+	border-color: var(--color-neutral-4, #dee2e6);
+	cursor: default;
+}
+
+.dropdown-button__group--is-disabled .dropdown-button__divider {
+	background-color: var(--color-neutral-4, #dee2e6);
+	opacity: 1;
+}
+
+.dropdown-button__menu {
+	position: absolute;
+	inset-block-start: 100%;
+	inset-inline-start: var(--space-none, 0);
+	z-index: var(--layer-local-tier-5, 5);
+	display: none;
+	flex-direction: column;
+	width: max-content;
+	min-width: 100%;
+	margin-block-start: var(--space-xs, 4px);
+	padding-block: var(--space-xs, 4px);
+	background-color: var(--color-neutral-0, #ffffff);
+	border: var(--border-size-s, 1px) solid var(--color-neutral-4, #dee2e6);
+	border-radius: var(--border-radius-soft, 4px);
+	box-shadow: var(--shadow-m, 0 4px 6px rgba(0, 0, 0, 0.1));
+}
+
+.dropdown-button__menu--is-open {
+	display: flex;
+}
+
+.dropdown-button--menu-end .dropdown-button__menu {
+	inset-inline: auto var(--space-none, 0);
+}
+
+.dropdown-button__item {
+	display: flex;
+	align-items: center;
+	gap: var(--space-s, 8px);
+	padding: var(--space-s, 8px) var(--space-base, 16px);
+	font-size: var(--font-size-s, 14px);
+	color: var(--color-neutral-9, #272b30);
+	white-space: nowrap;
+	text-decoration: none;
+}
+
+.dropdown-button__item:hover {
+	background-color: var(--color-neutral-2, #f1f3f5);
+}
+
+.dropdown-button__bridge {
+	display: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.dropdown-button__chevron {
+		transition: none;
+	}
+}
+
+/* ---- components/greeting-card/dist/GreetingCard.css ---- */
+/*
+ * GreetingCard styles, written to the rules in docs/guide/Style.md.
+ *
+ * - Base theme is OutSystems UI. Every colour, space, radius, border, shadow
+ *   and font value is an OutSystems UI variable; the fallback after the comma
+ *   is that variable's exact value in the base theme (OutSystems UI 2.30.0),
+ *   so the local preview matches an unthemed app.
+ * - Class names are BEM under the block greeting-card:
+ *     elements  greeting-card__body, __text, __title, __count, __button
+ *     modifiers greeting-card--compact   (passed by a screen through ExtendedClass)
+ * - Selectors are single BEM classes. Allowed prefixes: a modifier of this
+ *   block, or an OutSystems UI context class (.phone, .tablet, .is-rtl, ...).
+ * - Focus is left to OutSystems UI (.has-accessible-features); don't restyle it.
+ *
+ * Shipped as a stylesheet of its own (dist/GreetingCard.css), not by the JS.
+ */
+.greeting-card__body {
+	position: relative;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: var(--space-base, 16px);
+	flex-wrap: wrap;
+	padding: var(--space-base, 16px) var(--space-m, 24px);
+	padding-inline-start: calc(var(--space-m, 24px) + var(--border-size-l, 3px));
+	background-color: var(--color-neutral-0, #ffffff);
+	border: var(--border-size-s, 1px) solid var(--color-neutral-4, #dee2e6);
+	border-radius: var(--border-radius-soft, 4px);
+	box-shadow: var(--shadow-xs, 0 1px 2px rgba(0, 0, 0, 0.1));
+	overflow: hidden;
+	transition:
+		box-shadow 0.2s ease,
+		border-color 0.2s ease;
+}
+
+.greeting-card__body::before {
+	content: '';
+	position: absolute;
+	inset-block: 0;
+	inset-inline-start: 0;
+	width: var(--border-size-l, 3px);
+	background-color: var(--color-primary, #1068eb);
+}
+
+.greeting-card__body:hover {
+	border-color: var(--color-neutral-5, #ced4da);
+	box-shadow: var(--shadow-s, 0 2px 4px rgba(0, 0, 0, 0.1));
+}
+
+.greeting-card__text {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	gap: var(--space-xs, 4px);
+	min-width: 0;
+}
+
+.greeting-card__title {
+	margin: 0;
+	font-size: var(--font-size-h5, 20px);
+	font-weight: var(--font-semi-bold, 600);
+	line-height: 1.3;
+	color: var(--color-neutral-9, #272b30);
+	overflow-wrap: anywhere;
+}
+
+.greeting-card__count {
+	display: inline-flex;
+	align-items: center;
+	padding: var(--space-none, 0) var(--space-s, 8px);
+	border-radius: var(--border-radius-rounded, 100px);
+	font-size: var(--font-size-xs, 12px);
+	font-weight: var(--font-semi-bold, 600);
+	line-height: 1.75;
+	color: var(--color-primary, #1068eb);
+	background-color: var(--color-primary-selected, rgba(20, 110, 245, 0.12));
+	background-color: color-mix(in srgb, var(--color-primary, #1068eb) 12%, transparent);
+}
+
+.greeting-card__button {
+	flex-shrink: 0;
+	transition: transform 0.15s ease;
+}
+
+.greeting-card__button:hover {
+	transform: translateY(-1px);
+}
+
+.greeting-card__button:active {
+	transform: none;
+}
+
+.greeting-card--compact .greeting-card__body {
+	padding: var(--space-s, 8px) var(--space-base, 16px);
+	padding-inline-start: calc(var(--space-base, 16px) + var(--border-size-l, 3px));
+}
+
+.greeting-card--compact .greeting-card__title {
+	font-size: var(--font-size-base, 16px);
+}
+
+.phone .greeting-card__button {
+	width: 100%;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.greeting-card__body,
+	.greeting-card__button {
+		transition: none;
+	}
+
+	.greeting-card__button:hover {
+		transform: none;
+	}
+}
+
+/* ---- components/read-more/dist/ReadMore.css ---- */
+/*
+ * ReadMore styles, written to the rules in docs/guide/Style.md.
+ *
+ * - Every colour, space and font value is an OutSystems UI variable with its
+ *   base-theme value (OutSystems UI 2.30.0) as fallback.
+ * - BEM block read-more:
+ *     elements  read-more__text, __toggle (a link-styled button)
+ *     state     read-more__text--is-clamped   (set by the component)
+ *     modifiers read-more--muted               (through ExtendedClass)
+ * - The number of lines is set by the component on the element
+ *   (-webkit-line-clamp), because it comes from an Input Parameter.
+ * - Focus is left to OutSystems UI.
+ */
+.read-more__text {
+	margin: 0;
+	white-space: pre-line;
+	overflow-wrap: anywhere;
+}
+
+.read-more__text--is-clamped {
+	display: -webkit-box;
+	overflow: hidden;
+	-webkit-box-orient: vertical;
+}
+
+.read-more__toggle {
+	margin-block-start: var(--space-xs, 4px);
+	padding: var(--space-none, 0);
+	font-size: var(--font-size-s, 14px);
+	font-weight: var(--font-semi-bold, 600);
+	color: var(--color-primary, #1068eb);
+	cursor: pointer;
+	background: none;
+	border: none;
+}
+
+.read-more__toggle:hover {
+	text-decoration: underline;
+}
+
+.read-more--muted .read-more__text {
+	font-size: var(--font-size-s, 14px);
+	color: var(--color-neutral-7, #6a7178);
+}
+
+/* ---- components/relative-time/dist/RelativeTime.css ---- */
+/*
+ * RelativeTime styles, written to the rules in docs/guide/Style.md.
+ *
+ * - Every colour and font value is an OutSystems UI variable with its
+ *   base-theme value (OutSystems UI 2.30.0) as fallback.
+ * - BEM block relative-time:
+ *     elements  relative-time__value (a <time> element)
+ *     modifiers relative-time--muted   (passed by a screen through ExtendedClass)
+ * - It inherits the surrounding text's size and colour unless muted, so it
+ *   reads as part of a sentence ("Updated 3 minutes ago").
+ */
+.relative-time__value {
+	white-space: nowrap;
+	cursor: help;
+}
+
+.relative-time--muted .relative-time__value {
+	font-size: var(--font-size-s, 14px);
+	color: var(--color-neutral-7, #6a7178);
+}
+
+/* ---- components/sparkline/dist/Sparkline.css ---- */
+/*
+ * Sparkline styles, written to the rules in docs/guide/Style.md.
+ *
+ * - Every colour and size is an OutSystems UI variable with its base-theme
+ *   value (OutSystems UI 2.30.0) as fallback, so the app's theme recolours it.
+ * - BEM block sparkline:
+ *     elements  sparkline__chart (the <svg>), __line, __dot
+ *     modifiers sparkline--positive, sparkline--negative (through ExtendedClass)
+ * - The SVG fills its container's width; its height follows the text size.
+ */
+.sparkline__chart {
+	display: block;
+	width: 100%;
+	height: var(--space-m, 24px);
+	overflow: visible;
+}
+
+.sparkline__line {
+	fill: none;
+	stroke: var(--color-primary, #1068eb);
+	stroke-width: var(--border-size-m, 2px);
+	stroke-linecap: round;
+	stroke-linejoin: round;
+}
+
+.sparkline__dot {
+	fill: var(--color-primary, #1068eb);
+}
+
+.sparkline--positive .sparkline__line {
+	stroke: var(--color-success, #29823b);
+}
+
+.sparkline--positive .sparkline__dot {
+	fill: var(--color-success, #29823b);
+}
+
+.sparkline--negative .sparkline__line {
+	stroke: var(--color-error, #dc2020);
+}
+
+.sparkline--negative .sparkline__dot {
+	fill: var(--color-error, #dc2020);
+}

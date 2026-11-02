@@ -1,0 +1,26 @@
+# Dependency updates, grouped so they arrive as a few pull requests a week, not dozens.
+# CI (npm test) has to pass on each before it's merged.
+version: 2
+updates:
+  - package-ecosystem: npm
+    # The root lockfile covers every workspace (components/*, templates/*).
+    directory: '/'
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+    groups:
+      lint:
+        patterns: ['eslint*', '@eslint/*', 'typescript-eslint', 'globals', 'prettier', 'stylelint*']
+      build:
+        patterns: ['esbuild', 'sass', 'typescript', 'jsdom']
+    ignore:
+      # Pinned to the version the OutSystems 11 environment runs (factory.config.json "outsystemsUi").
+      # Change it together with the config when the environment upgrades, never on its own.
+      - dependency-name: 'outsystems-ui'
+  - package-ecosystem: github-actions
+    directory: '/'
+    schedule:
+      interval: weekly
+    groups:
+      actions:
+        patterns: ['*']

@@ -1,0 +1,46 @@
+{
+	"class": "RelativeTime",
+	"block": "relative-time",
+	"description": "Shows a date and time relative to now, such as 3 minutes ago or in 2 days, in the user's language, with the exact date on hover, and keeps it current.",
+	"inputs": [
+		{
+			"name": "Timestamp",
+			"type": "Text",
+			"mandatory": true,
+			"default": "\"\"",
+			"description": "The moment to show, in ISO 8601 (for example 2026-10-22T10:00:00Z). From an OutSystems DateTime, use FormatDateTime(<value>, \"yyyy-MM-ddTHH:mm:ss\"), which is read in the browser's time zone; add \"Z\" when the value is UTC.",
+			"example": "\"2026-10-22T10:00:00Z\""
+		},
+		{
+			"name": "Locale",
+			"type": "Text",
+			"mandatory": false,
+			"default": "\"\"",
+			"description": "A BCP 47 language tag such as pt-PT or en-GB, for the words and the date format. Empty uses the browser's language.",
+			"example": "\"en-GB\""
+		},
+		{
+			"name": "EmptyLabel",
+			"type": "Text",
+			"mandatory": false,
+			"default": "\"\"",
+			"description": "Shown when Timestamp is empty or not a valid date.",
+			"example": "\"Never\""
+		},
+		{
+			"name": "Live",
+			"type": "Boolean",
+			"mandatory": false,
+			"default": "True",
+			"description": "Refresh the text every 30 seconds, so 'just now' becomes '1 minute ago' without a screen refresh.",
+			"example": "True"
+		}
+	],
+	"events": [],
+	"modifiers": [
+		{
+			"class": "relative-time--muted",
+			"description": "Secondary text colour and a smaller size, for metadata lines."
+		}
+	]
+}

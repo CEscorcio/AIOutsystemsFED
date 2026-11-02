@@ -1,0 +1,47 @@
+{
+	"class": "CopyField",
+	"block": "copy-field",
+	"description": "Shows a value, such as a reference number, an API key or a link, with a button that copies it to the clipboard and confirms it.",
+	"inputs": [
+		{
+			"name": "Value",
+			"type": "Text",
+			"mandatory": true,
+			"default": "\"\"",
+			"description": "The text shown and copied.",
+			"example": "\"ORD-2026-00042\""
+		},
+		{
+			"name": "Label",
+			"type": "Text",
+			"mandatory": false,
+			"default": "\"\"",
+			"description": "A label above the value. Empty shows none.",
+			"example": "\"Order reference\""
+		},
+		{
+			"name": "CopyLabel",
+			"type": "Text",
+			"mandatory": false,
+			"default": "\"Copy\"",
+			"description": "The button's text.",
+			"example": "\"Copy\""
+		},
+		{
+			"name": "CopiedLabel",
+			"type": "Text",
+			"mandatory": false,
+			"default": "\"Copied\"",
+			"description": "Shown on the button for two seconds after a copy, and announced to screen readers.",
+			"example": "\"Copied\""
+		}
+	],
+	"events": [
+		{
+			"name": "OnCopied",
+			"description": "Raised after the value was copied to the clipboard.",
+			"params": [{ "name": "Value", "type": "Text", "description": "The text that was copied." }]
+		}
+	],
+	"modifiers": [{ "class": "copy-field--compact", "description": "Smaller text and padding, for tables and dense forms." }]
+}

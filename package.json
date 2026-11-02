@@ -1,0 +1,44 @@
+{
+	"name": "ai-outsystems-fed",
+	"private": true,
+	"description": "Custom front-end components for OutSystems. Each folder in components/ is an npm workspace with its own build and tests.",
+	"type": "module",
+	"engines": {
+		"node": ">=20"
+	},
+	"workspaces": [
+		"components/*",
+		"templates/*",
+		"packages/*"
+	],
+	"scripts": {
+		"lint": "eslint . && node scripts/check-links.mjs && node scripts/check-private.mjs && stylelint \"{components,templates}/*/style/**/*.{css,scss}\" && prettier --check .",
+		"format": "prettier --write . && stylelint \"{components,templates}/*/style/**/*.{css,scss}\" --fix && eslint . --fix",
+		"test": "npm run lint && npm test --workspaces --if-present && node scripts/check-contracts.mjs",
+		"build:all": "node scripts/build-all.mjs",
+		"prepare": "node scripts/install-hooks.mjs",
+		"release-notes": "node scripts/release-notes.mjs",
+		"check:contracts": "node scripts/check-contracts.mjs",
+		"release:record": "node scripts/release-record.mjs",
+		"o11:generate": "node platform/o11/generate.mjs",
+		"init": "node scripts/init.mjs",
+		"check:audit": "node scripts/check-audit.mjs",
+		"check:private": "node scripts/check-private.mjs",
+		"test:blueprint": "node scripts/test-blueprint.mjs",
+		"docs:components": "node scripts/component-docs.mjs",
+		"o11:verify": "node platform/o11/verify.mjs"
+	},
+	"devDependencies": {
+		"@eslint/js": "^10.0.1",
+		"eslint": "^10.13.0",
+		"eslint-config-prettier": "^10.1.8",
+		"globals": "^17.13.0",
+		"outsystems-ui": "2.30.0",
+		"prettier": "^3.9.10",
+		"stylelint": "^17.16.0",
+		"stylelint-config-standard": "^40.0.0",
+		"stylelint-config-standard-scss": "^17.0.0",
+		"stylelint-order": "^8.1.2",
+		"typescript-eslint": "^8.72.0"
+	}
+}

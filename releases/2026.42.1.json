@@ -1,0 +1,65 @@
+{
+	"version": "2026.42.1",
+	"built": "2026-10-15T11:18:37.009Z",
+	"description": "First release: the GreetingCard example, built to prove the pipeline. Where it was uploaded wasn't recorded at the time.",
+	"sourceCommit": "eb8e2288c91471fdbe5d72abfe53d520dc7debd9",
+	"previousVersion": null,
+	"files": {
+		"dist/components.js": {
+			"bytes": 2632,
+			"sha256": "08f6c6ef412f61ebc2441355971e2e944a6d16cba162b26b1c9fb98ef93b3f12"
+		},
+		"dist/components.css": {
+			"bytes": 3618,
+			"sha256": "3d39fa2c485de8d70896130c94c76ef343aa2d0769ac359fe2b81e71eb7e3a10"
+		}
+	},
+	"components": [
+		{
+			"folder": "greeting-card",
+			"class": "GreetingCard",
+			"namespace": "ClaudeTest",
+			"contract": {
+				"inputs": [
+					{
+						"name": "Name",
+						"type": "Text",
+						"mandatory": true
+					},
+					{
+						"name": "ButtonLabel",
+						"type": "Text",
+						"mandatory": false
+					}
+				],
+				"events": [
+					{
+						"name": "OnGreetClicked",
+						"params": [
+							{
+								"name": "Count",
+								"type": "Integer"
+							}
+						]
+					}
+				],
+				"modifiers": [
+					"greeting-card--compact"
+				]
+			},
+			"contractSource": "today's component.json (the compiled JS is identical)",
+			"sha256": {
+				"js": "ee6b8d3e60a5d15861a0dcd4654bb36acd98650259ca34db1119a7c3bff76398",
+				"css": "09fd63a9c63dd103bd84caa7fe7d457386fca013503b22fc26770be297f23842"
+			}
+		}
+	],
+	"contractChanges": [
+		{
+			"component": "greeting-card",
+			"change": "component added",
+			"breaking": false
+		}
+	],
+	"deployments": []
+}

@@ -1,0 +1,132 @@
+// Loads and validates a component's contract (components/<name>/component.json),
+// the single description of its OutSystems Block that the checks, the
+// generators (platform/o11/) and the release records all read.
+//
+// component.json:
+//   class        PascalCase class name; src/index.ts exports it, and the build
+//                registers it as window.<namespace>.<class> (the namespace is
+//                factory.config.json's, never repeated here)
+//   block        the BEM block, kebab-case of class (Style.md, Rule 0)
+//   description  one sentence, shown in the docs and the Block's description
+//   inputs       Block Input Parameters, in order: name (PascalCase), type,
+//                mandatory, default (an OutSystems expression), description,
+//                example (an expression the harness uses), and for a Text input
+//                that takes a fixed set, values (["Primary", "Secondary"])
+//   events       Block Events: name (On...), description, params [{ name, type, description }]
+//   modifiers    BEM modifiers accepted through ExtendedClass: [{ class, description }]
+//   placeholders optional Block Placeholders the screen fills with its own widgets:
+//                [{ name, description, itemClass, example: [{ label, icon }] }]. Each sits
+//                in a container "<Name>Container" (class <block>__<name>) inside the
+//                mount; the class gets that container's id as config.<name>Id.
+//                itemClass is the class each widget put in it should have; example is
+//                what the generated screens put in it (Links with an icon and a label)
+//   showcase     optional example screen (npm run o11:generate -- showcase):
+//                { screen, title, groups: [{ title, examples: [{ title, args }] }] }.
+//                args maps an input (or ExtendedClass) to an OutSystems expression;
+//                inputs not given use their example
+//
+// ExtendedClass is not listed: every Block gets it (Text, not mandatory,
+// default ""), applied by the Block's main container and never passed to
+// the class (Components.md, step 2).
+import { existsSync, readdirSync, readFileSync } from 'node:fs';
+import { join } from 'node:path';
+
+export const root = join(import.meta.dirname, '..', '..');
+export const componentsDir = join(root, 'components');
+// Examples the scaffold copies from: checked like components, never shipped.
+export const templatesDir = join(root, 'templates');
+
+// OutSystems basic types a contract may use, with their TypeScript and Model API forms.
+export const TYPES = {
+	Text: { ts: 'string', modelApi: 'eSpace.TextType' },
+	Integer: { ts: 'number', modelApi: 'eSpace.IntegerType' },
+	Decimal: { ts: 'number', modelApi: 'eSpace.DecimalType' },
+	Boolean: { ts: 'boolean', modelApi: 'eSpace.BooleanType' },
+};
+
+// The same rule as the scaffold: StatusBadge -> status-badge, XMLViewer -> xml-viewer.
+export const kebab = (pascal) =>
+	pascal
+		.replace(/([a-z0-9])([A-Z])/g, '$1-$2')
+		.replace(/([A-Z])([A-Z][a-z])/g, '$1-$2')
+		.toLowerCase();
+export const camel = (pascal) => pascal.charAt(0).toLowerCase() + pascal.slice(1);
+// OnGreetClicked -> TriggerGreetClicked: the Client Action a JS node can call ($actions lists Client Actions, not Block Events).
+export const bridgeAction = (eventName) => `Trigger${eventName.replace(/^On/, '')}`;
+
+const PASCAL = /^[A-Z][A-Za-z0-9]*$/;
+
+export function listComponents(dir = componentsDir) {
+	return (existsSync(dir) ? readdirSync(dir) : []).filter((name) => existsSync(join(dir, name, 'component.json'))).sort();
+}
+
+// Returns { contract, errors }. errors is empty when the contract is valid.
+export function loadContract(folder, dir = componentsDir) {
+	const path = join(dir, folder, 'component.json');
+	const errors = [];
+	let c;
+	try {
+		c = JSON.parse(readFileSync(path, 'utf8'));
+	} catch (e) {
+		return { contract: null, errors: [`${folder}/component.json: ${e.message}`] };
+	}
+	const err = (m) => errors.push(`${folder}/component.json: ${m}`);
+	if (!PASCAL.test(c.class || '')) err('"class" must be PascalCase');
+	if (c.block !== kebab(c.class || '')) err(`"block" must be "${kebab(c.class || '')}", the kebab-case of "class"`);
+	if (c.block !== folder) err(`"block" must match the folder name "${folder}"`);
+	if ('namespace' in c) err('remove "namespace": it lives in factory.config.json only, and the build registers the class on it');
+	if (!c.description) err('"description" is missing');
+	const names = new Set();
+	for (const [i, p] of (c.inputs || []).entries()) {
+		const at = `inputs[${i}]`;
+		if (!PASCAL.test(p.name || '')) err(`${at}.name must be PascalCase`);
+		if (p.name === 'ExtendedClass') err(`${at}: ExtendedClass is added to every Block; don't list it`);
+		if (names.has(p.name)) err(`${at}: "${p.name}" is listed twice`);
+		names.add(p.name);
+		if (!TYPES[p.type]) err(`${at}.type must be one of ${Object.keys(TYPES).join(', ')}`);
+		if (typeof p.mandatory !== 'boolean') err(`${at}.mandatory must be true or false`);
+		if (typeof p.default !== 'string') err(`${at}.default must be an OutSystems expression, e.g. "\\"\\"" or "0"`);
+		if (!p.description) err(`${at}.description is missing`);
+		if (p.values !== undefined) {
+			if (p.type !== 'Text' || !Array.isArray(p.values) || !p.values.length || !p.values.every((v) => PASCAL.test(v))) err(`${at}.values must be a list of PascalCase names, on a Text input`);
+			else if (!p.values.some((v) => p.default === `"${v}"`)) err(`${at}.default must be one of its values, e.g. "\\"${p.values[0]}\\""`);
+		}
+	}
+	for (const [i, e] of (c.events || []).entries()) {
+		const at = `events[${i}]`;
+		if (!/^On[A-Z][A-Za-z0-9]*$/.test(e.name || '')) err(`${at}.name must start with "On", e.g. OnClick`);
+		if (!e.description) err(`${at}.description is missing`);
+		for (const [j, p] of (e.params || []).entries()) {
+			if (!PASCAL.test(p.name || '')) err(`${at}.params[${j}].name must be PascalCase`);
+			if (!TYPES[p.type]) err(`${at}.params[${j}].type must be one of ${Object.keys(TYPES).join(', ')}`);
+		}
+	}
+	for (const [i, m] of (c.modifiers || []).entries()) {
+		if (!new RegExp(`^${c.block}--[a-z0-9]+(-[a-z0-9]+)*$`).test(m.class || '')) err(`modifiers[${i}].class must be ${c.block}--<modifier>`);
+		if ((m.class || '').includes('--is-')) err(`modifiers[${i}]: --is-* is a state the component sets, not a modifier`);
+		if (!m.description) err(`modifiers[${i}].description is missing`);
+	}
+	for (const [i, p] of (c.placeholders || []).entries()) {
+		const at = `placeholders[${i}]`;
+		if (!PASCAL.test(p.name || '')) err(`${at}.name must be PascalCase`);
+		if (names.has(p.name)) err(`${at}: "${p.name}" is also an input`);
+		if (!p.description) err(`${at}.description is missing`);
+		if (p.itemClass !== undefined && !new RegExp(`^${c.block}__[a-z0-9]+(-[a-z0-9]+)*$`).test(p.itemClass)) err(`${at}.itemClass must be ${c.block}__<element>`);
+		for (const [j, x] of (p.example || []).entries()) if (!x.label) err(`${at}.example[${j}].label is missing`);
+	}
+	if (c.showcase !== undefined) {
+		const s = c.showcase;
+		if (!/^[A-Z][A-Za-z0-9_]*$/.test(s.screen || '')) err('showcase.screen must be a screen name, e.g. StatusBadgeDemo');
+		if (!s.title) err('showcase.title is missing');
+		if (!Array.isArray(s.groups) || !s.groups.length) err('showcase.groups must list at least one group');
+		for (const [i, g] of (s.groups || []).entries()) {
+			if (!g.title) err(`showcase.groups[${i}].title is missing`);
+			if (!Array.isArray(g.examples) || !g.examples.length) err(`showcase.groups[${i}].examples must list at least one example`);
+			for (const [j, x] of (g.examples || []).entries()) {
+				if (!x.title) err(`showcase.groups[${i}].examples[${j}].title is missing`);
+				for (const k of Object.keys(x.args || {})) if (k !== 'ExtendedClass' && !names.has(k)) err(`showcase.groups[${i}].examples[${j}].args.${k} isn't an input`);
+			}
+		}
+	}
+	return { contract: { inputs: [], events: [], modifiers: [], placeholders: [], ...c, folder, dir }, errors };
+}

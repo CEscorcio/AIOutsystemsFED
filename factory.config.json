@@ -1,0 +1,17 @@
+{
+	"project": "AIOutsystemsFED",
+	"namespace": "AIOutsystemsFED",
+	"outsystemsUi": "2.30.0",
+	"o11": {
+		"script": "Components",
+		"theme": "AppTheme",
+		"flow": "MainFlow",
+		"blockFlow": "Patterns",
+		"layout": "LayoutTopMenu",
+		"harnessRole": "Registered"
+	},
+	"budgets": {
+		"releaseJsKB": 100,
+		"releaseCssKB": 50
+	}
+}

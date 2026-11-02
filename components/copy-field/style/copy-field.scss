@@ -1,0 +1,62 @@
+/*
+ * CopyField styles, written to the rules in docs/guide/Style.md.
+ *
+ * - Every colour, space, radius, border and font value is an OutSystems UI
+ *   variable with its base-theme value (OutSystems UI 2.30.0) as fallback.
+ * - BEM block copy-field:
+ *     elements  copy-field__body, __label, __row, __value, __button, __status
+ *     modifiers copy-field--compact   (passed by a screen through ExtendedClass)
+ * - The button is OutSystems UI's btn btn-small; the live region uses its
+ *   wcag-hide-text. Focus is left to OutSystems UI.
+ */
+
+// SCSS only groups the block's rules (Style.md, Rule 8).
+.copy-field {
+	&__body {
+		display: flex;
+		flex-direction: column;
+		gap: var(--space-xs, 4px);
+		min-width: 0;
+	}
+
+	&__label {
+		font-size: var(--font-size-s, 14px);
+		font-weight: var(--font-semi-bold, 600);
+		color: var(--color-neutral-7, #6a7178);
+	}
+
+	&__row {
+		display: flex;
+		align-items: center;
+		gap: var(--space-s, 8px);
+		min-width: 0;
+	}
+
+	&__value {
+		flex: 1 1 auto;
+		min-width: 0;
+		padding: var(--space-xs, 4px) var(--space-s, 8px);
+		overflow: hidden;
+		font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+		font-size: var(--font-size-s, 14px);
+		color: var(--color-neutral-9, #272b30);
+		text-overflow: ellipsis;
+		white-space: nowrap;
+		background-color: var(--color-neutral-2, #f1f3f5);
+		border: var(--border-size-s, 1px) solid var(--color-neutral-4, #dee2e6);
+		border-radius: var(--border-radius-soft, 4px);
+	}
+
+	&__button {
+		flex-shrink: 0;
+	}
+
+	&--compact &__value {
+		padding: var(--space-none, 0) var(--space-xs, 4px);
+		font-size: var(--font-size-xs, 12px);
+	}
+
+	&--compact &__label {
+		font-size: var(--font-size-xs, 12px);
+	}
+}
