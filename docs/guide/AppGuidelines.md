@@ -76,7 +76,7 @@ Screens get their layout, spacing, colours and type from OutSystems UI classes i
 | Flex rows | `display-flex`, `align-items-center`, `justify-content-space-between` / `-center`, `flex-wrap`, `flex1`, `gap-s` / `gap-base` / `gap-m` |
 | Spacing | `padding-base` / `-m` / `-xl`, `padding-x-none`, `padding-y-base`, `margin-top-s` / `-base` / `-m`, `margin-left-base` |
 | Surfaces | `card` (white, border, radius, padding), `shadow-s`, `border-radius-soft`, `background-neutral-2` / `-3`, `background-violet` / `-teal` / `-green` / `-yellow` / … |
-| Text | `heading1` … `heading6`, `font-size-s`, `font-semi-bold`, `text-neutral-0` (white), `text-neutral-7` (muted), `text-primary`, `text-align-center` / `-right` |
+| Text | `heading1` … `heading6`, `font-size-s`, `font-semi-bold`, `text-neutral-0` (white), `text-neutral-7` (muted on the base theme; see Rule 6), `text-primary`, `text-align-center` / `-right` |
 | List rows | `list-item` (divider line and padding) with `list-item-content` (flex row) and a `list-item-content-center` child that takes the free space; `list-item-no-hover` for rows that aren't clickable |
 | Avatars and image placeholders | `avatar avatar-medium` (a 40 px circle) with a `background-*` colour; add `border-radius-soft` for a rounded square |
 | Icons | A container with `fa fa-<icon>`; `fa-lg` for size, a `text-*` class for colour |
@@ -115,3 +115,23 @@ Give every container a name that says what it is in the design: `Hero`, `OrderCo
 **How to check:** in Service Studio's widget tree, every container under `MainContent` has a name.
 
 **Measured on:** a test O11 app's `Wireframe` and `Design` screens.
+
+## Rule 6: read the app's theme before choosing a class
+
+Before styling a screen, find the theme the module really uses and work out what each class renders in it. A class existing in OutSystems UI doesn't tell you what it looks like.
+
+**Why:** an app's theme can replace any variable, so the same class can show a very different colour or size from one app to the next. The tables in these guides and the `outsystems-ui` package only give base-theme values. A screenshot doesn't settle it either: small text is anti-aliased, so similar colours look alike.
+
+**How to apply:**
+
+1. **Find the chain.** Read the module's default theme, then each theme's `BaseTheme`, down to OutSystems UI. The theme may live in another module, which has to be open to be read.
+2. **Work out the final value.** Check the theme's stylesheet for the variable and for the class itself, and check OutSystems UI too. Some classes exist only in one of them, and a theme's class can use `!important`. Sizes can also depend on the device class on `body`.
+3. **Reuse before adding.** Copy classes from the closest existing screen in the module, and add one only when the design requires it.
+4. **Take values from the design, not by eye.** Read them from the design tool, or ask. List anything unconfirmed as a guess when handing the screen over.
+5. **Look at it running.** A screen matches its design only after comparing them in a browser. The computed `color` in DevTools is the colour actually on screen.
+
+A project can record its theme's values in `docs/project/Theme.md`, which git ignores, so the next screen starts from them without publishing a client's brand values.
+
+**How to check:** for each text colour on the screen, you can name the theme that sets it and its final value.
+
+**Measured on:** a screen in a test app (2026-11-02). `text-neutral-7` is `#6a7178` in the base theme and `#D0D1D1` in that app's theme, so text chosen as muted from the base value would be nearly invisible on white. It was caught in review, before publishing. The values are read from the theme's stylesheet; not yet compared in a browser.

@@ -5,6 +5,7 @@ This project's own documents, as opposed to the factory's guide in [../guide/](.
 - [Releases.md](Releases.md): every release, generated from `releases/` by `npm run release:record`; don't edit it
 - run logs: what happened when something was done for the first time in this project, one file each (`<What>-<date>.md`)
 - decisions that only apply to this project
+- `Theme.md` (local, ignored by git): what the app's theme really renders: its layers, tokens and type sizes
 
 What a log teaches that would hold in any project goes into the guide instead, usually [PlatformNotes.md](../guide/PlatformNotes.md).
 

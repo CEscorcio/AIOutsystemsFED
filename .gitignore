@@ -6,3 +6,4 @@ node_modules/
 # Your own environment's names, and the words check-private forbids: never committed
 factory.config.local.json
 .forbidden-words
+docs/project/Theme.md
