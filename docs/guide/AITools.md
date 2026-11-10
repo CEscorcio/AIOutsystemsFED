@@ -43,5 +43,6 @@ Service Studio's MCP server only exists on a machine with Service Studio open, a
 2. Open the repo: VS Code suggests ESLint, stylelint, Prettier and Copilot (`.vscode/extensions.json`). `.vscode/settings.json` turns on `AGENTS.md` and instruction files for Copilot Chat.
 3. `npm install`. It also installs the git hook.
 4. For the OutSystems side: Service Studio 11 with its MCP Server enabled. Claude Code and VS Code pick up `.mcp.json`, and ask you to approve the server the first time.
+5. Your own settings stay local: copy `factory.config.local.example.json` to `factory.config.local.json` with your environment's names, and list the words that must never be committed in `.forbidden-words` ([HowTo.md, Keep private things out](HowTo.md#keep-private-things-out-of-the-repo)). Claude Code writes its settings in `.claude/`, which git ignores except `.claude/skills/`; never paste a token into a command an AI tool runs, since its settings can record the command.
 
 Or open it in Codespaces: `.devcontainer/` installs everything and runs `npm test`, for all the work that doesn't need Service Studio.

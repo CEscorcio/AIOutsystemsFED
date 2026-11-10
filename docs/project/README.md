@@ -16,6 +16,7 @@ What a log teaches that would hold in any project goes into the guide instead, u
 - **Released** ([Releases.md](Releases.md)):
   - 2026.43.2: the six components, in the Sandbox app (Reactive, personal environment), with a `<Name>Test` screen each; its Blocks are in the `Patterns` flow.
   - 2026.44.1: all seven, in a style-guide sandbox module (Traditional Web, "styleguide"): `ComponentsScript`, the theme section, `DropdownButtonPattern` and the `DropdownBTN` screen. Published; the served files and the browser click-through are not verified.
+- **History reset (2026-11-02):** the repository's history was replaced by one commit, so that no environment-specific names remain in it. Older commit hashes cited in `CHANGELOG.md` and `releases/` no longer exist on `main`; GitHub still serves the old commits by hash until Support purges them. Environment names now live in `factory.config.local.json`, and `check-private` guards the rest ([HowTo.md, Keep private things out](../guide/HowTo.md#keep-private-things-out-of-the-repo)).
 - **Run logs:**
   - [FirstRun-2026-10-21.md](FirstRun-2026-10-21.md): GreetingCard into the Sandbox app, by hand.
   - [GeneratorRun-2026-10-22.md](GeneratorRun-2026-10-22.md): all six from the generators.

@@ -189,6 +189,8 @@ This copies `templates/greeting-card/` into `components/status-badge/` and renam
 
 `npm run check:private` (part of `npm run lint`) refuses secrets and server addresses, and the words you list in `.forbidden-words`, one per line. Git ignores that file too, since committing it would publish the list. In CI, set the secret `FORBIDDEN_WORDS` (comma-separated). `npm run check:private -- --history` also scans every commit.
 
+Credentials never go in a file or a command line: they reach the tools through environment variables (`O11_APP_URL` for `o11:verify`) and CI secrets. Claude Code's files in `.claude/` stay local too, except the shared `.claude/skills/`, and `check:private` refuses a committed `settings.local.json` or `.env`. More, including what to do if something private was pushed: [SECURITY.md](SECURITY.md) and [HowTo.md](docs/guide/HowTo.md#keep-private-things-out-of-the-repo).
+
 ### Generating the OutSystems side
 
 The Block, its harness screen, the Script and the theme stylesheet section are generated, not typed. `platform/o11/generate.mjs` reads a component's `component.json` and the files in `dist/`, and writes Model API lambdas to `platform/o11/out/` for the Service Studio MCP:

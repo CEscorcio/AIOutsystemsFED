@@ -91,12 +91,27 @@ What `npm test` runs:
 |---|---|
 | ESLint | The TypeScript and scripts, including the ban on `innerHTML` and `eval` in components |
 | `check-links` | Every relative link and `#anchor` in the Markdown resolves |
+| `check-private` | No secret, OutSystems server address or forbidden word in any file, and no personal settings or credentials file (`settings.local.json`, `.env`) ([Keep private things out](#keep-private-things-out-of-the-repo)) |
 | stylelint | BEM class names and the other [Style.md](Style.md) rules, in the SCSS source |
 | Prettier | Formatting (`npm run format` fixes it) |
 | Each component's tests | Typecheck, build, then its checks in jsdom: behaviour, BEM, OutSystems UI tokens and fallbacks, no injected CSS, destroy safety |
 | `check-contracts` | `factory.config.json` is valid; each `component.json` agrees with `types.ts`, `index.ts` and the compiled CSS; each component README is current |
 
 CI also runs `npm run check:audit` (dependency advisories) and `npm run test:blueprint` (a new project made from the repo reaches its first release).
+
+## Keep private things out of the repo
+
+The repo can be public, and anything committed stays in its history even after it's deleted. So:
+
+- **Your environment's names** (themes, modules, flows) go in `factory.config.local.json`, which git ignores; copy `factory.config.local.example.json`. The committed `factory.config.json` holds neutral values.
+- **Words that must never appear** (client names, real module names, a server's name) go in `.forbidden-words`, one per line, which git also ignores. `check-private` fails on any of them, whole and ignoring case. In CI, set the repository secret `FORBIDDEN_WORDS` (comma-separated) to the same list.
+- **Credentials never go in a file or a command line.** Pass them through environment variables: the app's URL to `o11:verify` through `O11_APP_URL`, for example, and in CI through repository secrets.
+- **Claude Code's own files stay local.** Everything in `.claude/` is ignored except `.claude/skills/`, which the template shares; `settings.local.json` records the permissions you approved and can hold commands. `check-private` refuses a committed `settings.local.json` or `.env`, whatever it contains.
+- **A project's theme notes** go in `docs/project/Theme.md`, which git ignores, since they're a client's brand values.
+
+Before making a repo public, or after a scare, run `npm run check:private -- --history`: it also scans every commit message and diff.
+
+**If something private was committed:** a secret is compromised from the moment it's pushed, so revoke or change it first. Deleting the file isn't enough, because history keeps it. Rewriting history (a force-push) removes it from the branches, but GitHub keeps the old commits reachable by their hash, and in pull request refs, until [GitHub Support](https://support.github.com/) purges them. Ask before any force-push: every clone then has to be made again.
 
 ## Fix a failing check
 
@@ -110,7 +125,10 @@ CI also runs `npm run check:audit` (dependency advisories) and `npm run test:blu
 | `… Parameters has no "x" (input X in component.json)` | Make `types.ts` and `component.json` agree |
 | `the CSS styles <block>--x, which isn't in component.json's modifiers` | Add the modifier to `component.json`, or remove it from the styles |
 | `README.md doesn't match component.json` | `npm run docs:components` (never edit it by hand) |
-| `check-links: … (no such file)` | Fix the link; files moved recently are the usual cause |
+| `check-links: … (no such file)` | Fix the link; files moved recently are the usual cause. Don't link to a file git ignores (`docs/project/Theme.md`): it's missing in CI and in new projects |
+| `check-private: <file>:<line>: forbidden word <n>` | Replace the name with a neutral one; `<n>` is its line in `.forbidden-words` (or its place in `FORBIDDEN_WORDS`) |
+| `check-private: … a password or secret`, `… a GitHub token` | Remove it and read it from an environment variable instead; if it was ever pushed, revoke it ([Keep private things out](#keep-private-things-out-of-the-repo)) |
+| `check-private: … a personal settings or credentials file` | `git rm --cached <file>`; it stays on your machine, ignored |
 | `package.json pins outsystems-ui to …` | See [Change the OutSystems UI version](#change-the-outsystems-ui-version) |
 | `A component's dist/ doesn't match its source` (CI) | `npm test` locally, then commit the rebuilt `components/*/dist/` |
 | `high or critical advisories not accepted` (CI) | Update the dependency; if it truly doesn't apply, accept it in `scripts/check-audit.mjs` with the reason |
@@ -197,7 +215,9 @@ Things to know:
 
 ## Update dependencies
 
-Dependabot opens grouped pull requests weekly (lint tools, build tools, GitHub Actions). Merge one when its CI is green: the dist check proves the build output didn't change. Then `git pull && npm install`.
+Dependabot opens grouped pull requests weekly (lint tools, build tools, GitHub Actions). Merge one when its CI is green: the dist check proves the build output didn't change. Then `git pull && npm install`, and if `npm install` changed `package-lock.json`, commit it: a Dependabot update can leave the lockfile's copy of a version range disagreeing with an exact pin (it wrote `^1.107.1` for the toolchain's `sass` pinned to `1.107.1`), and `npm install` corrects it without changing what's installed.
+
+Merging on GitHub moves `main` there, so a later `git push` from an older local copy is refused. `git pull --rebase` (or fetch and rebase), `npm install`, `npm test`, then push; never force-push over it.
 
 `outsystems-ui` is excluded on purpose; it follows your environment (next recipe).
 
@@ -227,6 +247,8 @@ When the OutSystems 11 environment upgrades OutSystems UI:
 | The hook refuses your commit: `stage releases/<version>.json` | Record the release first (`npm run release:record`), then `git add releases/` |
 | The hook refuses: `isn't from the same build` | Stage `dist/components.js` and `dist/components.css` from the same `npm run build:all` |
 | `build:all`: `nothing to release` | `components/` has no component yet; `templates/` never ships |
+| `git push` is refused (`fetch first`, `non-fast-forward`) | `main` moved on GitHub, usually a merged Dependabot pull request: `git pull --rebase`, `npm install`, `npm test`, then push. Never force-push over it |
+| A secret, a client name or a personal settings file was pushed | See [Keep private things out](#keep-private-things-out-of-the-repo): revoke the secret first, then rewrite history only with everyone's agreement |
 | A component works in the preview but not in OutSystems | Check the Block's Required Scripts includes the release Script, the theme section is present, and the console shows `window.<Namespace>.<Class>` |
 
 ## Command cheat sheet

@@ -10,7 +10,7 @@ The essentials, in case you read only this:
 - **Never invent OutSystems UI values.** Every colour, space, radius, shadow and font value in CSS is an OutSystems UI variable with its exact base-theme fallback ([Style.md](../docs/guide/Style.md), Rule 2). The tests check it.
 - **Platform data enters the DOM through `textContent` only**, never `innerHTML`. ESLint enforces it.
 - **Every visible string comes from an input** (with an English default), so screens can translate it.
-- **No server hostnames, URLs or keys** in committed files. Environments are labels like `dev` or `prod`.
+- **No server hostnames, URLs, keys, client names or real module names** in committed files, commit messages or release records. Environments are labels like `dev` or `prod`; an environment's names go in `factory.config.local.json`, credentials in environment variables or CI secrets. `check-private` (in `npm test`) enforces it, and refuses any `settings.local.json` or `.env`.
 - The OutSystems side (Scripts, Blocks, publishing) runs through Service Studio's MCP server on a developer's Windows machine. In the cloud you can't reach it: prepare the change and the generated lambdas (`npm run o11:generate`), and say what's left for someone with Service Studio.
 
 ## Reviewing a pull request
