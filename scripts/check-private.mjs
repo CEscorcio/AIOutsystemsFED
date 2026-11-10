@@ -1,6 +1,7 @@
 // Build rule: nothing private reaches the repo. Scans every tracked and new file for
 // secrets, OutSystems server hostnames and a private list of forbidden words, and prints
-// where, never the value it found.
+// where, never the value it found. Personal settings files (settings.local.json, .env)
+// are refused whatever they contain.
 //
 // The word list stays out of the repo, because committing it would publish it: one word
 // or module name per line in .forbidden-words (ignored by git; # starts a comment), and in
@@ -47,6 +48,9 @@ for (const file of files) {
 		for (const [what, pattern] of PATTERNS) if (pattern.test(line)) problems.push(`${file}:${i + 1}: ${what}`);
 	});
 }
+// Files that hold personal settings or credentials are never committed, whatever they contain.
+for (const file of files) if (/(^|\/)(settings\.local\.json|\.env(\.[^/]*)?)$/.test(file) && !file.endsWith('.example')) problems.push(`${file}: a personal settings or credentials file`);
+
 const history = process.argv.includes('--history');
 if (history) {
 	for (const hash of git('rev-list', '--all').split('\n').filter(Boolean)) {
